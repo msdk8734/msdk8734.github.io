@@ -538,13 +538,25 @@ function positionTip(clientX, clientY) {
   tooltip.style('left', x + 'px').style('top', y + 'px');
 }
 
-function showTip(ev, p) {
-  tooltip.html(renderTipHTML(p, isMobile))
-    .classed('visible', true);
+function showTip(ev, p, locked=false) {
+  
+  tooltip.html(html).classed('visible', true);
+  moveTip(ev);
 
-  const cx = (ev.touches && ev.touches[0]) ? ev.touches[0].clientX : ev.clientX;
-  const cy = (ev.touches && ev.touches[0]) ? ev.touches[0].clientY : ev.clientY;
-  positionTip(cx, cy);
+  // ▼ 1. ランキングリストの背景をハイライト
+  document.querySelectorAll('.rk-item').forEach(el => {
+    if (+el.dataset.id === p.id) {
+      el.style.background = 'rgba(26,111,196,0.15)';
+      el.scrollIntoView({ behavior: 'nearest', block: 'nearest' });
+    } else {
+      el.style.background = '';
+    }
+  });
+
+  // ▼ 2. 地図の枠線も赤く太くハイライト（追加）
+  const targetPath = g.selectAll('.pref-path').filter(d => d.properties.id === p.id);
+  targetPath.raise(); // 最前面に移動
+  targetPath.style('stroke', '#d03025').style('stroke-width', '2.5px');
 }
 
 function moveTip(ev) {
@@ -552,11 +564,33 @@ function moveTip(ev) {
   positionTip(ev.clientX, ev.clientY);
 }
 
-function hideTip() {
-  if (stickyId !== null) return;
-  tooltip.classed('visible', false);
-}
+function hideTip() { 
+  if (tipLocked) return; 
+  tooltip.classed('visible', false); 
 
+  // リストのハイライトをリセット
+  document.querySelectorAll('.rk-item').forEach(el => {
+    el.style.background = '';
+  });
+
+  // ▼ 地図の枠線ハイライトをリセット（追加）
+  g.selectAll('.pref-path')
+    .style('stroke', null)
+    .style('stroke-width', null);
+};
+function forceHideTip() { 
+  tooltip.classed('visible', false); 
+  
+  // スマホでツールチップを閉じた時も、両方のハイライトをリセットする
+  document.querySelectorAll('.rk-item').forEach(el => {
+    el.style.background = '';
+  });
+
+  g.selectAll('.pref-path')
+    .style('stroke', null)
+    .style('stroke-width', null);
+}
+ 
 function toggleTip(ev, p) {
   // If tapping same prefecture again, close
   if (stickyId === p.id) {
