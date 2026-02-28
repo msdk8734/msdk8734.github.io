@@ -35,7 +35,7 @@
     font-weight: 400;
     color: #888;
     line-height: 1.6;
-    max-width: 520px;
+    max-width: 620px;
   }
 
   .divider {
@@ -85,8 +85,12 @@
     background: linear-gradient(135deg, #fef2f0 0%, #fde8e4 50%, #f8d5cf 100%);
   }
 
-  .card-preview.ramen-theme-2 {
-    background: linear-gradient(135deg, #f0f4fe 0%, #e4ecfd 50%, #cfddf8 100%);
+  .card-preview.population-theme {
+    background: linear-gradient(135deg, #eef7f0 0%, #e1f1e6 50%, #cfe6d7 100%);
+  }
+
+  .card-preview.heatmap-theme {
+    background: linear-gradient(135deg, #eef3fb 0%, #dfeaf9 38%, #fff6cf 58%, #fddbb6 76%, #f4b0a6 100%);
   }
 
   .card-preview .preview-icon {
@@ -94,7 +98,6 @@
     opacity: 0.9;
   }
 
-  /* Bar chart preview */
   .bar-preview {
     position: absolute;
     bottom: 0;
@@ -102,7 +105,7 @@
     right: 0;
     display: flex;
     align-items: flex-end;
-    gap: 3px;
+    gap: 4px;
     padding: 0 20px;
   }
   .bar-preview .bar {
@@ -111,10 +114,10 @@
     background: #1a6fc4;
   }
 
-  .card-preview .mini-bars {
+  .mini-bars {
     position: absolute;
-    bottom: 30px;
-    right: 30px;
+    bottom: 28px;
+    right: 28px;
     display: flex;
     align-items: flex-end;
     gap: 3px;
@@ -122,7 +125,31 @@
   .mini-bars .mb {
     width: 4px;
     border-radius: 2px 2px 0 0;
-    opacity: 0.5;
+    opacity: 0.55;
+    background: #1a6fc4;
+  }
+
+  .heat-grid {
+    position: absolute;
+    inset: 20px 22px 26px 22px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 3px;
+    opacity: 0.92;
+  }
+  .heat-cell {
+    border-radius: 2px;
+  }
+
+  .population-rings {
+    position: absolute;
+    inset: 0;
+  }
+  .ring {
+    position: absolute;
+    border: 3px solid rgba(31,122,67,0.35);
+    border-radius: 999px;
   }
 
   .card-body {
@@ -182,20 +209,6 @@
     transform: translateX(3px);
   }
 
-  /* Placeholder card for future works */
-  .card-placeholder {
-    background: #fff;
-    border: 2px dashed #e0e0e0;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    color: #ccc;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
   footer {
     max-width: 960px;
     margin: 0 auto;
@@ -217,82 +230,157 @@
 
 <header>
   <h1>Data Visualizations</h1>
-  <p>Interactive data visualizations exploring various datasets. Built with D3.js and open data sources.</p>
+  <p>Interactive data visualizations built with D3.js, exploring Japanese consumption, population, and climate data through maps and heatmaps.</p>
 </header>
 
 <div class="divider"><hr></div>
 
 <div class="gallery">
 
-  <!-- Ramen Map Card (Choropleth) -->
-  <a class="card" href="ramen-map1.html">
+  <a class="card" href="ramen-map-2025.html">
     <div class="card-preview ramen-theme">
       <span class="preview-icon">🍜</span>
       <div class="mini-bars">
-        <div class="mb" style="height:14px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:22px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:10px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:38px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:18px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:28px; background:#1a6fc4;"></div>
-        <div class="mb" style="height:12px; background:#1a6fc4;"></div>
+        <div class="mb" style="height:14px;"></div>
+        <div class="mb" style="height:24px;"></div>
+        <div class="mb" style="height:11px;"></div>
+        <div class="mb" style="height:40px;"></div>
+        <div class="mb" style="height:18px;"></div>
+        <div class="mb" style="height:30px;"></div>
+        <div class="mb" style="height:13px;"></div>
       </div>
     </div>
     <div class="card-body">
       <div class="card-tag">Interactive Map</div>
       <div class="card-title">Japan Ramen Consumption Map</div>
-      <div class="card-desc">Visualizing annual household spending on dining-out ramen across Japan's 47 prefectures. Yamagata dominates with ¥22,389/year.</div>
+      <div class="card-desc">A choropleth-style prefecture map exploring annual ramen spending in Japan, with responsive tooltips and ranking interactions.</div>
       <div class="card-meta">
         <span class="meta-tag">D3.js</span>
-        <span class="meta-tag">TopoJSON</span>
+        <span class="meta-tag">Map</span>
         <span class="card-arrow">→</span>
       </div>
     </div>
   </a>
 
-  <!-- Ramen Bar Chart Card -->
-  <a class="card" href="ramen-map2.html">
-    <div class="card-preview ramen-theme-2">
-      <span class="preview-icon">🍜</span>
-      <div class="bar-preview">
-        <div class="bar" style="height:28px; opacity:0.3;"></div>
-        <div class="bar" style="height:44px; opacity:0.4;"></div>
-        <div class="bar" style="height:36px; opacity:0.35;"></div>
-        <div class="bar" style="height:100px; opacity:0.75;"></div>
-        <div class="bar" style="height:55px; opacity:0.5;"></div>
-        <div class="bar" style="height:72px; opacity:0.62;"></div>
-        <div class="bar" style="height:30px; opacity:0.28;"></div>
-        <div class="bar" style="height:48px; opacity:0.44;"></div>
-        <div class="bar" style="height:20px; opacity:0.22;"></div>
-        <div class="bar" style="height:62px; opacity:0.55;"></div>
-        <div class="bar" style="height:38px; opacity:0.35;"></div>
-        <div class="bar" style="height:52px; opacity:0.48;"></div>
-        <div class="bar" style="height:24px; opacity:0.25;"></div>
-        <div class="bar" style="height:66px; opacity:0.58;"></div>
-        <div class="bar" style="height:42px; opacity:0.4;"></div>
+  <a class="card" href="japan-population-map-2024.html">
+    <div class="card-preview population-theme">
+      <span class="preview-icon">👥</span>
+      <div class="population-rings">
+        <div class="ring" style="width:120px;height:120px;left:38px;top:34px;"></div>
+        <div class="ring" style="width:76px;height:76px;right:50px;top:44px;"></div>
+        <div class="ring" style="width:92px;height:92px;right:92px;bottom:22px;"></div>
       </div>
     </div>
     <div class="card-body">
-      <div class="card-tag">Bar Chart</div>
-      <div class="card-title">Japan Ramen Consumption Map - Bar chart</div>
-      <div class="card-desc">Bar chart ranking all 47 prefectures by annual household spending on dining-out ramen. Compare regional differences at a glance.</div>
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Japan Population Map 2024</div>
+      <div class="card-desc">A prefecture-level population map with switches for total, male, and female population, plus rankings and national-share tooltips.</div>
       <div class="card-meta">
         <span class="meta-tag">D3.js</span>
-        <span class="meta-tag">Bar Chart</span>
+        <span class="meta-tag">Population</span>
         <span class="card-arrow">→</span>
       </div>
     </div>
   </a>
 
-  <!-- Placeholder for future -->
-  <div class="card-placeholder">
-    More coming soon
-  </div>
+  <a class="card" href="tokyo-heatmap.html">
+    <div class="card-preview heatmap-theme">
+      <div class="heat-grid">
+        <div class="heat-cell" style="background:#6ea9d9"></div>
+        <div class="heat-cell" style="background:#8bc1d8"></div>
+        <div class="heat-cell" style="background:#b7ddc9"></div>
+        <div class="heat-cell" style="background:#f2efaf"></div>
+        <div class="heat-cell" style="background:#f9d585"></div>
+        <div class="heat-cell" style="background:#f4bb74"></div>
+        <div class="heat-cell" style="background:#ec8c6d"></div>
+        <div class="heat-cell" style="background:#db6f68"></div>
+        <div class="heat-cell" style="background:#c85966"></div>
+        <div class="heat-cell" style="background:#b14e65"></div>
+        <div class="heat-cell" style="background:#964d67"></div>
+        <div class="heat-cell" style="background:#7a5b7e"></div>
+
+        <div class="heat-cell" style="background:#88bddb"></div>
+        <div class="heat-cell" style="background:#a5d2d0"></div>
+        <div class="heat-cell" style="background:#d8e7bf"></div>
+        <div class="heat-cell" style="background:#f8e7a0"></div>
+        <div class="heat-cell" style="background:#f8cf7b"></div>
+        <div class="heat-cell" style="background:#f0ad6d"></div>
+        <div class="heat-cell" style="background:#e38468"></div>
+        <div class="heat-cell" style="background:#d66966"></div>
+        <div class="heat-cell" style="background:#c25967"></div>
+        <div class="heat-cell" style="background:#aa5067"></div>
+        <div class="heat-cell" style="background:#8a5672"></div>
+        <div class="heat-cell" style="background:#745f83"></div>
+
+        <div class="heat-cell" style="background:#9cc8d8"></div>
+        <div class="heat-cell" style="background:#b9dbca"></div>
+        <div class="heat-cell" style="background:#e3eab8"></div>
+        <div class="heat-cell" style="background:#fbe0a3"></div>
+        <div class="heat-cell" style="background:#f8c67f"></div>
+        <div class="heat-cell" style="background:#eea870"></div>
+        <div class="heat-cell" style="background:#df8169"></div>
+        <div class="heat-cell" style="background:#d36767"></div>
+        <div class="heat-cell" style="background:#be5967"></div>
+        <div class="heat-cell" style="background:#a65268"></div>
+        <div class="heat-cell" style="background:#885a76"></div>
+        <div class="heat-cell" style="background:#716489"></div>
+
+        <div class="heat-cell" style="background:#aacfd5"></div>
+        <div class="heat-cell" style="background:#c7e0c8"></div>
+        <div class="heat-cell" style="background:#ececb7"></div>
+        <div class="heat-cell" style="background:#fcd8a0"></div>
+        <div class="heat-cell" style="background:#f7c07f"></div>
+        <div class="heat-cell" style="background:#eb9f70"></div>
+        <div class="heat-cell" style="background:#dd7b69"></div>
+        <div class="heat-cell" style="background:#d06467"></div>
+        <div class="heat-cell" style="background:#bb5868"></div>
+        <div class="heat-cell" style="background:#a05269"></div>
+        <div class="heat-cell" style="background:#855b79"></div>
+        <div class="heat-cell" style="background:#6f678d"></div>
+
+        <div class="heat-cell" style="background:#bad6d2"></div>
+        <div class="heat-cell" style="background:#d4e4c5"></div>
+        <div class="heat-cell" style="background:#f1edb6"></div>
+        <div class="heat-cell" style="background:#fdd39f"></div>
+        <div class="heat-cell" style="background:#f6ba7f"></div>
+        <div class="heat-cell" style="background:#ea9a70"></div>
+        <div class="heat-cell" style="background:#dc786a"></div>
+        <div class="heat-cell" style="background:#ce6268"></div>
+        <div class="heat-cell" style="background:#b85769"></div>
+        <div class="heat-cell" style="background:#9d536c"></div>
+        <div class="heat-cell" style="background:#825c7d"></div>
+        <div class="heat-cell" style="background:#6d6a90"></div>
+
+        <div class="heat-cell" style="background:#c5dbd0"></div>
+        <div class="heat-cell" style="background:#dde7c3"></div>
+        <div class="heat-cell" style="background:#f5efb6"></div>
+        <div class="heat-cell" style="background:#fdcf9d"></div>
+        <div class="heat-cell" style="background:#f5b67d"></div>
+        <div class="heat-cell" style="background:#e99670"></div>
+        <div class="heat-cell" style="background:#db766a"></div>
+        <div class="heat-cell" style="background:#cc6169"></div>
+        <div class="heat-cell" style="background:#b6586a"></div>
+        <div class="heat-cell" style="background:#9b546d"></div>
+        <div class="heat-cell" style="background:#815d80"></div>
+        <div class="heat-cell" style="background:#6c6c93"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Heatmap</div>
+      <div class="card-title">Tokyo Temperature Heatmap</div>
+      <div class="card-desc">A monthly climate heatmap for Tokyo with switches for mean, maximum, and minimum temperature anomalies using JMA data.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Climate</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
 
 </div>
 
 <footer>
-  Data sources: Ministry of Internal Affairs &amp; Communications, Japan
+  Built with D3.js and open public data sources.
 </footer>
 
 </body>
