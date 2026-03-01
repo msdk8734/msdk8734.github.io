@@ -88,15 +88,15 @@
     font-size: 13px;
     margin-bottom: 8px;
   }
-  .legend-bar {
+　.legend-bar {
     height: 14px;
     border-radius: 999px;
     background: linear-gradient(90deg,
-      #2c7bb6 0%,
-      #7fcdbb 25%,
-      #ffffbf 50%,
-      #fdae61 75%,
-      #d7191c 100%);
+      #87cefa 0%,
+      #bae1ff 25%,
+      #fdfdfd 50%,
+      #ffb6c1 75%,
+      #ff69b4 100%);
     border: 1px solid rgba(0,0,0,0.12);
   }
   .legend-scale {
@@ -233,12 +233,12 @@ function hexToRgb(hex) {
 function rgbToHex(r,g,b) {
   return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
 }
-const stops = [
-  {v: -2.0, c: '#2c7bb6'},
-  {v: -1.0, c: '#7fcdbb'},
-  {v:  0.0, c: '#ffffbf'},
-  {v:  1.0, c: '#fdae61'},
-  {v:  2.0, c: '#d7191c'}
+const stops =[
+  {v: -2.0, c: '#87cefa'}, /* Light Sky Blue */
+  {v: -1.0, c: '#bae1ff'}, /* Pastel Blue */
+  {v:  0.0, c: '#fdfdfd'}, /* Almost White (Neutral) */
+  {v:  1.0, c: '#ffb6c1'}, /* Light Pink */
+  {v:  2.0, c: '#ff69b4'}  /* Hot Pink */
 ];
 function colorFor(value) {
   const v = clamp(value, -2, 2);
