@@ -33,6 +33,45 @@ svg{display:block;margin:0 auto}
 .stat-value{font-family:"JetBrains Mono";font-size:22px;font-weight:600;color:#1a1a1a}
 .stat-label{font-size:11px;color:#aaa;margin-top:2px}
 .source{font-size:10px;color:#ccc;text-align:center;margin-top:24px}
+  /* ツールチップとグラフホバー時のスタイル */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(19, 19, 19, 0.94);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+}
+.tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tt-title {
+  font-size: 11px;
+  color: #aaa;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+.tt-val {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  font-weight: 600;
+}
+rect {
+  cursor: pointer;
+}
+rect:hover {
+  opacity: 1 !important;
+  stroke: #1a1a1a;
+  stroke-width: 1px;
+}
+  
 </style>
 </head>
 <body>
@@ -59,7 +98,7 @@ svg{display:block;margin:0 auto}
 <div class="stats" id="stats"></div>
 
 <div class="source">Source: Statistics Bureau of Japan (Census) and National Institute of Population and Social Security Research "Population Projections for Japan (2023 Revision)" — Medium fertility, medium mortality variant.</div>
-
+<div class="tooltip" id="tooltip"></div>
 <script>
 const ageLabels = ["0–4","5–9","10–14","15–19","20–24","25–29","30–34","35–39","40–44","45–49","50–54","55–59","60–64","65–69","70–74","75–79","80–84","85–89","90+"];
 
@@ -140,23 +179,33 @@ function updateChart(yearIdx) {
   document.getElementById("yearDisplay").textContent = year;
   document.getElementById("yearDisplay").className = year > 2020 ? "year-display future" : "year-display";
 
-  maleGroup.selectAll("rect").data(d.m)
+  // ツールチップ表示用に配列の構造をマッピング
+  const mappedM = d.m.map((val, i) => ({ val, i, gender: "Male" }));
+  const mappedF = d.f.map((val, i) => ({ val, i, gender: "Female" }));
+
+  maleGroup.selectAll("rect").data(mappedM)
     .join("rect")
+    .on("mouseenter touchstart", showTip)
+    .on("mousemove touchmove", moveTip)
+    .on("mouseleave touchend", hideTip)
     .transition().duration(300)
-    .attr("x", v => xScaleM(v))
-    .attr("y", (v,i) => yScale(i))
-    .attr("width", v => halfW - xScaleM(v))
+    .attr("x", d => xScaleM(d.val))
+    .attr("y", d => yScale(d.i))
+    .attr("width", d => halfW - xScaleM(d.val))
     .attr("height", yScale.bandwidth())
     .attr("fill", "#4a90d9")
     .attr("rx", 2)
     .attr("opacity", 0.82);
 
-  femaleGroup.selectAll("rect").data(d.f)
+  femaleGroup.selectAll("rect").data(mappedF)
     .join("rect")
+    .on("mouseenter touchstart", showTip)
+    .on("mousemove touchmove", moveTip)
+    .on("mouseleave touchend", hideTip)
     .transition().duration(300)
     .attr("x", halfW + centerGap)
-    .attr("y", (v,i) => yScale(i))
-    .attr("width", v => xScaleF(v))
+    .attr("y", d => yScale(d.i))
+    .attr("width", d => xScaleF(d.val))
     .attr("height", yScale.bandwidth())
     .attr("fill", "#d04a5a")
     .attr("rx", 2)
@@ -206,7 +255,45 @@ playBtn.addEventListener("click", () => {
     }, 800);
   }
 });
+const tooltip = document.getElementById("tooltip");
 
+function showTip(event, d) {
+  // 元の配列インデックスから年齢層を取得
+  const age = ageLabels[d.i];
+  // データは千人単位なので、1000を掛けてカンマ区切りにする
+  const pop = Math.round(d.val * 1000).toLocaleString();
+  const color = d.gender === "Male" ? "#4a90d9" : "#d04a5a";
+  
+  tooltip.innerHTML = `
+    <div class="tt-title">${d.gender} • Aged ${age}</div>
+    <div class="tt-val" style="color:${color}">${pop}</div>
+  `;
+  tooltip.classList.add("show");
+  moveTip(event);
+}
+
+function moveTip(event) {
+  // スマホのタッチとマウスの両方に対応
+  const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+  const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+  
+  const pad = 12;
+  const rect = tooltip.getBoundingClientRect();
+  let left = clientX + 16;
+  let top = clientY - rect.height - 16;
+  
+  if (left + rect.width > window.innerWidth - pad) left = window.innerWidth - rect.width - pad;
+  if (left < pad) left = pad;
+  if (top < pad) top = clientY + 16;
+  if (top + rect.height > window.innerHeight - pad) top = window.innerHeight - rect.height - pad;
+  
+  tooltip.style.left = left + "px";
+  tooltip.style.top = top + "px";
+}
+
+function hideTip() {
+  tooltip.classList.remove("show");
+}
 updateChart(0);
 </script>
 
