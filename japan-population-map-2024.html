@@ -112,8 +112,8 @@
   }
   .pref-path.hovered {
     stroke: rgba(255,255,255,1) !important;
-    stroke-width: 1.5px !important;
-    filter: brightness(0.96);
+    stroke-width: 1.8px !important;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.32)) brightness(1.04);
   }
 
   .tooltip {
@@ -502,24 +502,36 @@ function showTip(ev, p) {
 
 function moveTip(ev) {
   const pad = 12;
+  const cursorGap = 24; // distance from cursor
   const mobile = isMobile();
   const cx = (ev && ev.clientX != null) ? ev.clientX : (window.innerWidth / 2);
   const cy = (ev && ev.clientY != null) ? ev.clientY : (window.innerHeight / 3);
-  let x = mobile ? (cx - 40) : (cx + 20);
-  let y = mobile ? (cy - 12) : (cy + 20);
 
-  tooltip.style('left', x + 'px').style('top', y + 'px');
+  // First render offscreen to measure size
+  tooltip.style('left', '-9999px').style('top', '-9999px');
   const node = tooltip.node();
   if (!node) return;
   const r = node.getBoundingClientRect();
-  let nx = x, ny = y;
+  const tw = r.width, th = r.height;
 
-  if (r.right > window.innerWidth - pad) nx -= (r.right - (window.innerWidth - pad));
-  if (r.left < pad) nx += (pad - r.left);
-  if (r.bottom > window.innerHeight - pad) ny -= (r.bottom - (window.innerHeight - pad));
-  if (r.top < pad) ny += (pad - r.top);
+  let x, y;
+  if (mobile) {
+    x = cx - 40;
+    y = cy - 12;
+  } else {
+    // Prefer right + below cursor
+    x = cx + cursorGap;
+    y = cy + cursorGap;
+    // Flip left if overflows right edge
+    if (x + tw > window.innerWidth - pad) x = cx - cursorGap - tw;
+    // Flip up if overflows bottom edge
+    if (y + th > window.innerHeight - pad) y = cy - cursorGap - th;
+    // Clamp
+    x = Math.max(pad, x);
+    y = Math.max(pad, y);
+  }
 
-  tooltip.style('left', nx + 'px').style('top', ny + 'px');
+  tooltip.style('left', x + 'px').style('top', y + 'px');
 }
 
 function hideTip() {
@@ -563,14 +575,14 @@ function renderRanking(ranked, maxValue, meta) {
     el.addEventListener('mouseenter', () => {
       const path = g.selectAll('.pref-path').filter(d => d.properties.id === id);
       path.raise();
-      path.style('stroke', meta.accent).style('stroke-width', '2.5px');
+      path.style('stroke', 'rgba(255,255,255,1)').style('stroke-width', '1.8px').style('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.32)) brightness(1.04)');
       document.querySelectorAll('.rk-item').forEach(x => {
         x.style.background = (+x.dataset.id === id) ? 'rgba(21,87,160,0.15)' : '';
       });
     });
     el.addEventListener('mouseleave', () => {
       const path = g.selectAll('.pref-path').filter(d => d.properties.id === id);
-      path.style('stroke', null).style('stroke-width', null);
+      path.style('stroke', null).style('stroke-width', null).style('filter', null);
       document.querySelectorAll('.rk-item').forEach(x => x.style.background = '');
     });
     el.addEventListener('click', () => {
