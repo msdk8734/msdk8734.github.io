@@ -106,11 +106,7 @@
     transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s;
     cursor: pointer;
   }
-  .pref-path:hover {
-    stroke: rgba(0,0,0,0.35);
-    stroke-width: 1.2;
-    filter: brightness(0.98);
-  }
+
 
   .tooltip {
     position: fixed;
@@ -420,18 +416,50 @@ g.selectAll('.pref-path')
   .attr('class', 'pref-path')
   .attr('d', pathGen)
   .attr('fill', '#eef3f8')
-  .on('mouseenter', (ev, d) => showTip(ev, d.properties))
+  .on('mouseenter', function(ev, d) {
+    d3.select(this)
+      .raise() // ★ これが重要：ホバーした要素を最前面に移動する
+      .style('stroke', 'rgba(0,0,0,0.35)')
+      .style('stroke-width', '1.2px')
+      .style('filter', 'brightness(0.98)');
+    showTip(ev, d.properties);
+  })
   .on('mousemove', moveTip)
-  .on('mouseleave', hideTip)
-  .on('touchstart', (ev, d) => {
+  .on('mouseleave', function() {
+    d3.select(this)
+      .style('stroke', null)
+      .style('stroke-width', null)
+      .style('filter', null);
+    hideTip();
+  })
+  .on('touchstart', function(ev, d) {
     ev.preventDefault();
     if (tipLocked && tipLockedId === d.properties.id) {
       tipLocked = false; tipLockedId = null;
       forceHideTip();
+      d3.select(this)
+        .style('stroke', null)
+        .style('stroke-width', null)
+        .style('filter', null);
       return;
     }
+    
+    // 他の都道府県のハイライトをリセット
+    g.selectAll('.pref-path')
+      .style('stroke', null)
+      .style('stroke-width', null)
+      .style('filter', null);
+
     tipLocked = true;
     tipLockedId = d.properties.id;
+    
+    // タッチ時も最前面に移動して太くする
+    d3.select(this)
+      .raise()
+      .style('stroke', 'rgba(0,0,0,0.35)')
+      .style('stroke-width', '1.2px')
+      .style('filter', 'brightness(0.98)');
+      
     showTip(ev.touches ? ev.touches[0] : ev, d.properties);
   });
 
