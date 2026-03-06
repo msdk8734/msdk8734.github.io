@@ -110,11 +110,7 @@
     cursor: pointer;
     shape-rendering: geometricPrecision;
   }
-  .pref-path:hover {
-    stroke: rgba(21,87,160,0.75);
-    stroke-width: 1.35;
-    filter: brightness(0.97);
-  }
+  /* pref-path hover is handled via JS to allow raise() */
 
   .tooltip {
     position: fixed;
@@ -304,11 +300,7 @@
     transition: fill 0.15s, stroke 0.15s, stroke-width 0.15s, filter 0.15s, opacity 0.15s;
     shape-rendering: geometricPrecision;
   }
-  .muni-path:hover {
-    stroke: rgba(21,87,160,0.75);
-    stroke-width: 1.4;
-    filter: brightness(0.94);
-  }
+  /* muni-path hover is handled via JS to allow raise() */
   #back-btn {
     display: none;
     position: fixed;
@@ -593,9 +585,21 @@ g.selectAll('.pref-path')
   .attr('class', 'pref-path')
   .attr('d', pathGen)
   .attr('fill', '#eef3f8')
-  .on('mouseenter', (ev, d) => showTip(ev, d.properties))
+  .on('mouseenter', function(ev, d) {
+      d3.select(this).raise()
+        .style('stroke', 'rgba(21,87,160,0.75)')
+        .style('stroke-width', '1.35px')
+        .style('filter', 'brightness(0.97)');
+      showTip(ev, d.properties);
+    })
   .on('mousemove', moveTip)
-  .on('mouseleave', hideTip)
+  .on('mouseleave', function(ev, d) {
+      d3.select(this)
+        .style('stroke', null)
+        .style('stroke-width', null)
+        .style('filter', null);
+      hideTip();
+    })
   .on('touchstart', (ev, d) => {
     ev.preventDefault();
     if (tipLocked && tipLockedId === d.properties.id) {
@@ -983,9 +987,21 @@ async function drillIntoPref(prefId) {
     .join('path')
     .attr('class', 'muni-path')
     .attr('d', pathGen)
-    .on('mouseenter', (ev, d) => showMuniTip(ev, d.properties))
+    .on('mouseenter', function(ev, d) {
+        d3.select(this).raise()
+          .style('stroke', 'rgba(21,87,160,0.75)')
+          .style('stroke-width', '1.4px')
+          .style('filter', 'brightness(0.94)');
+        showMuniTip(ev, d.properties);
+      })
     .on('mousemove', moveTip)
-    .on('mouseleave', hideTip)
+    .on('mouseleave', function(ev, d) {
+        d3.select(this)
+          .style('stroke', null)
+          .style('stroke-width', null)
+          .style('filter', null);
+        hideTip();
+      })
     .on('touchstart', (ev, d) => {
       ev.preventDefault();
       if (tipLocked && tipLockedId === d.properties.code) {
