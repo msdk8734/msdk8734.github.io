@@ -101,15 +101,19 @@
   #map-container svg { width: 100%; height: 100%; }
 
   .pref-path {
-    stroke: rgba(0,0,0,0.08);
-    stroke-width: 0.7;
-    transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s;
+    stroke: rgba(255,255,255,0.92);
+    stroke-width: 0.85;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s, filter 0.15s;
     cursor: pointer;
+    shape-rendering: geometricPrecision;
   }
-  .pref-path:hover {
-    stroke: rgba(0,0,0,0.35);
-    stroke-width: 1.2;
-    filter: brightness(0.98);
+  .pref-path.hovered {
+    stroke: rgba(255,255,255,1) !important;
+    stroke-width: 1.5px !important;
+    filter: brightness(0.96);
   }
 
   .tooltip {
@@ -409,7 +413,6 @@ const zoomBehavior = d3.zoom()
   .scaleExtent([0.4, 12])
   .on('zoom', (event) => {
     g.attr('transform', event.transform);
-    g.selectAll('.pref-path').attr('stroke-width', 0.7 / event.transform.k);
   });
 svg.call(zoomBehavior);
 
@@ -420,9 +423,15 @@ g.selectAll('.pref-path')
   .attr('class', 'pref-path')
   .attr('d', pathGen)
   .attr('fill', '#eef3f8')
-  .on('mouseenter', (ev, d) => showTip(ev, d.properties))
+  .on('mouseenter', function(ev, d) {
+    d3.select(this).raise().classed('hovered', true);
+    showTip(ev, d.properties);
+  })
   .on('mousemove', moveTip)
-  .on('mouseleave', hideTip)
+  .on('mouseleave', function() {
+    d3.select(this).classed('hovered', false);
+    hideTip();
+  })
   .on('touchstart', (ev, d) => {
     ev.preventDefault();
     if (tipLocked && tipLockedId === d.properties.id) {
@@ -496,8 +505,8 @@ function moveTip(ev) {
   const mobile = isMobile();
   const cx = (ev && ev.clientX != null) ? ev.clientX : (window.innerWidth / 2);
   const cy = (ev && ev.clientY != null) ? ev.clientY : (window.innerHeight / 3);
-  let x = mobile ? (cx - 40) : (cx + 18);
-  let y = mobile ? (cy - 12) : (cy - 10);
+  let x = mobile ? (cx - 40) : (cx + 20);
+  let y = mobile ? (cy - 12) : (cy + 20);
 
   tooltip.style('left', x + 'px').style('top', y + 'px');
   const node = tooltip.node();
