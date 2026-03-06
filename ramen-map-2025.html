@@ -46,15 +46,10 @@
   .scale-label { font-size: 10px; color: #999; margin-left: 6px; align-self: center; }
   #map-container, #map { width: 100vw; height: 100vh; display:block; }
   .pref-path {
-    fill: #f2f2f2; 
-    stroke: #ffffff; 
-    stroke-width: 0.85px;
-    vector-effect: non-scaling-stroke; /* ズーム時に線の太さを一定に保つ */
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    shape-rendering: geometricPrecision;
+    fill: #f2f2f2; stroke: #ffffff; stroke-width: 0.7;
     transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s;
   }
+  .pref-path:hover { stroke: #666; stroke-width: 1.6; }
   .bar-group { cursor: pointer; }
   .bar-group:hover .main-bar { filter: brightness(0.85); }
   body.highlighting .bar-group .main-bar {
@@ -291,24 +286,10 @@ function el(name, attrs={}, parent=null) {
 
 function renderMap() {
   topoData.objects.japan.geometries.forEach(g => {
-    const path = el('path', {
+    el('path', {
       class: 'pref-path',
       d: geometryPath(g)
     }, prefLayer);
-
-    // ホバー時に最前面に移動(appendChild)させ、線が隠れないようにする
-    path.addEventListener('mouseenter', function() {
-      this.parentNode.appendChild(this);
-      this.style.stroke = '#666';
-      this.style.strokeWidth = '1.6px';
-    });
-    path.addEventListener('mouseleave', function() {
-  const self = this;
-  requestAnimationFrame(() => {
-    self.style.stroke = '';
-    self.style.strokeWidth = '';
-  });
-});
   });
 }
 
