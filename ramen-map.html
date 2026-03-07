@@ -54,16 +54,20 @@
   #map { width: 100vw; height: 100vh; display: block; }
 
   /* ── Prefecture paths ── */
-  .pref-path {
-  fill: #f2f2f2; stroke: #ffffff; stroke-width: 0.7;
-  vector-effect: non-scaling-stroke;
-  transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s;
-}
-  .pref-path:hover { stroke: #aaa; stroke-width: 1.2; }
-   /* ↓ここに追加 */
+  .pref-fill {
+    fill: #f2f2f2;
+    stroke: none;
+    transition: fill 0.15s;
+  }
+  .pref-fill:hover { fill: #e2e2e2; }
+
+  /* 境界線：pointer-events:none で hover干渉なし、vector-effectで均一な太さ */
   .pref-stroke {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 0.7;
     vector-effect: non-scaling-stroke;
-    transition: stroke 0.15s, stroke-width 0.15s;
+    pointer-events: none;
   }
 
   /* ── Bar chart ── */
@@ -89,7 +93,7 @@
   /* ── Bubble chart ── */
   .bubble-group { cursor: pointer; }
   .bubble-circle {
-    transition: r 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s, fill 0.2s;
+    transition: opacity 0.2s, fill 0.2s;
     opacity: 0.78;
   }
   .bubble-group:hover .bubble-circle { opacity: 1; filter: brightness(0.88); }
@@ -100,7 +104,6 @@
     filter: drop-shadow(0 0 12px rgba(208,48,37,0.8)) brightness(1.15);
     stroke: #fffde0 !important; stroke-width: 2 !important;
   }
-
 
   /* ── Tooltip ── */
   .tooltip {
@@ -206,23 +209,20 @@
 <div class="hint">Drag to pan · Pinch / scroll to zoom</div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────
-const GEOJSON_URL   = 'geo-json/japan.geojson';
-const CSV_URL       = 'data/ramen-data.csv';
-const nationalAvg   = 8752;
-const jpyToUsd      = 0.0067;
-const isMobile      = window.matchMedia('(max-width:720px)').matches || ('ontouchstart' in window);
+const GEOJSON_URL = 'geo-json/japan.geojson';
+const CSV_URL     = 'data/ramen-data.csv';
+const nationalAvg = 8752;
+const jpyToUsd    = 0.0067;
+const isMobile    = window.matchMedia('(max-width:720px)').matches || ('ontouchstart' in window);
+const designWidth  = 1200;
+const designHeight = 900;
+const usableWidth  = isMobile ? designWidth : designWidth - 250;
 
-const designWidth   = 1200;
-const designHeight  = 900;
-const usableWidth   = isMobile ? designWidth : designWidth - 250;
-
-// ── Projection ───────────────────────────────────────────────
 function project(lon, lat) {
   const scale = 1900, centerLon = 136.0, centerLat = 36.0;
   const tx = usableWidth / 2, ty = designHeight / 2 + 40;
-  const lambda = lon * Math.PI / 180;
-  const phi    = Math.max(-89.5, Math.min(89.5, lat)) * Math.PI / 180;
+  const lambda  = lon * Math.PI / 180;
+  const phi     = Math.max(-89.5, Math.min(89.5, lat)) * Math.PI / 180;
   const lambda0 = centerLon * Math.PI / 180;
   const x = scale * (lambda - lambda0) + tx;
   const y = scale * Math.log(Math.tan(Math.PI/4 + (centerLat*Math.PI/180)/2))
@@ -230,22 +230,18 @@ function project(lon, lat) {
   return [x, y];
 }
 
-// ── SVG helpers ──────────────────────────────────────────────
 const NS  = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('map');
-
 function el(tag, attrs = {}) {
   const e = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
   return e;
 }
 
-// ── Layers ───────────────────────────────────────────────────
 const prefLayer   = el('g'); svg.appendChild(prefLayer);
 const barsLayer   = el('g'); svg.appendChild(barsLayer);
 const bubbleLayer = el('g'); svg.appendChild(bubbleLayer);
 
-// ── Pan / Zoom ───────────────────────────────────────────────
 let transform = { x: 0, y: 0, k: 1 };
 let drag = null;
 
@@ -281,7 +277,6 @@ svg.addEventListener('wheel', e => {
   applyTransform();
 }, { passive: false });
 
-// Touch zoom
 let touches = [];
 svg.addEventListener('touchstart', e => { touches = [...e.touches]; }, { passive: true });
 svg.addEventListener('touchmove', e => {
@@ -308,7 +303,6 @@ svg.addEventListener('touchmove', e => {
   touches = [...e.touches];
 }, { passive: false });
 
-// ── Tooltip ──────────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
 let stickyId = null;
 
@@ -350,9 +344,8 @@ function positionTooltip(e) {
 
 function hideTooltip() { tooltip.classList.remove('visible'); }
 
-// ── Highlight linking ────────────────────────────────────────
-const barById     = new Map();
-const bubbleById  = new Map();
+const barById      = new Map();
+const bubbleById   = new Map();
 const rankItemById = new Map();
 
 function clearHighlight() {
@@ -363,7 +356,6 @@ function clearHighlight() {
   stickyId = null;
 }
 
-// クリック時の固定ハイライト
 function setHighlight(id) {
   clearHighlight();
   if (!id) return;
@@ -374,7 +366,6 @@ function setHighlight(id) {
   stickyId = id;
 }
 
-// hover時の一時ハイライト（stickyIdを変えない）
 function setTempHighlight(id) {
   document.body.classList.add('highlighting');
   barById.forEach(g => g.classList.remove('linked'));
@@ -389,7 +380,6 @@ function setTempHighlight(id) {
 
 function clearTempHighlight() {
   if (stickyId) {
-    // sticky状態に戻す
     setTempHighlight(stickyId);
   } else {
     document.body.classList.remove('highlighting');
@@ -403,9 +393,8 @@ svg.addEventListener('click', e => {
   if (!e.target.closest('.bar-group') && !e.target.closest('.bubble-group')) clearHighlight();
 });
 
-// ── GeoJSON rendering ────────────────────────────────────────
 function coordsToPath(coords) {
-  return coords.map((ring, ri) =>
+  return coords.map((ring) =>
     ring.map(([lon, lat], i) => {
       const [x, y] = project(lon, lat);
       return (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
@@ -430,44 +419,32 @@ function renderGeoJSON(geojson) {
     }
     if (!d) continue;
 
-    // 塗りつぶし（境界線なし）
-    const fill = el('path', {
-      d, fill: '#f2f2f2', stroke: 'none'
-    });
-    fillLayer.appendChild(fill);
-
-    // 境界線のみ（塗りつぶしなし）・全県を同じレイヤーで上書きなし
-    const stroke = el('path', {
-      d, fill: 'none', stroke: '#ffffff',
-      'stroke-width': '0.7',
-      'vector-effect': 'non-scaling-stroke',
-      class: 'pref-stroke'
-    });
-    strokeLayer.appendChild(stroke);
+    // 塗りつぶし層（hoverで色変化）
+    fillLayer.appendChild(el('path', { d, class: 'pref-fill' }));
+    // 境界線層（均一な太さ・hover干渉なし）
+    strokeLayer.appendChild(el('path', { d, class: 'pref-stroke' }));
   }
 }
 
-// ── CSV parser ───────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
+  const lines   = text.trim().split('\n');
   const headers = lines[0].split(',');
   return lines.slice(1).map(line => {
     const vals = line.split(',');
-    const obj = {};
+    const obj  = {};
     headers.forEach((h, i) => obj[h.trim()] = vals[i]?.trim());
     obj.spending = parseInt(obj.spending);
-    obj.lon = parseFloat(obj.lon);
-    obj.lat = parseFloat(obj.lat);
+    obj.lon      = parseFloat(obj.lon);
+    obj.lat      = parseFloat(obj.lat);
     return obj;
   });
 }
 
-// ── Bar chart ────────────────────────────────────────────────
 const BAR_MAX_H = 90;
 const BAR_W     = 6;
 const BAR_COLOR = '#d03025';
 
-function buildScaleLegend(maxSpending) {
+function buildScaleLegend() {
   const legend = document.getElementById('scale-legend');
   legend.innerHTML = '';
   [0.33, 0.55, 0.75, 1.0].forEach(f => {
@@ -481,74 +458,34 @@ function buildScaleLegend(maxSpending) {
 function renderBars(cities) {
   barsLayer.innerHTML = '';
   const maxSpending = Math.max(...cities.map(d => d.spending));
-
   cities.forEach((d, i) => {
     const [cx, cy] = project(d.lon, d.lat);
     const barH = (d.spending / maxSpending) * BAR_MAX_H;
     const rank = i + 1;
-
-    const grp = el('g', { class: 'bar-group' });
+    const grp  = el('g', { class: 'bar-group' });
     grp.dataset.id = d.id;
-
-    // shadow
-    const shadow = el('ellipse', {
-      cx, cy: cy + 2, rx: BAR_W * 0.9, ry: 2,
-      fill: 'rgba(0,0,0,0.10)'
-    });
-    grp.appendChild(shadow);
-
-    // main bar
-    const bar = el('rect', {
-      x: cx - BAR_W/2, y: cy - barH,
-      width: BAR_W, height: barH,
-      fill: BAR_COLOR, rx: 1.5,
-      class: 'main-bar',
-      opacity: 0.85
-    });
-    grp.appendChild(bar);
-
-    // cap
-    const cap = el('rect', {
-      x: cx - BAR_W/2, y: cy - barH - 2,
-      width: BAR_W, height: 3,
-      fill: '#ff6b60', rx: 1,
-      class: 'bar-cap'
-    });
-    grp.appendChild(cap);
-
-    // hit area
-    const hit = el('rect', {
-      x: cx - 10, y: cy - barH - 10,
-      width: 20, height: barH + 14,
-      fill: 'transparent'
-    });
-    grp.appendChild(hit);
-
-    grp.addEventListener('mouseenter', e => {
-      if (!stickyId) showTooltip(d, rank, cities.length, e);
-    });
-    grp.addEventListener('mousemove', e => {
-      if (!stickyId || stickyId === d.id) positionTooltip(e);
-    });
+    grp.appendChild(el('ellipse', { cx, cy: cy + 2, rx: BAR_W * 0.9, ry: 2, fill: 'rgba(0,0,0,0.10)' }));
+    grp.appendChild(el('rect', { x: cx - BAR_W/2, y: cy - barH, width: BAR_W, height: barH, fill: BAR_COLOR, rx: 1.5, class: 'main-bar', opacity: 0.85 }));
+    grp.appendChild(el('rect', { x: cx - BAR_W/2, y: cy - barH - 2, width: BAR_W, height: 3, fill: '#ff6b60', rx: 1, class: 'bar-cap' }));
+    grp.appendChild(el('rect', { x: cx - 10, y: cy - barH - 10, width: 20, height: barH + 14, fill: 'transparent' }));
+    grp.addEventListener('mouseenter', e => { if (!stickyId) showTooltip(d, rank, cities.length, e); });
+    grp.addEventListener('mousemove',  e => { if (!stickyId || stickyId === d.id) positionTooltip(e); });
     grp.addEventListener('mouseleave', () => { if (!stickyId) hideTooltip(); });
     grp.addEventListener('click', e => {
       e.stopPropagation();
       if (stickyId === d.id) { clearHighlight(); hideTooltip(); }
       else { setHighlight(d.id); showTooltip(d, rank, cities.length, e); }
     });
-
     barsLayer.appendChild(grp);
     barById.set(d.id, grp);
   });
 }
 
-// ── Bubble chart ─────────────────────────────────────────────
 const BUBBLE_MAX_R = 28;
 const BUBBLE_MIN_R = 5;
 
 function spendingToColor(spending, max) {
   const t = spending / max;
-  // red spectrum: low=pale, high=deep red
   const r = Math.round(255 - t * 40);
   const g = Math.round(220 - t * 190);
   const b = Math.round(210 - t * 200);
@@ -558,65 +495,44 @@ function spendingToColor(spending, max) {
 function renderBubbles(cities) {
   bubbleLayer.innerHTML = '';
   const maxSpending = Math.max(...cities.map(d => d.spending));
-
   cities.forEach((d, i) => {
     const [cx, cy] = project(d.lon, d.lat);
-    const r    = BUBBLE_MIN_R + (d.spending / maxSpending) * (BUBBLE_MAX_R - BUBBLE_MIN_R);
-    const rank = i + 1;
+    const r     = BUBBLE_MIN_R + (d.spending / maxSpending) * (BUBBLE_MAX_R - BUBBLE_MIN_R);
+    const rank  = i + 1;
     const color = spendingToColor(d.spending, maxSpending);
-
-    const grp = el('g', { class: 'bubble-group' });
+    const grp   = el('g', { class: 'bubble-group' });
     grp.dataset.id = d.id;
-
-    const circle = el('circle', {
-      cx, cy, r,
-      fill: color,
-      stroke: '#fff',
-      'stroke-width': 1.2,
-      class: 'bubble-circle'
-    });
-    grp.appendChild(circle);
-
-    grp.addEventListener('mouseenter', e => {
-      if (!stickyId) showTooltip(d, rank, cities.length, e);
-    });
-    grp.addEventListener('mousemove', e => {
-      if (!stickyId || stickyId === d.id) positionTooltip(e);
-    });
+    grp.appendChild(el('circle', { cx, cy, r, fill: color, stroke: '#fff', 'stroke-width': 1.2, class: 'bubble-circle' }));
+    grp.addEventListener('mouseenter', e => { if (!stickyId) showTooltip(d, rank, cities.length, e); });
+    grp.addEventListener('mousemove',  e => { if (!stickyId || stickyId === d.id) positionTooltip(e); });
     grp.addEventListener('mouseleave', () => { if (!stickyId) hideTooltip(); });
     grp.addEventListener('click', e => {
       e.stopPropagation();
       if (stickyId === d.id) { clearHighlight(); hideTooltip(); }
       else { setHighlight(d.id); showTooltip(d, rank, cities.length, e); }
     });
-
     bubbleLayer.appendChild(grp);
     bubbleById.set(d.id, grp);
   });
 }
 
-// ── Ranking sidebar ──────────────────────────────────────────
 function buildRanking(cities) {
   const list = document.getElementById('rk-list');
   list.innerHTML = '';
   const max = cities[0].spending;
-
   cities.forEach((d, i) => {
-    const rank = i + 1;
-    const item = document.createElement('div');
-    item.className = 'rk-item';
+    const rank      = i + 1;
+    const item      = document.createElement('div');
+    item.className  = 'rk-item';
     item.dataset.id = d.id;
-
-    const numClass = rank === 1 ? 'rk-num gold' : rank === 2 ? 'rk-num silver' : rank === 3 ? 'rk-num bronze' : 'rk-num';
-    const pct = (d.spending / max * 100).toFixed(0);
-
-    item.innerHTML = `
+    const numClass  = rank === 1 ? 'rk-num gold' : rank === 2 ? 'rk-num silver' : rank === 3 ? 'rk-num bronze' : 'rk-num';
+    const pct       = (d.spending / max * 100).toFixed(0);
+    item.innerHTML  = `
       <span class="${numClass}">${rank}</span>
       <span class="rk-name">${d.city_ja}</span>
       <div class="rk-bar"><div class="rk-bar-fill" style="width:${pct}%"></div></div>
       <span class="rk-val">¥${(d.spending/1000).toFixed(1)}k</span>
     `;
-
     item.addEventListener('mouseenter', e => {
       setTempHighlight(d.id);
       showTooltip(d, rank, cities.length, { clientX: window.innerWidth - 270, clientY: e.clientY });
@@ -629,27 +545,24 @@ function buildRanking(cities) {
       if (stickyId === d.id) { clearHighlight(); hideTooltip(); }
       else setHighlight(d.id);
     });
-
     list.appendChild(item);
     rankItemById.set(d.id, item);
   });
 }
 
-// ── View switching ───────────────────────────────────────────
 let currentView = 'bar';
 
 function setView(mode) {
   currentView = mode;
   document.getElementById('btn-bar').classList.toggle('active', mode === 'bar');
   document.getElementById('btn-bubble').classList.toggle('active', mode === 'bubble');
-
   if (mode === 'bar') {
-    barsLayer.style.display = '';
+    barsLayer.style.display   = '';
     bubbleLayer.style.display = 'none';
     document.getElementById('scale-legend').style.display = '';
     document.getElementById('scale-label').textContent = 'Bar height = annual spending (JPY)';
   } else {
-    barsLayer.style.display = 'none';
+    barsLayer.style.display   = 'none';
     bubbleLayer.style.display = '';
     document.getElementById('scale-legend').style.display = 'none';
     document.getElementById('scale-label').textContent = 'Bubble size = annual spending (JPY)';
@@ -658,35 +571,20 @@ function setView(mode) {
   hideTooltip();
 }
 
-// ── Main: load data ──────────────────────────────────────────
 async function main() {
   try {
-    const [geoRes, csvRes] = await Promise.all([
-      fetch(GEOJSON_URL),
-      fetch(CSV_URL)
-    ]);
-
+    const [geoRes, csvRes] = await Promise.all([fetch(GEOJSON_URL), fetch(CSV_URL)]);
     if (!geoRes.ok) throw new Error('GeoJSON fetch failed: ' + geoRes.status);
     if (!csvRes.ok) throw new Error('CSV fetch failed: ' + csvRes.status);
-
-    const [geojson, csvText] = await Promise.all([
-      geoRes.json(),
-      csvRes.text()
-    ]);
-
+    const [geojson, csvText] = await Promise.all([geoRes.json(), csvRes.text()]);
     const cities = parseCSV(csvText).sort((a, b) => b.spending - a.spending);
-
     renderGeoJSON(geojson);
     renderBars(cities);
     renderBubbles(cities);
     buildRanking(cities);
-    buildScaleLegend(cities[0].spending);
-
-    // start in bar mode
+    buildScaleLegend();
     bubbleLayer.style.display = 'none';
-
     document.getElementById('loading').style.display = 'none';
-
   } catch (err) {
     document.getElementById('loading').innerHTML = `
       <div style="color:#d03025;font-size:15px;">⚠️ 読み込みエラー</div>
