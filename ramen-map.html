@@ -62,15 +62,20 @@
 
   /* ── Bar chart ── */
   .bar-group { cursor: pointer; }
-  .bar-group:hover .main-bar { filter: brightness(0.85); }
+  .bar-group:hover .main-bar {
+    fill: #ff2a1f !important;
+    filter: drop-shadow(0 0 8px rgba(208,48,37,0.7)) brightness(1.15);
+    stroke: #fffde0 !important; stroke-width: 2.5 !important;
+  }
+  .bar-group:hover .bar-cap { fill: #ffe566 !important; }
   body.highlighting .bar-group .main-bar { opacity: 0.22 !important; filter: saturate(0.4); transition: opacity 0.12s, filter 0.12s; }
   body.highlighting .bar-group .bar-cap,
   body.highlighting .bar-group circle { opacity: 0.15 !important; transition: opacity 0.12s; }
   .bar-group.linked .main-bar,
   body.highlighting .bar-group.linked .main-bar {
     fill: #0b57d0 !important; opacity: 1 !important;
-    stroke: #fff7a8 !important; stroke-width: 2.2 !important;
-    filter: drop-shadow(0 0 10px rgba(11,87,208,0.55)) brightness(1.05);
+    stroke: #fff7a8 !important; stroke-width: 2.5 !important;
+    filter: drop-shadow(0 0 12px rgba(11,87,208,0.7)) brightness(1.1);
   }
   .bar-group.linked .bar-cap,
   body.highlighting .bar-group.linked .bar-cap { fill: #fff36d !important; opacity: 1 !important; }
@@ -88,13 +93,7 @@
     fill: #0b57d0 !important; opacity: 1 !important;
     filter: drop-shadow(0 0 10px rgba(11,87,208,0.55));
   }
-  .bubble-label {
-    font-size: 8px; fill: #555; text-anchor: middle; pointer-events: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-  body.highlighting .bubble-group .bubble-label { opacity: 0.2 !important; }
-  .bubble-group.linked .bubble-label,
-  body.highlighting .bubble-group.linked .bubble-label { fill: #0b57d0 !important; font-weight: 700; opacity: 1 !important; }
+
 
   /* ── Tooltip ── */
   .tooltip {
@@ -527,16 +526,6 @@ function renderBubbles(cities) {
     });
     grp.appendChild(circle);
 
-    // label (only for larger bubbles)
-    if (r > 12) {
-      const label = el('text', {
-        x: cx, y: cy + r + 9,
-        class: 'bubble-label'
-      });
-      label.textContent = d.city_ja;
-      grp.appendChild(label);
-    }
-
     grp.addEventListener('mouseenter', e => {
       if (!stickyId) showTooltip(d, rank, cities.length, e);
     });
@@ -578,9 +567,14 @@ function buildRanking(cities) {
     `;
 
     item.addEventListener('mouseenter', e => {
-      if (!stickyId) showTooltip(d, rank, cities.length, { clientX: window.innerWidth - 270, clientY: e.clientY });
+      if (!stickyId) {
+        setHighlight(d.id);
+        showTooltip(d, rank, cities.length, { clientX: window.innerWidth - 270, clientY: e.clientY });
+      }
     });
-    item.addEventListener('mouseleave', () => { if (!stickyId) hideTooltip(); });
+    item.addEventListener('mouseleave', () => {
+      if (!stickyId) { clearHighlight(); hideTooltip(); }
+    });
     item.addEventListener('click', () => {
       if (stickyId === d.id) { clearHighlight(); hideTooltip(); }
       else setHighlight(d.id);
