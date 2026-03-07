@@ -393,11 +393,26 @@ const bars = g.selectAll('.bar')
 
 bars.on('mousemove', function(event, d) {
     tooltip.style.opacity = '1';
-    const rect = container.getBoundingClientRect();
-    tooltip.style.left = (event.pageX - rect.left + 12) + 'px';
-    tooltip.style.top = (event.pageY - rect.top - 60) + 'px';
     ttYear.textContent = d.year;
     ttValue.textContent = d.value.toLocaleString('en-US') + ' copies';
+
+    const ttW = tooltip.offsetWidth || 170;
+    const ttH = tooltip.offsetHeight || 56;
+    const margin = 12;
+    const vpW = window.innerWidth;
+    const vpH = window.innerHeight;
+
+    let left = event.clientX + margin;
+    let top  = event.clientY - ttH - margin;
+
+    // flip right→left if too close to right edge
+    if (left + ttW > vpW - margin) left = event.clientX - ttW - margin;
+    // flip above→below if too close to top
+    if (top < margin) top = event.clientY + margin;
+
+    tooltip.style.position = 'fixed';
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = top  + 'px';
   })
   .on('mouseleave', function() {
     tooltip.style.opacity = '0';
