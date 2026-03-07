@@ -73,12 +73,12 @@
   body.highlighting .bar-group circle { opacity: 0.15 !important; transition: opacity 0.12s; }
   .bar-group.linked .main-bar,
   body.highlighting .bar-group.linked .main-bar {
-    fill: #0b57d0 !important; opacity: 1 !important;
-    stroke: #fff7a8 !important; stroke-width: 2.5 !important;
-    filter: drop-shadow(0 0 12px rgba(11,87,208,0.7)) brightness(1.1);
+    fill: #ff2a1f !important; opacity: 1 !important;
+    stroke: #fffde0 !important; stroke-width: 2.5 !important;
+    filter: drop-shadow(0 0 12px rgba(208,48,37,0.8)) brightness(1.15);
   }
   .bar-group.linked .bar-cap,
-  body.highlighting .bar-group.linked .bar-cap { fill: #fff36d !important; opacity: 1 !important; }
+  body.highlighting .bar-group.linked .bar-cap { fill: #ffe566 !important; opacity: 1 !important; }
 
   /* ── Bubble chart ── */
   .bubble-group { cursor: pointer; }
@@ -90,8 +90,9 @@
   body.highlighting .bubble-group .bubble-circle { opacity: 0.18 !important; filter: saturate(0.4); transition: opacity 0.12s; }
   .bubble-group.linked .bubble-circle,
   body.highlighting .bubble-group.linked .bubble-circle {
-    fill: #0b57d0 !important; opacity: 1 !important;
-    filter: drop-shadow(0 0 10px rgba(11,87,208,0.55));
+    fill: #ff2a1f !important; opacity: 1 !important;
+    filter: drop-shadow(0 0 12px rgba(208,48,37,0.8)) brightness(1.15);
+    stroke: #fffde0 !important; stroke-width: 2 !important;
   }
 
 
@@ -125,15 +126,15 @@
   }
   .rk-title { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
   .rk-item { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 5px; cursor: pointer; transition: background 0.12s; }
-  .rk-item:hover { background: rgba(26,111,196,0.06); }
+  .rk-item:hover { background: rgba(208,48,37,0.05); }
   body.highlighting .rk-item { opacity: 0.42; transition: opacity 0.12s, background 0.12s, transform 0.12s; }
   .rk-item.linked, body.highlighting .rk-item.linked {
-    opacity: 1 !important; background: rgba(11,87,208,0.14);
-    outline: 2px solid rgba(11,87,208,0.28); transform: translateX(-2px);
+    opacity: 1 !important; background: rgba(208,48,37,0.08);
+    outline: 2px solid rgba(208,48,37,0.25); transform: translateX(-2px);
   }
   .rk-item.linked .rk-name, .rk-item.linked .rk-val,
-  body.highlighting .rk-item.linked .rk-name, body.highlighting .rk-item.linked .rk-val { color: #0b57d0; font-weight: 700; }
-  .rk-item.linked .rk-bar-fill, body.highlighting .rk-item.linked .rk-bar-fill { background: #0b57d0; opacity: 1; }
+  body.highlighting .rk-item.linked .rk-name, body.highlighting .rk-item.linked .rk-val { color: #d03025; font-weight: 700; }
+  .rk-item.linked .rk-bar-fill, body.highlighting .rk-item.linked .rk-bar-fill { background: #d03025; opacity: 1; }
   .rk-num { font-family: ui-monospace, monospace; font-size: 10px; font-weight: 600; color: #ccc; width: 18px; text-align: right; flex-shrink: 0; }
   .rk-num.gold { color: #d4a017; } .rk-num.silver { color: #999; } .rk-num.bronze { color: #b07040; }
   .rk-name { font-size: 11.5px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -356,6 +357,7 @@ function clearHighlight() {
   stickyId = null;
 }
 
+// クリック時の固定ハイライト
 function setHighlight(id) {
   clearHighlight();
   if (!id) return;
@@ -364,6 +366,31 @@ function setHighlight(id) {
   bubbleById.get(id)?.classList.add('linked');
   rankItemById.get(id)?.classList.add('linked');
   stickyId = id;
+}
+
+// hover時の一時ハイライト（stickyIdを変えない）
+function setTempHighlight(id) {
+  document.body.classList.add('highlighting');
+  barById.forEach(g => g.classList.remove('linked'));
+  bubbleById.forEach(g => g.classList.remove('linked'));
+  rankItemById.forEach(i => i.classList.remove('linked'));
+  if (id) {
+    barById.get(id)?.classList.add('linked');
+    bubbleById.get(id)?.classList.add('linked');
+    rankItemById.get(id)?.classList.add('linked');
+  }
+}
+
+function clearTempHighlight() {
+  if (stickyId) {
+    // sticky状態に戻す
+    setTempHighlight(stickyId);
+  } else {
+    document.body.classList.remove('highlighting');
+    barById.forEach(g => g.classList.remove('linked'));
+    bubbleById.forEach(g => g.classList.remove('linked'));
+    rankItemById.forEach(i => i.classList.remove('linked'));
+  }
 }
 
 svg.addEventListener('click', e => {
@@ -567,13 +594,12 @@ function buildRanking(cities) {
     `;
 
     item.addEventListener('mouseenter', e => {
-      if (!stickyId) {
-        setHighlight(d.id);
-        showTooltip(d, rank, cities.length, { clientX: window.innerWidth - 270, clientY: e.clientY });
-      }
+      setTempHighlight(d.id);
+      showTooltip(d, rank, cities.length, { clientX: window.innerWidth - 270, clientY: e.clientY });
     });
     item.addEventListener('mouseleave', () => {
-      if (!stickyId) { clearHighlight(); hideTooltip(); }
+      clearTempHighlight();
+      if (!stickyId) hideTooltip();
     });
     item.addEventListener('click', () => {
       if (stickyId === d.id) { clearHighlight(); hideTooltip(); }
