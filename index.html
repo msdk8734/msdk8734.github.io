@@ -96,6 +96,10 @@
     background: linear-gradient(135deg, #eef3fb 0%, #dce8f8 50%, #c8d8f0 100%);
   }
 
+  .card-preview.newspaper-theme {
+    background: linear-gradient(135deg, #1a1610 0%, #2a2118 50%, #1e1a12 100%);
+  }
+
   .pyramid-preview {
     position: absolute;
     inset: 0;
@@ -138,10 +142,6 @@
     opacity: 0.75;
   }
 
-
-    background: linear-gradient(135deg, #eef3fb 0%, #dfeaf9 38%, #fff6cf 58%, #fddbb6 76%, #f4b0a6 100%);
-  }
-
   .card-preview .preview-icon {
     font-size: 56px;
     opacity: 0.9;
@@ -176,6 +176,44 @@
     border-radius: 2px 2px 0 0;
     opacity: 0.55;
     background: #1a6fc4;
+  }
+
+  /* Newspaper preview bars */
+  .newspaper-bars-preview {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 18px;
+  }
+  .newspaper-bars-preview .nb {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .newspaper-peak-line {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    height: 1px;
+    background: #c8a96e;
+    opacity: 0.5;
+    top: 62px;
+    border-top: 1px dashed #c8a96e;
+  }
+
+  .newspaper-label {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: #c8a96e;
+    opacity: 0.8;
   }
 
   .heat-grid {
@@ -337,7 +375,7 @@
   </a>
 
   <a class="card" href="tokyo-heatmap.html">
-    <div class="card-preview heatmap-theme">
+    <div class="card-preview heatmap-theme" style="background: linear-gradient(135deg, #eef3fb 0%, #dfeaf9 38%, #fff6cf 58%, #fddbb6 76%, #f4b0a6 100%);">
       <div class="heat-grid">
         <div class="heat-cell" style="background:#6ea9d9"></div>
         <div class="heat-cell" style="background:#8bc1d8"></div>
@@ -351,7 +389,6 @@
         <div class="heat-cell" style="background:#b14e65"></div>
         <div class="heat-cell" style="background:#964d67"></div>
         <div class="heat-cell" style="background:#7a5b7e"></div>
-
         <div class="heat-cell" style="background:#88bddb"></div>
         <div class="heat-cell" style="background:#a5d2d0"></div>
         <div class="heat-cell" style="background:#d8e7bf"></div>
@@ -364,7 +401,6 @@
         <div class="heat-cell" style="background:#aa5067"></div>
         <div class="heat-cell" style="background:#8a5672"></div>
         <div class="heat-cell" style="background:#745f83"></div>
-
         <div class="heat-cell" style="background:#9cc8d8"></div>
         <div class="heat-cell" style="background:#b9dbca"></div>
         <div class="heat-cell" style="background:#e3eab8"></div>
@@ -377,7 +413,6 @@
         <div class="heat-cell" style="background:#a65268"></div>
         <div class="heat-cell" style="background:#885a76"></div>
         <div class="heat-cell" style="background:#716489"></div>
-
         <div class="heat-cell" style="background:#aacfd5"></div>
         <div class="heat-cell" style="background:#c7e0c8"></div>
         <div class="heat-cell" style="background:#ececb7"></div>
@@ -390,7 +425,6 @@
         <div class="heat-cell" style="background:#a05269"></div>
         <div class="heat-cell" style="background:#855b79"></div>
         <div class="heat-cell" style="background:#6f678d"></div>
-
         <div class="heat-cell" style="background:#bad6d2"></div>
         <div class="heat-cell" style="background:#d4e4c5"></div>
         <div class="heat-cell" style="background:#f1edb6"></div>
@@ -403,7 +437,6 @@
         <div class="heat-cell" style="background:#9d536c"></div>
         <div class="heat-cell" style="background:#825c7d"></div>
         <div class="heat-cell" style="background:#6d6a90"></div>
-
         <div class="heat-cell" style="background:#c5dbd0"></div>
         <div class="heat-cell" style="background:#dde7c3"></div>
         <div class="heat-cell" style="background:#f5efb6"></div>
@@ -452,6 +485,44 @@
         <span class="meta-tag">D3.js</span>
         <span class="meta-tag">Bar Chart</span>
         <span class="meta-tag">Ramen</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <a class="card" href="newspaper-circulation.html">
+    <div class="card-preview newspaper-theme">
+      <div class="newspaper-peak-line"></div>
+      <div class="newspaper-label">PEAK 1997 ▲</div>
+      <div class="newspaper-bars-preview">
+        <div class="nb" style="height:62px;background:#5a4a2e;"></div>
+        <div class="nb" style="height:68px;background:#6a5535;"></div>
+        <div class="nb" style="height:74px;background:#7a6040;"></div>
+        <div class="nb" style="height:82px;background:#8a6e48;"></div>
+        <div class="nb" style="height:88px;background:#9a7c52;"></div>
+        <div class="nb" style="height:94px;background:#a88a5e;"></div>
+        <div class="nb" style="height:100px;background:#b8986a;"></div>
+        <div class="nb" style="height:104px;background:#c8a96e;"></div>
+        <div class="nb" style="height:106px;background:#c8a96e;"></div>
+        <div class="nb" style="height:104px;background:#cda068;"></div>
+        <div class="nb" style="height:100px;background:#cc9560;"></div>
+        <div class="nb" style="height:96px;background:#c48a58;"></div>
+        <div class="nb" style="height:90px;background:#bc7e52;"></div>
+        <div class="nb" style="height:82px;background:#b07048;"></div>
+        <div class="nb" style="height:72px;background:#a36040;"></div>
+        <div class="nb" style="height:60px;background:#954e38;"></div>
+        <div class="nb" style="height:50px;background:#883e30;"></div>
+        <div class="nb" style="height:40px;background:#7a3028;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Bar Chart</div>
+      <div class="card-title">Japanese Newspaper Circulation 1965–2025</div>
+      <div class="card-desc">An animated bar chart tracing Japan's newspaper circulation over 60 years, from postwar growth to the digital-era decline.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Animation</span>
+        <span class="meta-tag">Media</span>
         <span class="card-arrow">→</span>
       </div>
     </div>
