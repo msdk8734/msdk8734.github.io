@@ -375,89 +375,113 @@ function isMobile() {
 
 // 初期化・データ読み込み関数
 async function initData() {
-  // 01〜47のコード配列を生成
-  const prefCodes = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
+  try {
+    // 01〜47のコード配列を生成
+    const prefCodes = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-  // 人口データと47個の地理データを並行して一気にfetch
-  const [popResp, ...geoResps] = await Promise.all([
-    fetch('population-json/pref-pop.json'),
-    ...prefCodes.map(code => fetch(`geo/pref_${code}.json`))
-  ]);
+    // 人口データと47個の地理データを並行してfetch
+    // ※ファイルが存在しない場合（404等）はエラーにならず null を返すように処理
+    const [popResp, ...geoResps] = await Promise.all([
+      fetch('population-json/pref-pop.json')
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null),
+      ...prefCodes.map(code => 
+        fetch(`geo/pref_${code}.json`)
+          .then(res => res.ok ? res.json() : null)
+          .catch(() => null)
+      )
+    ]);
 
-  prefDataRaw = await popResp.json();
-  const geoJsons = await Promise.all(geoResps.map(r => r.json()));
-  
-  // 47個のGeoJSONのfeatures(市区町村)を1つの配列に結合
-  geojson.features = geoJsons.flatMap(d => d.features);
+    if (!popResp) {
+      console.error("人口データ (pref-pop.json) が読み込めませんでした。ローカルサーバー経由で開いているか確認してください。");
+      return;
+    }
+    prefDataRaw = popResp;
 
-  // 人口データをセットアップ
-  for (const [code, d] of Object.entries(prefDataRaw)) {
-    const id = parseInt(code, 10);
-    nameEn[id] = d.nameEn;
-    metricData.total[id] = d.total;
-    metricData.male[id] = d.male;
-    metricData.female[id] = d.female;
-    nationalTotals.total += d.total;
-    nationalTotals.male += d.male;
-    nationalTotals.female += d.female;
+    // 取得に成功した（nullでない）GeoJSONだけを抽出
+    const validGeoJsons = geoResps.filter(r => r !== null);
+    
+    if (validGeoJsons.length === 0) {
+      console.error("地図データ (geo/pref_XX.json) が1つも読み込めませんでした。ファイルがまだ無いか、パスが間違っています。");
+      // 地図データがなくても一応処理を止めない
+    } else {
+      // 取得できた県のGeoJSONのfeatures(市区町村)を1つの配列に結合
+      geojson.features = validGeoJsons.flatMap(d => d.features);
+    }
+
+    // 人口データをセットアップ
+    for (const [code, d] of Object.entries(prefDataRaw)) {
+      const id = parseInt(code, 10);
+      nameEn[id] = d.nameEn;
+      metricData.total[id] = d.total;
+      metricData.male[id] = d.male;
+      metricData.female[id] = d.female;
+      nationalTotals.total += d.total;
+      nationalTotals.male += d.male;
+      nationalTotals.female += d.female;
+    }
+
+    if (geojson.features.length > 0) {
+      // 各市区町村フィーチャーに都道府県のIDやデータを紐付け
+      geojson.features.forEach(f => {
+        const codeStr = f.properties.code || ""; 
+        const prefCodeStr = codeStr.slice(0, 2); // 行政区域コードの先頭2桁
+        const id = parseInt(prefCodeStr, 10);
+
+        f.properties.id = id;
+        f.properties.nameEn = nameEn[id] || f.properties.pref || "";
+        f.properties.nam_ja = prefDataRaw[prefCodeStr]?.nameJa || f.properties.pref || "";
+        f.properties.value = metricData[currentMetric][id] || 0;
+      });
+
+      // 取得できたデータに合わせて地図のスケールを調整
+      projection.fitExtent(
+        [[pad, topPadding],[Math.max(pad + 10, width - panelWidth - pad), height - pad]],
+        geojson
+      );
+
+      // パスの描画
+      g.selectAll('.pref-path')
+        .data(geojson.features)
+        .join('path')
+        .attr('class', 'pref-path')
+        .attr('d', pathGen)
+        .attr('fill', '#eef3f8')
+        .on('mouseenter', function(ev, d) {
+          const prefId = d.properties.id;
+          g.selectAll('.pref-path')
+            .filter(f => f.properties.id === prefId)
+            .raise()
+            .classed('hovered', true);
+          showTip(ev, d.properties);
+        })
+        .on('mousemove', moveTip)
+        .on('mouseleave', function(ev, d) {
+          const prefId = d.properties.id;
+          g.selectAll('.pref-path')
+            .filter(f => f.properties.id === prefId)
+            .classed('hovered', false);
+          hideTip();
+        })
+        .on('touchstart', (ev, d) => {
+          ev.preventDefault();
+          if (tipLocked && tipLockedId === d.properties.id) {
+            tipLocked = false; tipLockedId = null;
+            forceHideTip();
+            return;
+          }
+          tipLocked = true;
+          tipLockedId = d.properties.id;
+          showTip(ev.touches ? ev.touches[0] : ev, d.properties);
+        });
+    }
+
+    // 初回の塗り分けとランキング生成を実行
+    applyMetric('total');
+
+  } catch (error) {
+    console.error("初期化中にエラーが発生しました:", error);
   }
-
-  // 各市区町村フィーチャーに都道府県のIDやデータを紐付け
-  geojson.features.forEach(f => {
-    const codeStr = f.properties.code || ""; 
-    const prefCodeStr = codeStr.slice(0, 2); // 行政区域コードの先頭2桁
-    const id = parseInt(prefCodeStr, 10);
-
-    f.properties.id = id;
-    f.properties.nameEn = nameEn[id] || f.properties.pref || "";
-    f.properties.nam_ja = prefDataRaw[prefCodeStr]?.nameJa || f.properties.pref || "";
-    f.properties.value = metricData[currentMetric][id] || 0;
-  });
-
-  // 全国のデータが揃ったので、画面サイズに合わせて地図のスケールを調整
-  projection.fitExtent(
-    [[pad, topPadding],[Math.max(pad + 10, width - panelWidth - pad), height - pad]],
-    geojson
-  );
-
-  // パスの描画
-  g.selectAll('.pref-path')
-    .data(geojson.features)
-    .join('path')
-    .attr('class', 'pref-path')
-    .attr('d', pathGen)
-    .attr('fill', '#eef3f8')
-    .on('mouseenter', function(ev, d) {
-      const prefId = d.properties.id;
-      // 市区町村に分かれているため、同じ県のポリゴンをすべてハイライトする
-      g.selectAll('.pref-path')
-        .filter(f => f.properties.id === prefId)
-        .raise()
-        .classed('hovered', true);
-      showTip(ev, d.properties);
-    })
-    .on('mousemove', moveTip)
-    .on('mouseleave', function(ev, d) {
-      const prefId = d.properties.id;
-      g.selectAll('.pref-path')
-        .filter(f => f.properties.id === prefId)
-        .classed('hovered', false);
-      hideTip();
-    })
-    .on('touchstart', (ev, d) => {
-      ev.preventDefault();
-      if (tipLocked && tipLockedId === d.properties.id) {
-        tipLocked = false; tipLockedId = null;
-        forceHideTip();
-        return;
-      }
-      tipLocked = true;
-      tipLockedId = d.properties.id;
-      showTip(ev.touches ? ev.touches[0] : ev, d.properties);
-    });
-
-  // 初回の塗り分けとランキング生成を実行
-  applyMetric('total');
 }
 
 function applyMetric(metric) {
@@ -470,36 +494,44 @@ function applyMetric(metric) {
   document.getElementById('rkTitle').textContent = meta.short;
   document.getElementById('colorBar').style.background = `linear-gradient(90deg, ${meta.c1}, ${meta.c2})`;
 
-  // 人口データを更新
-  geojson.features.forEach(f => {
-    const id = f.properties.id;
-    f.properties.value = metricData[metric][id] || 0;
-  });
-
-  // ランキング用に各都道府県1フィーチャーだけを抽出（市区町村の重複排除）
-  const uniqueFeatures = Array.from(new Map(geojson.features.map(f =>[f.properties.id, f])).values());
-  const ranked = uniqueFeatures.sort((a, b) => b.properties.value - a.properties.value);
+  // ランキング用に各都道府県1フィーチャーだけを抽出（地図データが取得できた県のみ）
+  const uniqueFeatures = Array.from(new Map(geojson.features.map(f => [f.properties.id, f])).values());
   
-  // 順位をマップに保存し、すべての市区町村に反映
-  const rankMap = {};
-  ranked.forEach((f, i) => rankMap[f.properties.id] = i + 1);
-  geojson.features.forEach(f => f.properties.rank = rankMap[f.properties.id]);
+  if (uniqueFeatures.length > 0) {
+    // 人口データを更新
+    geojson.features.forEach(f => {
+      const id = f.properties.id;
+      f.properties.value = metricData[metric][id] || 0;
+    });
 
-  const maxValue = d3.max(ranked, f => f.properties.value);
-  const minValue = d3.min(ranked, f => f.properties.value);
+    const ranked = uniqueFeatures.sort((a, b) => b.properties.value - a.properties.value);
+    
+    // 順位をマップに保存し、すべての市区町村に反映
+    const rankMap = {};
+    ranked.forEach((f, i) => rankMap[f.properties.id] = i + 1);
+    geojson.features.forEach(f => f.properties.rank = rankMap[f.properties.id]);
 
-  document.getElementById('minLabel').textContent = `${minValue.toLocaleString()}`;
-  document.getElementById('maxLabel').textContent = `${maxValue.toLocaleString()}`;
+    const maxValue = d3.max(ranked, f => f.properties.value);
+    const minValue = d3.min(ranked, f => f.properties.value);
 
-  const colorScale = d3.scaleSequential()
-    .domain([minValue, maxValue])
-    .interpolator(t => d3.interpolateRgb(meta.c1, meta.c2)(Math.pow(t, 0.55)));
+    document.getElementById('minLabel').textContent = `${minValue.toLocaleString()}`;
+    document.getElementById('maxLabel').textContent = `${maxValue.toLocaleString()}`;
 
-  g.selectAll('.pref-path')
-    .transition().duration(250)
-    .attr('fill', d => colorScale(d.properties.value));
+    const colorScale = d3.scaleSequential()
+      .domain([minValue, maxValue])
+      .interpolator(t => d3.interpolateRgb(meta.c1, meta.c2)(Math.pow(t, 0.55)));
 
-  renderRanking(ranked, maxValue, meta);
+    g.selectAll('.pref-path')
+      .transition().duration(250)
+      .attr('fill', d => colorScale(d.properties.value));
+
+    renderRanking(ranked, maxValue, meta);
+  } else {
+    // 地図データが1つもない場合は、ランキングリストを空にするか、人口データだけで構築することも可能ですが、今回は空にします
+    document.getElementById('rk-list').innerHTML = '<div style="padding:10px;font-size:12px;color:#999;">Map data not found.</div>';
+    document.getElementById('minLabel').textContent = '';
+    document.getElementById('maxLabel').textContent = '';
+  }
 }
 
 function showTip(ev, p) {
@@ -517,7 +549,7 @@ function showTip(ev, p) {
   const mobile = isMobile();
   const html = mobile ? `
     <div class="tt-name">${p.nameEn}</div>
-    <div class="tt-rank"><span class="num">#${p.rank}</span><span class="of"> of 47</span></div>
+    <div class="tt-rank"><span class="num">#${p.rank}</span></div>
     <div class="tt-row">
       <span class="tt-label">${meta.label}</span>
       <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span>
@@ -529,7 +561,7 @@ function showTip(ev, p) {
   ` : `
     <div class="tt-name">${p.nameEn}</div>
     <div class="tt-name-ja">${p.nam_ja}</div>
-    <div class="tt-rank"><span class="num">#${p.rank}</span><span class="of"> of 47 prefectures</span></div>
+    <div class="tt-rank"><span class="num">#${p.rank}</span><span class="of"></span></div>
     <div class="tt-row">
       <span class="tt-label">${meta.label}</span>
       <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span>
@@ -656,11 +688,14 @@ window.addEventListener('resize', () => {
   const h = window.innerHeight;
   const pw = (w <= 720) ? 0 : 250;
   svg.attr('width', w).attr('height', h);
-  projection.fitExtent(
-    [[pad, topPadding],[Math.max(pad + 10, w - pw - pad), h - pad]],
-    geojson
-  );
-  g.selectAll('.pref-path').attr('d', pathGen);
+  
+  if (geojson.features.length > 0) {
+    projection.fitExtent(
+      [[pad, topPadding],[Math.max(pad + 10, w - pw - pad), h - pad]],
+      geojson
+    );
+    g.selectAll('.pref-path').attr('d', pathGen);
+  }
 });
 
 // アプリケーション起動
