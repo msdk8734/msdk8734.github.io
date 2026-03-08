@@ -924,7 +924,7 @@ function getMuniColorScale(values, meta) {
 async function drillIntoPref(prefId) {
   if (currentPrefId === prefId) return;
   currentPrefId = prefId;
-  const url = `geo-json/pref_${prefId}.geojson`;
+  const url = `geo-json/pref_${String(prefId).padStart(2, '0')}.geojson`;
 
   await loadMuniPopulation(prefId);
 
