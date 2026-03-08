@@ -392,7 +392,7 @@ async function initData() {
     // 地理データを取得
     const geoResps = await Promise.all(
       prefCodes.map(code => 
-        fetch(`geo/pref_${code}.json`)
+        fetch(`geo-json/pref_${code}.geojson`) 
           .then(res => res.ok ? res.json() : null)
           .catch(() => null)
       )
