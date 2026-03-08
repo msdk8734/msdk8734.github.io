@@ -376,38 +376,54 @@ function isMobile() {
 // 初期化・データ読み込み関数
 async function initData() {
   try {
-    // 01〜47のコード配列を生成
     const prefCodes = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-    // 人口データと47個の地理データを並行してfetch
-    // ※ファイルが存在しない場合（404等）はエラーにならず null を返すように処理
-    const [popResp, ...geoResps] = await Promise.all([
-      fetch('population-json/pref-pop.json')
-        .then(r => r.ok ? r.json() : null)
-        .catch(() => null),
-      ...prefCodes.map(code => 
-        fetch(`geo-json/pref_${code}.geojson`)
+    // 人口データを取得
+    let popResp;
+    try {
+      popResp = await fetch('population-json/pref-pop.json');
+      if (!popResp.ok) throw new Error(`HTTPステータス ${popResp.status}`);
+    } catch (e) {
+      showError(`人口データ (pref-pop.json) の読み込みに失敗しました。<br>詳細: ${e.message}`);
+      return;
+    }
+    prefDataRaw = await popResp.json();
+
+    // 地理データを取得
+    const geoResps = await Promise.all(
+      prefCodes.map(code => 
+        fetch(`geo/pref_${code}.json`)
           .then(res => res.ok ? res.json() : null)
           .catch(() => null)
       )
-    ]);
+    );
 
-    if (!popResp) {
-      console.error("人口データ (pref-pop.json) が読み込めませんでした。ローカルサーバー経由で開いているか確認してください。");
-      return;
-    }
-    prefDataRaw = popResp;
-
-    // 取得に成功した（nullでない）GeoJSONだけを抽出
     const validGeoJsons = geoResps.filter(r => r !== null);
     
     if (validGeoJsons.length === 0) {
-      console.error("地図データ (geo/pref_XX.json) が1つも読み込めませんでした。ファイルがまだ無いか、パスが間違っています。");
-      // 地図データがなくても一応処理を止めない
-    } else {
-      // 取得できた県のGeoJSONのfeatures(市区町村)を1つの配列に結合
-      geojson.features = validGeoJsons.flatMap(d => d.features);
+      showError(`地図データが1つも読み込めませんでした。`);
+      return;
     }
+
+    // ▼▼▼ 今回修正した部分：壊れたデータや違う形式のデータを安全に処理する ▼▼▼
+    let allFeatures =[];
+    validGeoJsons.forEach(d => {
+      if (d && Array.isArray(d.features)) {
+        // 通常の FeatureCollection の場合
+        allFeatures.push(...d.features);
+      } else if (Array.isArray(d)) {
+        // AIが直接「配列」として出力してしまった場合
+        allFeatures.push(...d);
+      } else if (d && d.type === 'Feature') {
+        // 単一の図形として出力された場合
+        allFeatures.push(d);
+      }
+    });
+
+    // 万が一、中身が空（undefined）や geometry を持たない無効なデータが混ざっていても除外する
+    geojson.features = allFeatures.filter(f => f && f.properties && f.geometry);
+    // ▲▲▲ 修正ここまで ▲▲▲
+
 
     // 人口データをセットアップ
     for (const [code, d] of Object.entries(prefDataRaw)) {
@@ -474,13 +490,18 @@ async function initData() {
           tipLockedId = d.properties.id;
           showTip(ev.touches ? ev.touches[0] : ev, d.properties);
         });
+
+    } else {
+       showError("地図データが存在しますが、有効なフォーマットではありませんでした。");
+       return;
     }
 
     // 初回の塗り分けとランキング生成を実行
     applyMetric('total');
 
   } catch (error) {
-    console.error("初期化中にエラーが発生しました:", error);
+    showError(`予期せぬエラーが発生しました: ${error.message}`);
+    console.error(error);
   }
 }
 
