@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Japan Population Map by Prefecture</title>
-
- <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>🗾</text></svg>">
- 
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>🗾</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -67,6 +65,7 @@
     font-size: 11px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s, color 0.15s;
   }
   .toggle-btn.active {
     background: #1a1a1a;
@@ -80,21 +79,39 @@
     gap: 4px;
     padding-top: 2px;
   }
-  .scale-legend {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-  }
-  .scale-label {
-    font-size: 10px;
-    color: #999;
-    margin-left: 6px;
-    align-self: center;
-  }
-
+  .scale-legend { display: flex; align-items: flex-end; gap: 2px; }
+  .scale-label { font-size: 10px; color: #999; margin-left: 6px; align-self: center; }
   .color-legend { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
-  .color-bar { width: 140px; height: 10px; border-radius: 999px; background: linear-gradient(90deg, #edf3fb, #1557a0); border: 1px solid rgba(0,0,0,0.08); }
+  .color-bar { width: 140px; height: 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08); }
   .color-minmax { display:flex; justify-content: space-between; font-size: 9.5px; color:#aaa; font-family: 'JetBrains Mono', monospace; }
+
+  /* 戻るボタン */
+  #back-btn {
+    position: fixed;
+    top: 14px;
+    left: 24px;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    transition: background 0.15s, transform 0.1s;
+  }
+  #back-btn:hover { background: #333; transform: translateY(-1px); }
+  #back-btn.visible { display: flex; }
+  #back-btn svg { flex-shrink: 0; }
+
+  /* ズーム中のヘッダー調整 */
+  #header.zoomed { left: 160px; }
 
   #map-container { width: 100vw; height: 100vh; }
   #map-container svg { width: 100%; height: 100%; }
@@ -105,14 +122,35 @@
     vector-effect: non-scaling-stroke;
     stroke-linejoin: round;
     stroke-linecap: round;
-    transition: fill 0.2s, stroke 0.15s, stroke-width 0.15s, filter 0.15s;
+    transition: fill 0.25s;
     cursor: pointer;
     shape-rendering: geometricPrecision;
   }
+  /* 全国表示時のホバー */
   .pref-path.hovered {
     stroke: rgba(255,255,255,1) !important;
     stroke-width: 1.8px !important;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.32)) brightness(1.04);
+  }
+  /* ズーム中：対象県ハイライト */
+  .pref-path.dimmed {
+    opacity: 0.22;
+    pointer-events: none;
+  }
+  .pref-path.focused {
+    stroke: rgba(255,255,255,1) !important;
+    stroke-width: 1.2px !important;
+  }
+
+  /* 市区町村ラベル */
+  .city-label {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    fill: rgba(30,30,30,0.75);
+    pointer-events: none;
+    text-anchor: middle;
+    dominant-baseline: central;
   }
 
   .tooltip {
@@ -130,66 +168,21 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
   }
   .tooltip.visible { opacity: 1; }
-  .tt-name {
-    font-size: 17px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 1px;
-  }
-  .tt-name-ja {
-    font-size: 12px;
-    font-weight: 400;
-    color: #999;
-    margin-bottom: 6px;
-  }
-  .tt-rank {
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-  }
+  .tt-name { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; }
+  .tt-name-ja { font-size: 12px; font-weight: 400; color: #999; margin-bottom: 6px; }
+  .tt-rank { font-size: 12px; font-weight: 600; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
   .tt-rank .num { color: #1557a0; font-size: 20px; font-family: 'JetBrains Mono'; }
-  .tt-rank .of { color: #999; }
-  .tt-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-    gap: 14px;
-  }
+  .tt-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 14px; }
   .tt-label { font-size: 12px; color: #888; }
-  .tt-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 17px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
+  .tt-val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: #1a1a1a; }
   .tt-val .unit { font-size: 11px; color: #999; font-weight: 400; margin-left: 2px; }
-  .tt-val-sm {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 500;
-    color: #1a1a1a;
-  }
-  .tt-bar-bg {
-    height: 5px;
-    background: #f0f0f0;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 4px;
-  }
-  .tt-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6da7df, #1557a0);
-    border-radius: 3px;
-  }
-  .tt-note {
-    font-size: 9.5px;
-    color: #bbb;
-    margin-top: 10px;
-    line-height: 1.4;
-  }
+  .tt-val-sm { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: #1a1a1a; }
+  .tt-bar-bg { height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .tt-bar-fill { height: 100%; border-radius: 3px; }
+  .tt-note { font-size: 9.5px; color: #bbb; margin-top: 10px; line-height: 1.4; }
+  /* ズーム中tooltip（市区町村）*/
+  .tt-city { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .tt-pref-name { font-size: 11px; color: #aaa; margin-bottom: 8px; }
 
   #ranking {
     position: fixed;
@@ -203,64 +196,46 @@
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #ddd transparent;
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
   }
-  .rk-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #888;
-    margin-bottom: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .rk-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 6px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.12s;
-  }
+  #ranking.hidden { transform: translateX(100%); }
+  .rk-title { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .rk-item { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 5px; cursor: pointer; transition: background 0.12s; }
   .rk-item:hover { background: rgba(21,87,160,0.08); }
-  .rk-num {
-    font-family: 'JetBrains Mono';
-    font-size: 10px;
-    font-weight: 600;
-    color: #ccc;
-    width: 18px;
-    text-align: right;
-    flex-shrink: 0;
-  }
+  .rk-num { font-family: 'JetBrains Mono'; font-size: 10px; font-weight: 600; color: #ccc; width: 18px; text-align: right; flex-shrink: 0; }
   .rk-num.gold { color: #d4a017; }
   .rk-num.silver { color: #999; }
   .rk-num.bronze { color: #b07040; }
-  .rk-name {
-    font-size: 11.5px;
-    color: #444;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .rk-name { font-size: 11.5px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rk-val { font-family: 'JetBrains Mono'; font-size: 10px; color: #999; flex-shrink: 0; }
+  .rk-bar { width: 36px; height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+  .rk-bar-fill { height: 100%; border-radius: 2px; opacity: 0.5; }
+
+  /* 市区町村パネル（ズーム時） */
+  #city-panel {
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    width: 250px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid #eee;
+    z-index: 90;
+    padding: 16px 10px 12px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
   }
-  .rk-val {
-    font-family: 'JetBrains Mono';
-    font-size: 10px;
-    color: #999;
-    flex-shrink: 0;
-  }
-  .rk-bar {
-    width: 36px; height: 3px;
-    background: #f0f0f0;
-    border-radius: 2px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .rk-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    background: #1557a0;
-    opacity: 0.5;
-  }
+  #city-panel.visible { transform: translateX(0); }
+  .cp-pref { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .cp-sub { font-size: 10px; color: #aaa; margin-bottom: 12px; }
+  .cp-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; cursor: default; }
+  .cp-item:hover { background: rgba(21,87,160,0.06); }
+  .cp-num { font-family: 'JetBrains Mono'; font-size: 9px; color: #ccc; width: 16px; text-align: right; flex-shrink: 0; }
+  .cp-name { font-size: 11px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cp-bar { width: 30px; height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+  .cp-bar-fill { height: 100%; border-radius: 2px; background: #1557a0; opacity: 0.4; }
 
   .hint {
     position: fixed;
@@ -270,21 +245,18 @@
     font-size: 10px;
     color: #ccc;
     z-index: 100;
+    transition: opacity 0.3s;
   }
 
   @media (max-width: 720px) {
     #ranking { display: none; }
+    #city-panel { display: none; }
     #header { right: 0; }
+    #header.zoomed { left: 130px; }
     body { overflow: auto; }
     .controls { width: min(100%, 330px); flex-wrap: wrap; }
     .toggle-btn { flex: 1 1 calc(50% - 6px); text-align: center; }
-
-    .tooltip {
-      min-width: 0;
-      max-width: calc(100vw - 24px);
-      padding: 10px 12px;
-      border-radius: 10px;
-    }
+    .tooltip { min-width: 0; max-width: calc(100vw - 24px); padding: 10px 12px; border-radius: 10px; }
     .tt-name { font-size: 15px; }
     .tt-name-ja { display: none; }
     .tt-rank { margin-bottom: 8px; padding-bottom: 6px; }
@@ -296,24 +268,32 @@
 </head>
 <body>
 
+<!-- 戻るボタン -->
+<button id="back-btn" onclick="zoomOut()">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M9 2L4 7L9 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  全国表示に戻る
+</button>
+
 <div id="header">
   <div class="title-block">
     <h1>👥 Japan Population Map 2025</h1>
-    <div class="sub">Source: 2025 Resident Register Population and Households </div>
+    <div class="sub">Source: 2025 Resident Register Population and Households</div>
     <div class="controls" id="controls">
-      <button class="toggle-btn active" data-metric="total">Total population</button>
-      <button class="toggle-btn" data-metric="male">Male population</button>
-      <button class="toggle-btn" data-metric="female">Female population</button>
+      <button class="toggle-btn active" data-metric="total">Total</button>
+      <button class="toggle-btn" data-metric="male">Male</button>
+      <button class="toggle-btn" data-metric="female">Female</button>
     </div>
   </div>
   <div class="header-right">
     <div class="scale-legend">
-      <span class="scale-label" id="legendLabel">Choropleth = population (thousand persons)</span>
+      <span class="scale-label" id="legendLabel">Choropleth = population (persons)</span>
       <div class="color-legend">
         <div class="color-bar" id="colorBar"></div>
         <div class="color-minmax">
-          <span class="min" id="minLabel"></span>
-          <span class="max" id="maxLabel"></span>
+          <span id="minLabel"></span>
+          <span id="maxLabel"></span>
         </div>
       </div>
     </div>
@@ -328,233 +308,288 @@
   <div id="rk-list"></div>
 </div>
 
-<div class="hint">Scroll: zoom | Drag: pan | Hover: details</div>
+<div id="city-panel">
+  <div class="cp-pref" id="cp-pref-name"></div>
+  <div class="cp-sub" id="cp-sub"></div>
+  <div id="cp-list"></div>
+</div>
+
+<div class="hint" id="hint">Scroll: zoom &nbsp;|&nbsp; Drag: pan &nbsp;|&nbsp; Click: zoom in</div>
 
 <script>
 const metricMeta = {
   total: { label: 'Total population', short: 'Population Ranking', unit: 'persons', c1: '#eef7f0', c2: '#1f7a43', accent: '#1f7a43' },
-  male: { label: 'Male population', short: 'Male Population Ranking', unit: 'persons', c1: '#eef7f0', c2: '#1f7a43', accent: '#1f7a43' },
-  female: { label: 'Female population', short: 'Female Population Ranking', unit: 'persons', c1: '#eef7f0', c2: '#1f7a43', accent: '#1f7a43' }
+  male:  { label: 'Male population',  short: 'Male Population Ranking',  unit: 'persons', c1: '#eef7f0', c2: '#1f7a43', accent: '#1f7a43' },
+  female:{ label: 'Female population',short: 'Female Population Ranking',unit: 'persons', c1: '#eef7f0', c2: '#1f7a43', accent: '#1f7a43' }
 };
 
 let nameEn = {};
 let metricData = { total: {}, male: {}, female: {} };
 let nationalTotals = { total: 0, male: 0, female: 0 };
 let prefDataRaw = {};
-
 let currentMetric = 'total';
-const width = window.innerWidth;
-const height = window.innerHeight;
-const panelWidth = (width <= 720) ? 0 : 250;
+let zoomedPrefId = null; // ズーム中の都道府県ID
+
+const W = window.innerWidth;
+const H = window.innerHeight;
+const panelWidth = W <= 720 ? 0 : 250;
 const topPadding = 88;
 const pad = 18;
 
-const svg = d3.select('#map-container').append('svg')
-  .attr('width', width).attr('height', height);
+const svg = d3.select('#map-container').append('svg').attr('width', W).attr('height', H);
 const g = svg.append('g');
+const labelsG = g.append('g').attr('id', 'labels'); // ラベル用レイヤー
 const tooltip = d3.select('#tooltip');
 
 let tipLocked = false;
 let tipLockedId = null;
 
-// 空のGeoJSONオブジェクトを用意
-let geojson = { type: 'FeatureCollection', features:[] };
+let geojson = { type: 'FeatureCollection', features: [] };
 const projection = d3.geoMercator();
 const pathGen = d3.geoPath().projection(projection);
 
 const zoomBehavior = d3.zoom()
-  .scaleExtent([0.4, 12])
-  .on('zoom', (event) => {
-    g.attr('transform', event.transform);
-  });
+  .scaleExtent([0.4, 40])
+  .on('zoom', (event) => { g.attr('transform', event.transform); });
 svg.call(zoomBehavior);
 
-function isMobile() {
-  return window.innerWidth <= 720;
-}
+function isMobile() { return window.innerWidth <= 720; }
 
-// 初期化・データ読み込み関数
+// ─── データ読み込み ───────────────────────────────────────
 async function initData() {
+  const prefCodes = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
+
+  // 人口データ
+  let popResp;
   try {
-    const prefCodes = Array.from({ length: 47 }, (_, i) => String(i + 1).padStart(2, '0'));
-
-    // 人口データを取得
-    let popResp;
-    try {
-      popResp = await fetch('population-json/pref-pop.json');
-      if (!popResp.ok) throw new Error(`HTTPステータス ${popResp.status}`);
-    } catch (e) {
-      showError(`人口データ (pref-pop.json) の読み込みに失敗しました。<br>詳細: ${e.message}`);
-      return;
-    }
-    prefDataRaw = await popResp.json();
-
-    // 地理データを取得
-    const geoResps = await Promise.all(
-      prefCodes.map(code => 
-        fetch(`geo-json/pref_${code}.geojson`) 
-          .then(res => res.ok ? res.json() : null)
-          .catch(() => null)
-      )
-    );
-
-    const validGeoJsons = geoResps.filter(r => r !== null);
-    
-    if (validGeoJsons.length === 0) {
-      showError(`地図データが1つも読み込めませんでした。`);
-      return;
-    }
-
-    // ▼▼▼ 今回修正した部分：壊れたデータや違う形式のデータを安全に処理する ▼▼▼
-    let allFeatures =[];
-    validGeoJsons.forEach(d => {
-      if (d && Array.isArray(d.features)) {
-        // 通常の FeatureCollection の場合
-        allFeatures.push(...d.features);
-      } else if (Array.isArray(d)) {
-        // AIが直接「配列」として出力してしまった場合
-        allFeatures.push(...d);
-      } else if (d && d.type === 'Feature') {
-        // 単一の図形として出力された場合
-        allFeatures.push(d);
-      }
-    });
-
-    // 万が一、中身が空（undefined）や geometry を持たない無効なデータが混ざっていても除外する
-    geojson.features = allFeatures.filter(f => f && f.properties && f.geometry);
-    // ▲▲▲ 修正ここまで ▲▲▲
-
-
-    // 人口データをセットアップ
-    for (const [code, d] of Object.entries(prefDataRaw)) {
-      const id = parseInt(code, 10);
-      nameEn[id] = d.nameEn;
-      metricData.total[id] = d.total;
-      metricData.male[id] = d.male;
-      metricData.female[id] = d.female;
-      nationalTotals.total += d.total;
-      nationalTotals.male += d.male;
-      nationalTotals.female += d.female;
-    }
-
-    if (geojson.features.length > 0) {
-      // 各市区町村フィーチャーに都道府県のIDやデータを紐付け
-      geojson.features.forEach(f => {
-        const codeStr = f.properties.code || ""; 
-        const prefCodeStr = codeStr.slice(0, 2); // 行政区域コードの先頭2桁
-        const id = parseInt(prefCodeStr, 10);
-
-        f.properties.id = id;
-        f.properties.nameEn = nameEn[id] || f.properties.pref || "";
-        f.properties.nam_ja = prefDataRaw[prefCodeStr]?.nameJa || f.properties.pref || "";
-        f.properties.value = metricData[currentMetric][id] || 0;
-      });
-
-      // 取得できたデータに合わせて地図のスケールを調整
-      projection.fitExtent(
-        [[pad, topPadding],[Math.max(pad + 10, width - panelWidth - pad), height - pad]],
-        geojson
-      );
-
-      // パスの描画
-      g.selectAll('.pref-path')
-        .data(geojson.features)
-        .join('path')
-        .attr('class', 'pref-path')
-        .attr('d', pathGen)
-        .attr('fill', '#eef3f8')
-        .on('mouseenter', function(ev, d) {
-          const prefId = d.properties.id;
-          g.selectAll('.pref-path')
-            .filter(f => f.properties.id === prefId)
-            .raise()
-            .classed('hovered', true);
-          showTip(ev, d.properties);
-        })
-        .on('mousemove', moveTip)
-        .on('mouseleave', function(ev, d) {
-          const prefId = d.properties.id;
-          g.selectAll('.pref-path')
-            .filter(f => f.properties.id === prefId)
-            .classed('hovered', false);
-          hideTip();
-        })
-        .on('touchstart', (ev, d) => {
-          ev.preventDefault();
-          if (tipLocked && tipLockedId === d.properties.id) {
-            tipLocked = false; tipLockedId = null;
-            forceHideTip();
-            return;
-          }
-          tipLocked = true;
-          tipLockedId = d.properties.id;
-          showTip(ev.touches ? ev.touches[0] : ev, d.properties);
-        });
-
-    } else {
-       showError("地図データが存在しますが、有効なフォーマットではありませんでした。");
-       return;
-    }
-
-    // 初回の塗り分けとランキング生成を実行
-    applyMetric('total');
-
-  } catch (error) {
-    showError(`予期せぬエラーが発生しました: ${error.message}`);
-    console.error(error);
+    popResp = await fetch('population-json/pref-pop.json');
+    if (!popResp.ok) throw new Error(`HTTP ${popResp.status}`);
+  } catch (e) {
+    showError(`人口データ読み込み失敗: ${e.message}`); return;
   }
-}
+  prefDataRaw = await popResp.json();
 
-function applyMetric(metric) {
-  currentMetric = metric;
-  const meta = metricMeta[metric];
-  document.querySelectorAll('.toggle-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.metric === metric);
+  // 地理データ（並列fetch）
+  const geoResps = await Promise.all(
+    prefCodes.map(code =>
+      fetch(`geo-json/pref_${code}.geojson`)
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null)
+    )
+  );
+
+  const validGeoJsons = geoResps.filter(r => r !== null);
+  if (validGeoJsons.length === 0) { showError('地図データが読み込めませんでした'); return; }
+
+  let allFeatures = [];
+  validGeoJsons.forEach(d => {
+    if (d && Array.isArray(d.features))      allFeatures.push(...d.features);
+    else if (Array.isArray(d))               allFeatures.push(...d);
+    else if (d && d.type === 'Feature')      allFeatures.push(d);
   });
-  document.getElementById('legendLabel').textContent = `Choropleth = ${meta.label.toLowerCase()} (${meta.unit})`;
-  document.getElementById('rkTitle').textContent = meta.short;
-  document.getElementById('colorBar').style.background = `linear-gradient(90deg, ${meta.c1}, ${meta.c2})`;
+  geojson.features = allFeatures.filter(f => f && f.properties && f.geometry);
 
-  // ランキング用に各都道府県1フィーチャーだけを抽出（地図データが取得できた県のみ）
-  const uniqueFeatures = Array.from(new Map(geojson.features.map(f => [f.properties.id, f])).values());
-  
-  if (uniqueFeatures.length > 0) {
-    // 人口データを更新
-    geojson.features.forEach(f => {
-      const id = f.properties.id;
-      f.properties.value = metricData[metric][id] || 0;
+  // 人口データ紐付け
+  for (const [code, d] of Object.entries(prefDataRaw)) {
+    const id = parseInt(code, 10);
+    nameEn[id] = d.nameEn;
+    metricData.total[id] = d.total;
+    metricData.male[id]  = d.male;
+    metricData.female[id]= d.female;
+    nationalTotals.total  += d.total;
+    nationalTotals.male   += d.male;
+    nationalTotals.female += d.female;
+  }
+
+  if (geojson.features.length === 0) { showError('有効な地図データがありません'); return; }
+
+  // フィーチャーへID付与
+  geojson.features.forEach(f => {
+    const codeStr = f.properties.code || '';
+    const prefCodeStr = codeStr.slice(0, 2);
+    const id = parseInt(prefCodeStr, 10);
+    f.properties.id = id;
+    f.properties.nameEn  = nameEn[id] || f.properties.pref || '';
+    f.properties.nam_ja  = prefDataRaw[String(id).padStart(2,'0')]?.nameJa || f.properties.pref || '';
+    f.properties.value   = metricData[currentMetric][id] || 0;
+  });
+
+  projection.fitExtent(
+    [[pad, topPadding], [Math.max(pad + 10, W - panelWidth - pad), H - pad]],
+    geojson
+  );
+
+  // パス描画
+  g.selectAll('.pref-path')
+    .data(geojson.features)
+    .join('path')
+    .attr('class', 'pref-path')
+    .attr('d', pathGen)
+    .attr('fill', '#eef3f8')
+    .on('mouseenter', function(ev, d) {
+      if (zoomedPrefId !== null) {
+        // ズーム中は市区町村tooltip
+        if (d.properties.id === zoomedPrefId) showCityTip(ev, d.properties);
+        return;
+      }
+      const prefId = d.properties.id;
+      g.selectAll('.pref-path').filter(f => f.properties.id === prefId)
+        .raise().classed('hovered', true);
+      showTip(ev, d.properties);
+    })
+    .on('mousemove', moveTip)
+    .on('mouseleave', function(ev, d) {
+      if (zoomedPrefId !== null) { hideTip(); return; }
+      const prefId = d.properties.id;
+      g.selectAll('.pref-path').filter(f => f.properties.id === prefId)
+        .classed('hovered', false);
+      hideTip();
+    })
+    .on('click', function(ev, d) {
+      if (zoomedPrefId !== null) return; // ズーム中はクリック無効
+      ev.stopPropagation();
+      zoomToPref(d.properties.id);
+    })
+    .on('touchstart', (ev, d) => {
+      ev.preventDefault();
+      if (zoomedPrefId !== null) return;
+      if (tipLocked && tipLockedId === d.properties.id) {
+        tipLocked = false; tipLockedId = null; forceHideTip(); return;
+      }
+      tipLocked = true; tipLockedId = d.properties.id;
+      showTip(ev.touches ? ev.touches[0] : ev, d.properties);
     });
 
-    const ranked = uniqueFeatures.sort((a, b) => b.properties.value - a.properties.value);
-    
-    // 順位をマップに保存し、すべての市区町村に反映
-    const rankMap = {};
-    ranked.forEach((f, i) => rankMap[f.properties.id] = i + 1);
-    geojson.features.forEach(f => f.properties.rank = rankMap[f.properties.id]);
-
-    const maxValue = d3.max(ranked, f => f.properties.value);
-    const minValue = d3.min(ranked, f => f.properties.value);
-
-    document.getElementById('minLabel').textContent = `${minValue.toLocaleString()}`;
-    document.getElementById('maxLabel').textContent = `${maxValue.toLocaleString()}`;
-
-    const colorScale = d3.scaleSequential()
-      .domain([minValue, maxValue])
-      .interpolator(t => d3.interpolateRgb(meta.c1, meta.c2)(Math.pow(t, 0.55)));
-
-    g.selectAll('.pref-path')
-      .transition().duration(250)
-      .attr('fill', d => colorScale(d.properties.value));
-
-    renderRanking(ranked, maxValue, meta);
-  } else {
-    // 地図データが1つもない場合は、ランキングリストを空にするか、人口データだけで構築することも可能ですが、今回は空にします
-    document.getElementById('rk-list').innerHTML = '<div style="padding:10px;font-size:12px;color:#999;">Map data not found.</div>';
-    document.getElementById('minLabel').textContent = '';
-    document.getElementById('maxLabel').textContent = '';
-  }
+  applyMetric('total');
 }
 
+// ─── 都道府県ズームイン ──────────────────────────────────
+function zoomToPref(prefId) {
+  zoomedPrefId = prefId;
+  forceHideTip();
+  tipLocked = false;
+
+  // 対象フィーチャー群
+  const prefFeatures = geojson.features.filter(f => f.properties.id === prefId);
+  const prefGeo = { type: 'FeatureCollection', features: prefFeatures };
+
+  // ズーム先の bounds を計算
+  const [[x0, y0], [x1, y1]] = pathGen.bounds(prefGeo);
+  const dx = x1 - x0, dy = y1 - y0;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const rightMargin = isMobile() ? 0 : panelWidth;
+  const availW = W - rightMargin;
+  const scale = Math.min(8, 0.82 / Math.max(dx / availW, dy / H));
+  const tx = availW / 2 - scale * cx;
+  const ty = H / 2 - scale * cy;
+
+  // パス表示制御
+  g.selectAll('.pref-path')
+    .classed('hovered', false)
+    .classed('dimmed', f => f.properties.id !== prefId)
+    .classed('focused', f => f.properties.id === prefId);
+
+  // ズームアニメ
+  svg.transition().duration(650).ease(d3.easeCubicInOut)
+    .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+
+  // UIパネル切り替え
+  document.getElementById('back-btn').classList.add('visible');
+  document.getElementById('header').classList.add('zoomed');
+  document.getElementById('ranking').classList.add('hidden');
+  document.getElementById('hint').style.opacity = '0';
+
+  // 市区町村ラベル表示
+  setTimeout(() => showCityLabels(prefId, scale), 680);
+
+  // 右パネルに市区町村一覧
+  showCityPanel(prefId);
+
+  // ズーム中はマウスホイールでさらにズーム可能に（pref内のみ）
+  document.getElementById('hint').textContent = 'Scroll: zoom  |  Drag: pan  |  ← 全国に戻る';
+  document.getElementById('hint').style.opacity = '1';
+}
+
+function zoomOut() {
+  zoomedPrefId = null;
+  forceHideTip();
+  tipLocked = false;
+
+  // パス制御リセット
+  g.selectAll('.pref-path')
+    .classed('dimmed', false)
+    .classed('focused', false);
+
+  // ラベル削除
+  labelsG.selectAll('*').remove();
+
+  // 全国表示に戻る
+  projection.fitExtent(
+    [[pad, topPadding], [Math.max(pad + 10, W - panelWidth - pad), H - pad]],
+    geojson
+  );
+  const [[x0,y0],[x1,y1]] = pathGen.bounds(geojson);
+  const scale = 1;
+  svg.transition().duration(550).ease(d3.easeCubicInOut)
+    .call(zoomBehavior.transform, d3.zoomIdentity);
+
+  // UIリセット
+  document.getElementById('back-btn').classList.remove('visible');
+  document.getElementById('header').classList.remove('zoomed');
+  document.getElementById('ranking').classList.remove('hidden');
+  document.getElementById('city-panel').classList.remove('visible');
+  document.getElementById('hint').textContent = 'Scroll: zoom  |  Drag: pan  |  Click: zoom in';
+  document.getElementById('hint').style.opacity = '1';
+}
+
+// ─── 市区町村ラベル ───────────────────────────────────────
+function showCityLabels(prefId, scale) {
+  labelsG.selectAll('*').remove();
+  if (scale < 3) return; // 小さいスケールでは表示しない
+
+  const prefFeatures = geojson.features.filter(f => f.properties.id === prefId);
+  prefFeatures.forEach(f => {
+    const centroid = pathGen.centroid(f);
+    if (!centroid || isNaN(centroid[0])) return;
+    const cityName = f.properties.city || '';
+    if (!cityName) return;
+    labelsG.append('text')
+      .attr('class', 'city-label')
+      .attr('x', centroid[0])
+      .attr('y', centroid[1])
+      .attr('font-size', `${Math.max(7, Math.min(12, 60 / scale))}px`)
+      .text(cityName);
+  });
+}
+
+// ─── 市区町村パネル ───────────────────────────────────────
+function showCityPanel(prefId) {
+  const prefFeatures = geojson.features.filter(f => f.properties.id === prefId);
+  const prefName = prefFeatures[0]?.properties.nam_ja || prefFeatures[0]?.properties.pref || '';
+  const prefNameEn = prefFeatures[0]?.properties.nameEn || '';
+
+  document.getElementById('cp-pref-name').textContent = prefName;
+  document.getElementById('cp-sub').textContent = `${prefFeatures.length} municipalities`;
+
+  // 市区町村を名前順にソート
+  const sorted = [...prefFeatures].sort((a,b) =>
+    (a.properties.city||'').localeCompare(b.properties.city||'', 'ja')
+  );
+
+  const list = document.getElementById('cp-list');
+  list.innerHTML = sorted.map((f, i) => {
+    const city = f.properties.city || '（未定）';
+    const ward = f.properties.ward ? `　${f.properties.ward}` : '';
+    return `<div class="cp-item">
+      <span class="cp-num">${i+1}</span>
+      <span class="cp-name">${city}${ward}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('city-panel').classList.add('visible');
+}
+
+// ─── Tooltip（全国モード・都道府県） ──────────────────────
 function showTip(ev, p) {
   const meta = metricMeta[currentMetric];
   const values = Object.values(metricData[currentMetric]);
@@ -566,75 +601,65 @@ function showTip(ev, p) {
   const diff = p.value - avg;
   const diffStr = diff >= 0 ? `+${diff.toLocaleString()}` : `-${Math.abs(diff).toLocaleString()}`;
   const diffColor = diff >= 0 ? meta.accent : '#666';
-
   const mobile = isMobile();
+
   const html = mobile ? `
     <div class="tt-name">${p.nameEn}</div>
     <div class="tt-rank"><span class="num">#${p.rank}</span></div>
-    <div class="tt-row">
-      <span class="tt-label">${meta.label}</span>
-      <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span>
-    </div>
-    <div class="tt-row">
-      <span class="tt-label">Share of national total</span>
-      <span class="tt-val-sm">${share}%</span>
-    </div>
+    <div class="tt-row"><span class="tt-label">${meta.label}</span>
+      <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span></div>
+    <div class="tt-row"><span class="tt-label">Share of national total</span>
+      <span class="tt-val-sm">${share}%</span></div>
   ` : `
     <div class="tt-name">${p.nameEn}</div>
-    <div class="tt-name-ja">${p.nam_ja}</div>
-    <div class="tt-rank"><span class="num">#${p.rank}</span><span class="of"></span></div>
-    <div class="tt-row">
-      <span class="tt-label">${meta.label}</span>
-      <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span>
-    </div>
-    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${pct}%; background:linear-gradient(90deg, ${meta.c1}, ${meta.c2})"></div></div>
-    <div class="tt-row" style="margin-top:10px;">
-      <span class="tt-label">Share of national total</span>
-      <span class="tt-val-sm">${share}%</span>
-    </div>
-    <div class="tt-row">
-      <span class="tt-label">vs. prefecture average</span>
-      <span class="tt-val-sm" style="color:${diffColor};">${diffStr}</span>
-    </div>
+    <div class="tt-name-ja">${p.nam_ja} &nbsp;·&nbsp; <span style="font-size:10px;color:#bbb">click to zoom in</span></div>
+    <div class="tt-rank"><span class="num">#${p.rank}</span></div>
+    <div class="tt-row"><span class="tt-label">${meta.label}</span>
+      <span class="tt-val">${p.value.toLocaleString()}<span class="unit"> persons</span></span></div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${meta.c1},${meta.c2})"></div></div>
+    <div class="tt-row" style="margin-top:10px;"><span class="tt-label">Share of national total</span>
+      <span class="tt-val-sm">${share}%</span></div>
+    <div class="tt-row"><span class="tt-label">vs. prefecture average</span>
+      <span class="tt-val-sm" style="color:${diffColor}">${diffStr}</span></div>
     <div class="tt-note">Source: Statistics Bureau of Japan, Population Estimates</div>
   `;
   tooltip.html(html).classed('visible', true);
   moveTip(ev);
 
   document.querySelectorAll('.rk-item').forEach(el => {
-    if (+el.dataset.id === p.id) {
-      el.style.background = 'rgba(21,87,160,0.15)';
-      el.scrollIntoView({ behavior: 'nearest', block: 'nearest' });
-    } else {
-      el.style.background = '';
-    }
+    el.style.background = +el.dataset.id === p.id ? 'rgba(21,87,160,0.15)' : '';
+    if (+el.dataset.id === p.id) el.scrollIntoView({ behavior: 'nearest', block: 'nearest' });
   });
 }
 
+// ─── Tooltip（ズームモード・市区町村） ────────────────────
+function showCityTip(ev, p) {
+  const city = p.city || '（未定）';
+  const ward = p.ward ? ` ${p.ward}` : '';
+  const html = `
+    <div class="tt-city">${city}${ward}</div>
+    <div class="tt-pref-name">${p.nam_ja}</div>
+  `;
+  tooltip.html(html).classed('visible', true);
+  moveTip(ev);
+}
+
 function moveTip(ev) {
-  const pad = 12;
   const cursorGap = 24;
   const mobile = isMobile();
-  const cx = (ev && ev.clientX != null) ? ev.clientX : (window.innerWidth / 2);
-  const cy = (ev && ev.clientY != null) ? ev.clientY : (window.innerHeight / 3);
-
+  const cx = ev?.clientX ?? W / 2;
+  const cy = ev?.clientY ?? H / 3;
   tooltip.style('left', '-9999px').style('top', '-9999px');
   const node = tooltip.node();
   if (!node) return;
-  const r = node.getBoundingClientRect();
-  const tw = r.width, th = r.height;
-
+  const { width: tw, height: th } = node.getBoundingClientRect();
   let x, y;
-  if (mobile) {
-    x = cx - 40;
-    y = cy - 12;
-  } else {
-    x = cx + cursorGap;
-    y = cy + cursorGap;
-    if (x + tw > window.innerWidth - pad) x = cx - cursorGap - tw;
-    if (y + th > window.innerHeight - pad) y = cy - cursorGap - th;
-    x = Math.max(pad, x);
-    y = Math.max(pad, y);
+  if (mobile) { x = cx - 40; y = cy - 12; }
+  else {
+    x = cx + cursorGap; y = cy + cursorGap;
+    if (x + tw > W - 12) x = cx - cursorGap - tw;
+    if (y + th > H - 12) y = cy - cursorGap - th;
+    x = Math.max(12, x); y = Math.max(12, y);
   }
   tooltip.style('left', x + 'px').style('top', y + 'px');
 }
@@ -642,22 +667,62 @@ function moveTip(ev) {
 function hideTip() {
   if (tipLocked) return;
   tooltip.classed('visible', false);
-  document.querySelectorAll('.rk-item').forEach(el => {
-    el.style.background = '';
-  });
+  document.querySelectorAll('.rk-item').forEach(el => el.style.background = '');
 }
 function forceHideTip() { tooltip.classed('visible', false); }
 
-document.addEventListener('touchstart', (ev) => {
+document.addEventListener('touchstart', ev => {
   if (!tipLocked) return;
-  const t = ev.target;
-  if (!(t && t.closest && t.closest('.pref-path'))) {
-    tipLocked = false;
-    tipLockedId = null;
-    forceHideTip();
+  if (!(ev.target?.closest?.('.pref-path'))) {
+    tipLocked = false; tipLockedId = null; forceHideTip();
   }
 }, { passive: false });
 
+// ─── メトリクス切替 ───────────────────────────────────────
+function applyMetric(metric) {
+  currentMetric = metric;
+  const meta = metricMeta[metric];
+
+  document.querySelectorAll('.toggle-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.metric === metric)
+  );
+  document.getElementById('legendLabel').textContent =
+    `Choropleth = ${meta.label.toLowerCase()} (${meta.unit})`;
+  document.getElementById('rkTitle').textContent = meta.short;
+  document.getElementById('colorBar').style.background =
+    `linear-gradient(90deg, ${meta.c1}, ${meta.c2})`;
+
+  const uniqueFeatures = Array.from(
+    new Map(geojson.features.map(f => [f.properties.id, f])).values()
+  );
+  if (uniqueFeatures.length === 0) return;
+
+  geojson.features.forEach(f => {
+    f.properties.value = metricData[metric][f.properties.id] || 0;
+  });
+
+  const ranked = [...uniqueFeatures].sort((a, b) => b.properties.value - a.properties.value);
+  const rankMap = {};
+  ranked.forEach((f, i) => rankMap[f.properties.id] = i + 1);
+  geojson.features.forEach(f => f.properties.rank = rankMap[f.properties.id]);
+
+  const maxValue = d3.max(ranked, f => f.properties.value);
+  const minValue = d3.min(ranked, f => f.properties.value);
+  document.getElementById('minLabel').textContent = minValue.toLocaleString();
+  document.getElementById('maxLabel').textContent = maxValue.toLocaleString();
+
+  const colorScale = d3.scaleSequential()
+    .domain([minValue, maxValue])
+    .interpolator(t => d3.interpolateRgb(meta.c1, meta.c2)(Math.pow(t, 0.55)));
+
+  g.selectAll('.pref-path')
+    .transition().duration(250)
+    .attr('fill', d => colorScale(d.properties.value));
+
+  renderRanking(ranked, maxValue, meta);
+}
+
+// ─── ランキングパネル ─────────────────────────────────────
 function renderRanking(ranked, maxValue, meta) {
   const rkList = document.getElementById('rk-list');
   rkList.innerHTML = ranked.map((f, i) => {
@@ -671,55 +736,67 @@ function renderRanking(ranked, maxValue, meta) {
       <span class="${numClass}">${i + 1}</span>
       <span class="rk-name">${p.nameEn}</span>
       <span class="rk-val">${p.value.toLocaleString()}</span>
-      <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%; background:${meta.accent}"></span></span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%;background:${meta.accent}"></span></span>
     </div>`;
   }).join('');
 
   document.querySelectorAll('.rk-item').forEach(el => {
     const id = +el.dataset.id;
     el.addEventListener('mouseenter', () => {
+      if (zoomedPrefId !== null) return;
       const path = g.selectAll('.pref-path').filter(d => d.properties.id === id);
-      path.raise();
-      path.style('stroke', 'rgba(255,255,255,1)').style('stroke-width', '1.8px').style('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.32)) brightness(1.04)');
+      path.raise()
+        .style('stroke', 'rgba(255,255,255,1)')
+        .style('stroke-width', '1.8px')
+        .style('filter', 'drop-shadow(0 2px 6px rgba(0,0,0,0.32)) brightness(1.04)');
       document.querySelectorAll('.rk-item').forEach(x => {
-        x.style.background = (+x.dataset.id === id) ? 'rgba(21,87,160,0.15)' : '';
+        x.style.background = +x.dataset.id === id ? 'rgba(21,87,160,0.15)' : '';
       });
     });
     el.addEventListener('mouseleave', () => {
-      const path = g.selectAll('.pref-path').filter(d => d.properties.id === id);
-      path.style('stroke', null).style('stroke-width', null).style('filter', null);
+      if (zoomedPrefId !== null) return;
+      g.selectAll('.pref-path').filter(d => d.properties.id === id)
+        .style('stroke', null).style('stroke-width', null).style('filter', null);
       document.querySelectorAll('.rk-item').forEach(x => x.style.background = '');
     });
     el.addEventListener('click', () => {
+      if (zoomedPrefId !== null) return;
       const datum = geojson.features.find(f => f.properties.id === id);
       if (!datum) return;
-      tipLocked = true;
-      tipLockedId = id;
-      showTip({clientX: window.innerWidth - 220, clientY: 180}, datum.properties);
+      zoomToPref(id); // ランキングからもズームイン可能
     });
   });
 }
 
-document.querySelectorAll('.toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => applyMetric(btn.dataset.metric));
+// ─── エラー表示 ───────────────────────────────────────────
+function showError(msg) {
+  document.getElementById('map-container').innerHTML =
+    `<div style="padding:40px;color:#c00;font-size:14px">${msg}</div>`;
+}
+
+// ─── イベント ─────────────────────────────────────────────
+document.querySelectorAll('.toggle-btn').forEach(btn =>
+  btn.addEventListener('click', () => applyMetric(btn.dataset.metric))
+);
+
+// ESCキーで全国に戻る
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && zoomedPrefId !== null) zoomOut();
 });
 
 window.addEventListener('resize', () => {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const pw = (w <= 720) ? 0 : 250;
+  const w = window.innerWidth, h = window.innerHeight;
+  const pw = w <= 720 ? 0 : 250;
   svg.attr('width', w).attr('height', h);
-  
   if (geojson.features.length > 0) {
     projection.fitExtent(
-      [[pad, topPadding],[Math.max(pad + 10, w - pw - pad), h - pad]],
+      [[pad, topPadding], [Math.max(pad+10, w-pw-pad), h-pad]],
       geojson
     );
     g.selectAll('.pref-path').attr('d', pathGen);
   }
 });
 
-// アプリケーション起動
 initData();
 </script>
 </body>
