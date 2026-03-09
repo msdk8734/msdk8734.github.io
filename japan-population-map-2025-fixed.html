@@ -30,16 +30,20 @@
   #map-svg { width: 100%; height: 100%; display: block; }
 
   .pref-path {
-    stroke: rgba(255,255,255,0.7);
-    stroke-width: 0.5px;
-    stroke-linejoin: round;
+    stroke: none;   /* 市区町村内部の境界線を完全に消す */
     cursor: pointer;
     transition: filter 0.15s;
   }
   .pref-path:hover {
-    stroke: rgba(255,255,255,1);
-    stroke-width: 1.2px;
-    filter: brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    filter: brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+  }
+  /* 都道府県の外枠（白線）は .pref-border レイヤーで描く */
+  .pref-border {
+    fill: none;
+    stroke: rgba(255,255,255,0.9);
+    stroke-width: 0.8px;
+    stroke-linejoin: round;
+    pointer-events: none;
   }
 
   .tooltip {
@@ -293,10 +297,7 @@ function applyView() {
   const mapG = document.getElementById('map-g');
   if (mapG) {
     mapG.setAttribute('transform', `translate(${viewX}, ${viewY}) scale(${viewScale})`);
-    // stroke-widthをズームに合わせて調整
-    document.querySelectorAll('.pref-path').forEach(p => {
-      p.style.strokeWidth = (0.5 / viewScale) + 'px';
-    });
+
   }
 }
 
@@ -398,15 +399,13 @@ function renderRanking(ranked, maxVal) {
     const id = +el.dataset.id;
     el.addEventListener('mouseenter', () => {
       document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => {
-        p.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
-        p.style.stroke = 'rgba(255,255,255,1)';
+        p.style.filter = 'brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25))';
       });
       el.style.background = 'rgba(21,87,160,0.15)';
     });
     el.addEventListener('mouseleave', () => {
       document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => {
         p.style.filter = '';
-        p.style.stroke = '';
       });
       el.style.background = '';
     });
@@ -551,6 +550,20 @@ async function init() {
 
     g.appendChild(pathEl);
   });
+
+  // 都道府県の外枠（白線）を別レイヤーとして最前面に描画
+  // fillなし・strokeのみ → 市区町村境界は塗り色が同じなので見えず、外枠だけ白線になる
+  const borderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  borderG.id = 'border-g';
+  Object.entries(prefGroups).forEach(([idStr, { feats }]) => {
+    const combinedD = feats.map(featureToPath).join(' ');
+    const borderEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    borderEl.setAttribute('d', combinedD);
+    borderEl.setAttribute('class', 'pref-border');
+    borderEl.setAttribute('fill-rule', 'evenodd');
+    borderG.appendChild(borderEl);
+  });
+  g.appendChild(borderG);
 
   hideOverlay();
 }
