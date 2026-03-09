@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -7,96 +8,136 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>🗾</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #ffffff; color: #2a2a2a;
-    font-family: 'IBM Plex Sans', sans-serif;
-    overflow: hidden; height: 100vh; width: 100vw;
-  }
-  #header {
-    position: fixed; top: 0; left: 0; right: 250px; z-index: 100;
-    padding: 14px 24px 10px;
-    display: flex; align-items: flex-start; justify-content: space-between;
-    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 70%, rgba(255,255,255,0) 100%);
-    pointer-events: none;
-  }
-  .title-block h1 { font-size: 20px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.01em; }
-  .title-block .sub { font-size: 10.5px; color: #888; margin-top: 2px; }
-  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 4px; }
-  .color-bar { width: 140px; height: 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08); }
-  .color-minmax { display: flex; justify-content: space-between; font-size: 9.5px; color: #aaa; font-family: 'JetBrains Mono', monospace; width: 140px; }
+/* ── Reset & Base ──────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #ffffff;
+  color: #2a2a2a;
+  font-family: 'IBM Plex Sans', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
 
-  #map-container { width: 100vw; height: 100vh; overflow: hidden; position: relative; }
-  #map-svg { width: 100%; height: 100%; display: block; }
+/* ── Header ────────────────────────────────────────── */
+#header {
+position: fixed; top: 0; left: 0; right: 250px; z-index: 100;
+padding: 14px 24px 10px;
+display: flex; align-items: flex-start; justify-content: space-between;
+background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 70%, rgba(255,255,255,0) 100%);
+pointer-events: none;
+}
+.title-block h1 { font-size: 20px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.01em; }
+.title-block .sub { font-size: 10.5px; color: #888; margin-top: 2px; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; padding-top: 4px; }
+.color-bar { width: 140px; height: 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.08); }
+.color-minmax {
+display: flex; justify-content: space-between;
+font-size: 9.5px; color: #aaa;
+font-family: ‘JetBrains Mono’, monospace; width: 140px;
+}
 
-  .pref-path {
-    stroke: rgba(255,255,255,0.85);
-    stroke-width: 0.6px;
-    stroke-linejoin: round;
-    cursor: pointer;
-    transition: filter 0.15s;
-  }
-  .pref-path:hover {
-    stroke: rgba(255,255,255,1);
-    stroke-width: 1px;
-    filter: brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
-  }
+/* ── Map ───────────────────────────────────────────── */
+#map-container { width: 100vw; height: 100vh; overflow: hidden; position: relative; }
+#map-svg { width: 100%; height: 100%; display: block; }
+.pref-path {
+stroke: rgba(255,255,255,0.85);
+stroke-width: 0.6px;
+stroke-linejoin: round;
+cursor: pointer;
+transition: filter 0.15s;
+}
+.pref-path:hover {
+stroke: rgba(255,255,255,1);
+stroke-width: 1px;
+filter: brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+}
 
-  .tooltip {
-    position: fixed; pointer-events: none;
-    background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
-    border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px 20px;
-    opacity: 0; transition: opacity 0.12s; z-index: 200; min-width: 240px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .tooltip.visible { opacity: 1; }
-  .tt-name    { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; }
-  .tt-name-ja { font-size: 12px; color: #999; margin-bottom: 10px; }
-  .tt-rank    { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-  .tt-rank .num { color: #1557a0; font-size: 20px; font-family: 'JetBrains Mono'; font-weight: 600; }
-  .tt-row     { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 14px; }
-  .tt-label   { font-size: 12px; color: #888; }
-  .tt-val     { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: #1a1a1a; }
-  .tt-val .unit { font-size: 11px; color: #999; font-weight: 400; margin-left: 2px; }
-  .tt-val-sm  { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; color: #1a1a1a; }
-  .tt-bar-bg  { height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
-  .tt-bar-fill { height: 100%; border-radius: 3px; }
-  .tt-note    { font-size: 9.5px; color: #bbb; margin-top: 10px; line-height: 1.4; }
+/* ── Tooltip ───────────────────────────────────────── */
+.tooltip {
+position: fixed; pointer-events: none;
+background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
+border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px 20px;
+opacity: 0; transition: opacity 0.12s; z-index: 200; min-width: 240px;
+box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
+}
+.tooltip.visible { opacity: 1; }
+.tt-name    { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; }
+.tt-name-ja { font-size: 12px; color: #999; margin-bottom: 10px; }
+.tt-rank    { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+.tt-rank .num { color: #1557a0; font-size: 20px; font-family: ‘JetBrains Mono’; font-weight: 600; }
+.tt-row     { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 14px; }
+.tt-label   { font-size: 12px; color: #888; }
+.tt-val     { font-family: ‘JetBrains Mono’, monospace; font-size: 17px; font-weight: 600; color: #1a1a1a; }
+.tt-val .unit { font-size: 11px; color: #999; font-weight: 400; margin-left: 2px; }
+.tt-val-sm  { font-family: ‘JetBrains Mono’, monospace; font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.tt-bar-bg  { height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.tt-bar-fill { height: 100%; border-radius: 3px; }
+.tt-note    { font-size: 9.5px; color: #bbb; margin-top: 10px; line-height: 1.4; }
 
-  #ranking {
-    position: fixed; right: 0; top: 0; bottom: 0; width: 250px;
-    background: rgba(255,255,255,0.96); backdrop-filter: blur(10px);
-    border-left: 1px solid #eee; z-index: 90; padding: 16px 10px 12px;
-    overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ddd transparent;
-  }
-  .rk-title { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-  .rk-item  { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 5px; cursor: pointer; transition: background 0.12s; }
-  .rk-item:hover { background: rgba(21,87,160,0.08); }
-  .rk-num   { font-family: 'JetBrains Mono'; font-size: 10px; font-weight: 600; color: #ccc; width: 18px; text-align: right; flex-shrink: 0; }
-  .rk-num.gold   { color: #d4a017; }
-  .rk-num.silver { color: #999; }
-  .rk-num.bronze { color: #b07040; }
-  .rk-name  { font-size: 11.5px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rk-val   { font-family: 'JetBrains Mono'; font-size: 10px; color: #999; flex-shrink: 0; }
-  .rk-bar   { width: 36px; height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
-  .rk-bar-fill { height: 100%; border-radius: 2px; opacity: 0.5; }
+/* ── Ranking Panel ─────────────────────────────────── */
+#ranking {
+position: fixed; right: 0; top: 0; bottom: 0; width: 250px;
+background: rgba(255,255,255,0.96); backdrop-filter: blur(10px);
+border-left: 1px solid #eee; z-index: 90; padding: 16px 10px 12px;
+overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ddd transparent;
+}
+.rk-title {
+font-size: 11px; font-weight: 700; color: #888;
+margin-bottom: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.rk-item {
+display: flex; align-items: center; gap: 6px;
+padding: 5px 6px; border-radius: 5px; cursor: pointer; transition: background 0.12s;
+}
+.rk-item:hover { background: rgba(21,87,160,0.08); }
+.rk-item.active { background: rgba(21,87,160,0.15); }
+.rk-num   { font-family: ‘JetBrains Mono’; font-size: 10px; font-weight: 600; color: #ccc; width: 18px; text-align: right; flex-shrink: 0; }
+.rk-num.gold   { color: #d4a017; }
+.rk-num.silver { color: #999; }
+.rk-num.bronze { color: #b07040; }
+.rk-name  { font-size: 11.5px; color: #444; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rk-val   { font-family: ‘JetBrains Mono’; font-size: 10px; color: #999; flex-shrink: 0; }
+.rk-bar   { width: 36px; height: 3px; background: #f0f0f0; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.rk-bar-fill { height: 100%; border-radius: 2px; opacity: 0.5; }
 
-  #status-overlay {
-    position: fixed; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 14px; z-index: 300;
-    background: rgba(255,255,255,0.95); font-size: 13px; color: #666;
-  }
-  #status-overlay.hidden { display: none; }
-  .spinner { width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #1f7a43; border-radius: 50%; animation: spin .7s linear infinite; }
-  .err-detail { font-size: 11px; color: #555; line-height: 1.9; text-align: left; max-width: 520px; background: #f8f8f8; padding: 16px 20px; border-radius: 8px; }
-  .err-detail code { background: #eee; padding: 1px 5px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Loading Overlay ───────────────────────────────── */
+#status-overlay {
+position: fixed; inset: 0; display: flex; flex-direction: column;
+align-items: center; justify-content: center; gap: 14px; z-index: 300;
+background: rgba(255,255,255,0.95); font-size: 13px; color: #666;
+}
+#status-overlay.hidden { display: none; }
+.spinner {
+width: 32px; height: 32px;
+border: 3px solid #eee; border-top-color: #1f7a43;
+border-radius: 50%; animation: spin .7s linear infinite;
+}
+.err-detail {
+font-size: 11px; color: #555; line-height: 1.9; text-align: left;
+max-width: 520px; background: #f8f8f8; padding: 16px 20px; border-radius: 8px;
+}
+.err-detail code {
+background: #eee; padding: 1px 5px; border-radius: 4px;
+font-family: ‘JetBrains Mono’, monospace; font-size: 10.5px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  .hint { position: fixed; bottom: 12px; left: calc(50% - 125px); font-size: 10px; color: #ccc; z-index: 100; pointer-events: none; }
-  @media (max-width: 720px) { #ranking { display: none; } #header { right: 0; } }
+/* ── Misc ──────────────────────────────────────────── */
+.hint {
+position: fixed; bottom: 12px; left: calc(50% - 125px);
+font-size: 10px; color: #ccc; z-index: 100; pointer-events: none;
+}
+@media (max-width: 720px) {
+#ranking { display: none; }
+#header { right: 0; }
+}
 </style>
+
 </head>
 <body>
+
+<!-- ── Header ──────────────────────────────────────── -->
 
 <div id="header">
   <div class="title-block">
@@ -105,247 +146,201 @@
   </div>
   <div class="header-right">
     <div class="color-bar" id="colorBar"></div>
-    <div class="color-minmax"><span id="minLabel">—</span><span id="maxLabel">—</span></div>
+    <div class="color-minmax">
+      <span id="minLabel">—</span>
+      <span id="maxLabel">—</span>
+    </div>
   </div>
 </div>
+
+<!-- ── Map ─────────────────────────────────────────── -->
 
 <div id="map-container">
   <svg id="map-svg"></svg>
 </div>
 
+<!-- ── Tooltip ─────────────────────────────────────── -->
+
 <div class="tooltip" id="tooltip"></div>
+
+<!-- ── Ranking Panel ───────────────────────────────── -->
 
 <div id="ranking">
   <div class="rk-title">Population Ranking</div>
   <div id="rk-list"></div>
 </div>
 
+<!-- ── Hint ─────────────────────────────────────────── -->
+
 <div class="hint">Scroll: zoom &nbsp;|&nbsp; Drag: pan</div>
+
+<!-- ── Loading Overlay ─────────────────────────────── -->
 
 <div id="status-overlay">
   <div class="spinner" id="spinner"></div>
-  <div id="status-msg">GeoJSON を読み込み中…</div>
+  <div id="status-msg">データを読み込み中…</div>
   <div class="err-detail" id="err-detail" style="display:none"></div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════════════
-//  人口データ（インライン）
+//  Configuration
 // ══════════════════════════════════════════════════════════
-const POP_DATA = {
-  "01":{"nameJa":"北海道","nameEn":"Hokkaido","total":5044825},
-  "02":{"nameJa":"青森県","nameEn":"Aomori Prefecture","total":1185767},
-  "03":{"nameJa":"岩手県","nameEn":"Iwate Prefecture","total":1153900},
-  "04":{"nameJa":"宮城県","nameEn":"Miyagi Prefecture","total":2224980},
-  "05":{"nameJa":"秋田県","nameEn":"Akita Prefecture","total":907593},
-  "06":{"nameJa":"山形県","nameEn":"Yamagata Prefecture","total":1012355},
-  "07":{"nameJa":"福島県","nameEn":"Fukushima Prefecture","total":1771314},
-  "08":{"nameJa":"茨城県","nameEn":"Ibaraki Prefecture","total":2848597},
-  "09":{"nameJa":"栃木県","nameEn":"Tochigi Prefecture","total":1904173},
-  "10":{"nameJa":"群馬県","nameEn":"Gumma Prefecture","total":1907976},
-  "11":{"nameJa":"埼玉県","nameEn":"Saitama Prefecture","total":7374294},
-  "12":{"nameJa":"千葉県","nameEn":"Chiba Prefecture","total":6311579},
-  "13":{"nameJa":"東京都","nameEn":"Tokyo Metropolis","total":14002534},
-  "14":{"nameJa":"神奈川県","nameEn":"Kanagawa Prefecture","total":9202559},
-  "15":{"nameJa":"新潟県","nameEn":"Niigata Prefecture","total":2110754},
-  "16":{"nameJa":"富山県","nameEn":"Toyama Prefecture","total":1008536},
-  "17":{"nameJa":"石川県","nameEn":"Ishikawa Prefecture","total":1098121},
-  "18":{"nameJa":"福井県","nameEn":"Fukui Prefecture","total":746690},
-  "19":{"nameJa":"山梨県","nameEn":"Yamanashi Prefecture","total":801056},
-  "20":{"nameJa":"長野県","nameEn":"Nagano Prefecture","total":2012399},
-  "21":{"nameJa":"岐阜県","nameEn":"Gifu Prefecture","total":1951292},
-  "22":{"nameJa":"静岡県","nameEn":"Shizuoka Prefecture","total":3575704},
-  "23":{"nameJa":"愛知県","nameEn":"Aichi Prefecture","total":7483755},
-  "24":{"nameJa":"三重県","nameEn":"Mie Prefecture","total":1741266},
-  "25":{"nameJa":"滋賀県","nameEn":"Shiga Prefecture","total":1405246},
-  "26":{"nameJa":"京都府","nameEn":"Kyoto Prefecture","total":2472013},
-  "27":{"nameJa":"大阪府","nameEn":"Osaka Prefecture","total":8771961},
-  "28":{"nameJa":"兵庫県","nameEn":"Hyogo Prefecture","total":5393607},
-  "29":{"nameJa":"奈良県","nameEn":"Nara Prefecture","total":1303867},
-  "30":{"nameJa":"和歌山県","nameEn":"Wakayama Prefecture","total":901193},
-  "31":{"nameJa":"鳥取県","nameEn":"Tottori Prefecture","total":534003},
-  "32":{"nameJa":"島根県","nameEn":"Shimane Prefecture","total":642590},
-  "33":{"nameJa":"岡山県","nameEn":"Okayama Prefecture","total":1835478},
-  "34":{"nameJa":"広島県","nameEn":"Hiroshima Prefecture","total":2728771},
-  "35":{"nameJa":"山口県","nameEn":"Yamaguchi Prefecture","total":1292956},
-  "36":{"nameJa":"徳島県","nameEn":"Tokushima Prefecture","total":700409},
-  "37":{"nameJa":"香川県","nameEn":"Kagawa Prefecture","total":939965},
-  "38":{"nameJa":"愛媛県","nameEn":"Ehime Prefecture","total":1296359},
-  "39":{"nameJa":"高知県","nameEn":"Kochi Prefecture","total":664863},
-  "40":{"nameJa":"福岡県","nameEn":"Fukuoka Prefecture","total":5086957},
-  "41":{"nameJa":"佐賀県","nameEn":"Saga Prefecture","total":794252},
-  "42":{"nameJa":"長崎県","nameEn":"Nagasaki Prefecture","total":1274371},
-  "43":{"nameJa":"熊本県","nameEn":"Kumamoto Prefecture","total":1716360},
-  "44":{"nameJa":"大分県","nameEn":"Oita Prefecture","total":1102102},
-  "45":{"nameJa":"宮崎県","nameEn":"Miyazaki Prefecture","total":1048347},
-  "46":{"nameJa":"鹿児島県","nameEn":"Kagoshima Prefecture","total":1558920},
-  "47":{"nameJa":"沖縄県","nameEn":"Okinawa Prefecture","total":1484081}
+const DATA_PATHS = {
+  geojson:    'geo-json/japan.geojson',
+  population: 'population-json/pref-pop.json',
 };
 
-// ══════════════════════════════════════════════════════════
-//  投影（D3不使用・自前メルカトル）
-// ══════════════════════════════════════════════════════════
-// D3のgeoMercatorのfitExtentが正しく動作しないため
-// 同じアルゴリズムをJSで実装する
+const COLOR_LOW  = [238, 247, 240];
+const COLOR_HIGH = [31, 122, 67];
 
-let projScale, projTx, projTy;
+const PREF_COUNT = 47;
+
+// ══════════════════════════════════════════════════════════
+//  DOM References
+// ══════════════════════════════════════════════════════════
+const $svg       = document.getElementById('map-svg');
+const $tooltip   = document.getElementById('tooltip');
+const $rkList    = document.getElementById('rk-list');
+const $overlay   = document.getElementById('status-overlay');
+const $spinner   = document.getElementById('spinner');
+const $statusMsg = document.getElementById('status-msg');
+const $errDetail = document.getElementById('err-detail');
+const $colorBar  = document.getElementById('colorBar');
+const $minLabel  = document.getElementById('minLabel');
+const $maxLabel  = document.getElementById('maxLabel');
+
+// ══════════════════════════════════════════════════════════
+//  Mercator Projection (D3-free)
+// ══════════════════════════════════════════════════════════
+let projScale = 1, projTx = 0, projTy = 0;
 
 function toMerc(lon, lat) {
-  const x = lon * Math.PI / 180;
-  const y = Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
-  return [x, y];
+  return [
+    lon * Math.PI / 180,
+    Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)),
+  ];
 }
 
 function project(lon, lat) {
   const [mx, my] = toMerc(lon, lat);
-  return [
-    projScale * mx + projTx,
-    projScale * -my + projTy   // Y軸反転（SVGは下が+）
-  ];
+  return [projScale * mx + projTx, projScale * -my + projTy];
 }
 
-function fitProjection(allFeatures, svgW, svgH, padL, padT, padR, padB) {
-  // 全座標のメルカトル範囲を計算
-  let minX = Infinity, maxX = -Infinity;
-  let minY = Infinity, maxY = -Infinity;
+function fitProjection(features, w, h, pad) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
 
-  allFeatures.forEach(feat => {
-    const geom = feat.geometry;
-    const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
-    polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
+  const eachCoord = (coords, fn) => {
+    if (typeof coords[0] === 'number') { fn(coords); return; }
+    coords.forEach(c => eachCoord(c, fn));
+  };
+
+  features.forEach(f => {
+    if (!f.geometry) return;
+    eachCoord(f.geometry.coordinates, ([lon, lat]) => {
       const [mx, my] = toMerc(lon, lat);
+      const sy = -my; // SVG Y-flip
       if (mx < minX) minX = mx;
       if (mx > maxX) maxX = mx;
-      if (-my < minY) minY = -my;   // Y反転後の値で管理
-      if (-my > maxY) maxY = -my;
-    })));
-  });
-
-  const availW = svgW - padL - padR;
-  const availH = svgH - padT - padB;
-  const dx = maxX - minX;
-  const dy = maxY - minY;
-
-  // アスペクト比を保ってfitするscaleを決定
-  projScale = 0.95 * Math.min(availW / dx, availH / dy);
-
-  // センタリング
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  projTx = svgW / 2 - projScale * cx;
-  projTy = svgH / 2 - projScale * cy;
-}
-
-// GeoJSONのfeatureをSVGパス文字列に変換
-function featureToPath(feat) {
-  const geom = feat.geometry;
-  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
-  let d = '';
-  polys.forEach(poly => {
-    poly.forEach(ring => {
-      const pts = ring.map(([lon, lat]) => project(lon, lat));
-      d += `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)} `;
-      for (let i = 1; i < pts.length; i++) {
-        d += `L ${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)} `;
-      }
-      d += 'Z ';
+      if (sy < minY) minY = sy;
+      if (sy > maxY) maxY = sy;
     });
   });
-  return d.trim();
+
+  const availW = w - pad.left - pad.right;
+  const availH = h - pad.top - pad.bottom;
+  projScale = 0.95 * Math.min(availW / (maxX - minX), availH / (maxY - minY));
+
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  projTx = w / 2 - projScale * cx;
+  projTy = h / 2 - projScale * cy;
 }
 
 // ══════════════════════════════════════════════════════════
-//  カラースケール
+//  GeoJSON → SVG Path
 // ══════════════════════════════════════════════════════════
-const COLOR_LOW  = [238, 247, 240];
-const COLOR_HIGH = [31, 122, 67];
+function ringToPath(ring) {
+  const pts = ring.map(([lon, lat]) => project(lon, lat));
+  return 'M' + pts.map(p => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('L') + 'Z';
+}
 
+function featureToPathD(feat) {
+  const g = feat.geometry;
+  if (!g) return '';
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  return polys.map(poly => poly.map(ringToPath).join(' ')).join(' ');
+}
+
+// ══════════════════════════════════════════════════════════
+//  Color Scale
+// ══════════════════════════════════════════════════════════
 function lerpColor(c1, c2, t) {
-  // gamma補正つき補間（視覚的に均一に見える）
-  const g = Math.pow(t, 0.55);
-  const r = Math.round(c1[0] + (c2[0] - c1[0]) * g);
-  const gg = Math.round(c1[1] + (c2[1] - c1[1]) * g);
-  const b = Math.round(c1[2] + (c2[2] - c1[2]) * g);
-  return `rgb(${r},${gg},${b})`;
+  const g = Math.pow(t, 0.55); // gamma correction
+  return `rgb(${Math.round(c1[0] + (c2[0] - c1[0]) * g)},${Math.round(c1[1] + (c2[1] - c1[1]) * g)},${Math.round(c1[2] + (c2[2] - c1[2]) * g)})`;
 }
 
-function getColor(value, minVal, maxVal) {
-  const t = (value - minVal) / (maxVal - minVal);
-  return lerpColor(COLOR_LOW, COLOR_HIGH, t);
+function getColor(value, min, max) {
+  return lerpColor(COLOR_LOW, COLOR_HIGH, (value - min) / (max - min));
 }
 
 // ══════════════════════════════════════════════════════════
-//  ズーム＆パン（SVGのviewBox操作）
+//  Zoom & Pan (transform on <g>)
 // ══════════════════════════════════════════════════════════
-const PANEL_W = window.innerWidth <= 720 ? 0 : 250;
-let svgW = window.innerWidth;
-let svgH = window.innerHeight;
-
-const svgEl = document.getElementById('map-svg');
-svgEl.setAttribute('width', svgW);
-svgEl.setAttribute('height', svgH);
-
-// ズーム・パン状態
 let viewX = 0, viewY = 0, viewScale = 1;
-let isDragging = false, dragStartX, dragStartY, dragStartViewX, dragStartViewY;
+let isDragging = false, dragStartX, dragStartY, dragViewX0, dragViewY0;
 
 function applyView() {
-  const mapG = document.getElementById('map-g');
-  if (mapG) {
-    mapG.setAttribute('transform', `translate(${viewX}, ${viewY}) scale(${viewScale})`);
-
-  }
+  const g = document.getElementById('map-g');
+  if (g) g.setAttribute('transform', `translate(${viewX},${viewY}) scale(${viewScale})`);
 }
 
-svgEl.addEventListener('wheel', e => {
+$svg.addEventListener('wheel', e => {
   e.preventDefault();
-  const delta = e.deltaY > 0 ? 0.85 : 1.18;
-  const rect  = svgEl.getBoundingClientRect();
+  const factor = e.deltaY > 0 ? 0.85 : 1.18;
+  const rect = $svg.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-  // マウス位置を中心にズーム
-  viewX = mx - delta * (mx - viewX);
-  viewY = my - delta * (my - viewY);
-  viewScale *= delta;
-  viewScale  = Math.max(0.4, Math.min(20, viewScale));
+  viewX = mx - factor * (mx - viewX);
+  viewY = my - factor * (my - viewY);
+  viewScale = Math.max(0.4, Math.min(20, viewScale * factor));
   applyView();
 }, { passive: false });
 
-svgEl.addEventListener('mousedown', e => {
+$svg.addEventListener('mousedown', e => {
   isDragging = true;
   dragStartX = e.clientX; dragStartY = e.clientY;
-  dragStartViewX = viewX; dragStartViewY = viewY;
-  svgEl.style.cursor = 'grabbing';
+  dragViewX0 = viewX; dragViewY0 = viewY;
+  $svg.style.cursor = 'grabbing';
 });
 window.addEventListener('mousemove', e => {
   if (!isDragging) return;
-  viewX = dragStartViewX + (e.clientX - dragStartX);
-  viewY = dragStartViewY + (e.clientY - dragStartY);
+  viewX = dragViewX0 + (e.clientX - dragStartX);
+  viewY = dragViewY0 + (e.clientY - dragStartY);
   applyView();
 });
 window.addEventListener('mouseup', () => {
   isDragging = false;
-  svgEl.style.cursor = '';
+  $svg.style.cursor = '';
 });
 
 // ══════════════════════════════════════════════════════════
-//  TOOLTIP
+//  Tooltip
 // ══════════════════════════════════════════════════════════
-const tooltipEl = document.getElementById('tooltip');
-function showTip(e, props) {
-  const { nameEn, nameJa, value, rank, maxVal, natTot, avg } = props;
-  const pct   = ((value / maxVal) * 100).toFixed(0);
-  const share = ((value / natTot) * 100).toFixed(1);
-  const diff  = value - avg;
-  const diffStr   = diff >= 0 ? `+${diff.toLocaleString()}` : `-${Math.abs(diff).toLocaleString()}`;
+function showTooltip(e, { nameEn, nameJa, total, rank, maxVal, natTotal, avg }) {
+  const pct   = (total / maxVal * 100).toFixed(0);
+  const share = (total / natTotal * 100).toFixed(1);
+  const diff  = total - avg;
+  const diffStr   = diff >= 0 ? `+${diff.toLocaleString()}` : `−${Math.abs(diff).toLocaleString()}`;
   const diffColor = diff >= 0 ? '#1f7a43' : '#666';
-  tooltipEl.innerHTML = `
+
+  $tooltip.innerHTML = `
     <div class="tt-name">${nameEn}</div>
     <div class="tt-name-ja">${nameJa}</div>
     <div class="tt-rank"><span class="num">#${rank}</span></div>
     <div class="tt-row">
       <span class="tt-label">Total population</span>
-      <span class="tt-val">${value.toLocaleString()}<span class="unit"> persons</span></span>
+      <span class="tt-val">${total.toLocaleString()}<span class="unit"> persons</span></span>
     </div>
     <div class="tt-bar-bg">
       <div class="tt-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,rgb(238,247,240),rgb(31,122,67))"></div>
@@ -358,198 +353,243 @@ function showTip(e, props) {
       <span class="tt-label">vs. prefecture average</span>
       <span class="tt-val-sm" style="color:${diffColor}">${diffStr}</span>
     </div>
-    <div class="tt-note">Source: Statistics Bureau of Japan</div>
-  `;
-  tooltipEl.classList.add('visible');
-  moveTip(e);
+    <div class="tt-note">Source: Statistics Bureau of Japan</div>`;
+  $tooltip.classList.add('visible');
+  moveTooltip(e);
 }
-function moveTip(e) {
+
+function moveTooltip(e) {
   const gap = 24;
-  tooltipEl.style.left = '-9999px'; tooltipEl.style.top = '-9999px';
-  const tw = tooltipEl.offsetWidth, th = tooltipEl.offsetHeight;
+  $tooltip.style.left = '-9999px';
+  $tooltip.style.top  = '-9999px';
+  const tw = $tooltip.offsetWidth, th = $tooltip.offsetHeight;
   let x = e.clientX + gap, y = e.clientY + gap;
-  if (x + tw > svgW - 12) x = e.clientX - gap - tw;
-  if (y + th > svgH - 12) y = e.clientY - gap - th;
-  tooltipEl.style.left = Math.max(12, x) + 'px';
-  tooltipEl.style.top  = Math.max(12, y) + 'px';
+  if (x + tw > window.innerWidth - 12) x = e.clientX - gap - tw;
+  if (y + th > window.innerHeight - 12) y = e.clientY - gap - th;
+  $tooltip.style.left = Math.max(12, x) + 'px';
+  $tooltip.style.top  = Math.max(12, y) + 'px';
 }
-function hideTip() { tooltipEl.classList.remove('visible'); }
+
+function hideTooltip() {
+  $tooltip.classList.remove('visible');
+}
 
 // ══════════════════════════════════════════════════════════
-//  RANKING
+//  Ranking Panel
 // ══════════════════════════════════════════════════════════
 function renderRanking(ranked, maxVal) {
-  const list = document.getElementById('rk-list');
-  list.innerHTML = ranked.map((p, i) => {
-    const pct    = (p.value / maxVal * 100).toFixed(0);
-    const numCls = i===0 ? 'rk-num gold' : i===1 ? 'rk-num silver' : i===2 ? 'rk-num bronze' : 'rk-num';
-    return `<div class="rk-item" data-id="${p.id}">
-      <span class="${numCls}">${i+1}</span>
+  $rkList.innerHTML = ranked.map((p, i) => {
+    const pct    = (p.total / maxVal * 100).toFixed(0);
+    const numCls = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
+    return `<div class="rk-item" data-id="${p.prefId}">
+      <span class="${numCls}">${i + 1}</span>
       <span class="rk-name">${p.nameEn}</span>
-      <span class="rk-val">${p.value.toLocaleString()}</span>
+      <span class="rk-val">${p.total.toLocaleString()}</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%;background:rgb(31,122,67)"></span></span>
     </div>`;
   }).join('');
 
-  list.querySelectorAll('.rk-item').forEach(el => {
+  // Ranking ↔ Map hover linkage
+  $rkList.querySelectorAll('.rk-item').forEach(el => {
     const id = +el.dataset.id;
     el.addEventListener('mouseenter', () => {
-      document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => {
-        p.style.filter = 'brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25))';
-      });
-      el.style.background = 'rgba(21,87,160,0.15)';
+      highlightPref(id, true);
+      el.classList.add('active');
     });
     el.addEventListener('mouseleave', () => {
-      document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => {
-        p.style.filter = '';
-      });
-      el.style.background = '';
+      highlightPref(id, false);
+      el.classList.remove('active');
     });
   });
 }
-function highlightRank(id) {
-  document.querySelectorAll('.rk-item').forEach(el => {
-    const active = +el.dataset.id === id;
-    el.style.background = active ? 'rgba(21,87,160,0.15)' : '';
-    if (active) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+function highlightPref(prefId, on) {
+  document.querySelectorAll(`.pref-path[data-id="${prefId}"]`).forEach(p => {
+    p.style.filter = on ? 'brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,0.25))' : '';
   });
 }
+
+function highlightRankItem(prefId) {
+  $rkList.querySelectorAll('.rk-item').forEach(el => {
+    const active = +el.dataset.id === prefId;
+    el.classList.toggle('active', active);
+    if (active) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
 function clearRankHighlight() {
-  document.querySelectorAll('.rk-item').forEach(el => el.style.background = '');
+  $rkList.querySelectorAll('.rk-item').forEach(el => el.classList.remove('active'));
 }
 
 // ══════════════════════════════════════════════════════════
-//  INIT
+//  Loading UI
 // ══════════════════════════════════════════════════════════
-function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
-function hideOverlay()  { document.getElementById('status-overlay').classList.add('hidden'); }
+function setStatus(msg) { $statusMsg.textContent = msg; }
+function hideOverlay()  { $overlay.classList.add('hidden'); }
+
 function showError(html) {
-  document.getElementById('spinner').style.display = 'none';
-  document.getElementById('status-msg').textContent = '⚠️ エラー';
-  const det = document.getElementById('err-detail');
-  det.innerHTML = html; det.style.display = 'block';
+  $spinner.style.display = 'none';
+  $statusMsg.textContent = '⚠️ エラー';
+  $errDetail.innerHTML = html;
+  $errDetail.style.display = 'block';
 }
 
-async function init() {
-  // ランキング先行描画
-  const popMap = {};
-  for (const [code, d] of Object.entries(POP_DATA)) {
-    popMap[parseInt(code, 10)] = d;
-  }
-  const rankedPop = Object.entries(POP_DATA)
-    .map(([code, d]) => ({ id: parseInt(code, 10), nameEn: d.nameEn, value: d.total }))
-    .sort((a, b) => b.value - a.value);
-  const maxPopVal = rankedPop[0].value;
-  const minPopVal = rankedPop[rankedPop.length - 1].value;
-  renderRanking(rankedPop, maxPopVal);
-  document.getElementById('colorBar').style.background = 'linear-gradient(90deg, rgb(238,247,240), rgb(31,122,67))';
-  document.getElementById('minLabel').textContent = minPopVal.toLocaleString();
-  document.getElementById('maxLabel').textContent = maxPopVal.toLocaleString();
+// ══════════════════════════════════════════════════════════
+//  Data Loading
+// ══════════════════════════════════════════════════════════
+async function fetchJSON(path, label) {
+  setStatus(`${label}を読み込み中…`);
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+  return res.json();
+}
 
-  // japan.geojson を1回だけfetch（47県dissolved済み）
-  setStatus('japan.geojson を読み込み中…');
-  let japanGeo;
+// ══════════════════════════════════════════════════════════
+//  Extract prefecture ID from feature
+//  Handles both formats:
+//    - japan.geojson:  code = "01" (2-digit, 1 feature per pref)
+//    - pref_XX.geojson: code = "01101" (5-digit municipality)
+// ══════════════════════════════════════════════════════════
+function getPrefId(feature) {
+  const code = String(feature.properties?.code || '');
+  return parseInt(code.slice(0, 2), 10);
+}
+
+// ══════════════════════════════════════════════════════════
+//  Main Init
+// ══════════════════════════════════════════════════════════
+async function init() {
+  const svgW = window.innerWidth;
+  const svgH = window.innerHeight;
+  const panelW = window.innerWidth <= 720 ? 0 : 250;
+  $svg.setAttribute('width', svgW);
+  $svg.setAttribute('height', svgH);
+
+  // ── Load data ──
+  let popData, geoData;
   try {
-    const r = await fetch('geo-json/japan.geojson');
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    japanGeo = await r.json();
-  } catch(e) {
+    popData = await fetchJSON(DATA_PATHS.population, '人口データ');
+  } catch (e) {
+    showError(`<b>${DATA_PATHS.population}</b> の読み込みに失敗しました。<br><br>エラー: ${e.message}`);
+    return;
+  }
+  try {
+    geoData = await fetchJSON(DATA_PATHS.geojson, '地理データ');
+  } catch (e) {
     showError(`
-      <b>geo-json/japan.geojson</b> が読み込めませんでした。<br><br>
-      まず <code>make_japan_geojson.py</code> を実行して japan.geojson を生成してください：<br>
-      <code>python3 make_japan_geojson.py</code><br><br>
-      その後 <code>python3 -m http.server 8000</code> でサーバーを起動し、<br>
+      <b>${DATA_PATHS.geojson}</b> の読み込みに失敗しました。<br><br>
+      <code>python3 -m http.server 8000</code> でサーバーを起動し、<br>
       <code>http://localhost:8000</code> を開いてください。<br><br>
-      エラー: ${e.message}
-    `);
+      エラー: ${e.message}`);
     return;
   }
 
-  // 全featuresを収集
-  const allFeatures = japanGeo.features.filter(f => f?.geometry);
-  const prefGroups  = {};   // id → {feats, pop}
+  setStatus('描画中…');
 
-  allFeatures.forEach(feat => {
-    const code = feat.properties?.code || '';
-    const id   = parseInt(code, 10);
-    const pop  = popMap[id] || {};
-    // japan.geojsonは1県=1feature なのでそのまま格納
-    prefGroups[id] = { feats: [feat], pop };
+  // ── Build population lookup ──
+  // popData keys: "01" .. "47"
+  const popByPrefId = {};  // { 1: {nameJa, nameEn, total, male, female}, ... }
+  for (const [code, d] of Object.entries(popData)) {
+    popByPrefId[parseInt(code, 10)] = d;
+  }
+
+  // ── Compute ranking ──
+  const ranked = Object.entries(popByPrefId)
+    .map(([id, d]) => ({ prefId: +id, nameEn: d.nameEn, nameJa: d.nameJa, total: d.total }))
+    .sort((a, b) => b.total - a.total);
+
+  const maxPop = ranked[0].total;
+  const minPop = ranked[ranked.length - 1].total;
+  const natTotal = ranked.reduce((s, p) => s + p.total, 0);
+  const avgPop = Math.round(natTotal / PREF_COUNT);
+
+  const rankOf = {};
+  ranked.forEach((p, i) => { rankOf[p.prefId] = i + 1; });
+
+  // ── Render ranking panel & legend ──
+  renderRanking(ranked, maxPop);
+  $colorBar.style.background = 'linear-gradient(90deg, rgb(238,247,240), rgb(31,122,67))';
+  $minLabel.textContent = minPop.toLocaleString();
+  $maxLabel.textContent = maxPop.toLocaleString();
+
+  // ── Group features by prefecture ──
+  // This handles both cases:
+  //   - japan.geojson with 1 feature per pref (code = "01")
+  //   - any geojson with municipality features (code = "01101")
+  // By grouping on the 2-digit prefix and merging all path data
+  // into a single <path>, internal municipality borders disappear.
+  const prefGroups = {}; // { prefId: [feat, feat, ...] }
+  const features = (geoData.features || []).filter(f => f?.geometry);
+
+  features.forEach(feat => {
+    const prefId = getPrefId(feat);
+    if (!prefId || !popByPrefId[prefId]) return;
+    if (!prefGroups[prefId]) prefGroups[prefId] = [];
+    prefGroups[prefId].push(feat);
   });
 
-  if (!allFeatures.length) {
-    showError('japan.geojson に有効なデータがありません。');
-    return;
-  }
+  // ── Projection ──
+  fitProjection(features, svgW, svgH, {
+    left:   18,
+    top:    88,
+    right:  18 + panelW,
+    bottom: 18,
+  });
 
-  // 投影パラメータ計算（D3不使用）
-  fitProjection(
-    allFeatures,
-    svgW, svgH,
-    18,           // padLeft
-    88,           // padTop（ヘッダー分）
-    18 + PANEL_W, // padRight（ランキングパネル分）
-    18            // padBottom
-  );
-
-  // SVG描画
-  const svgEl2 = document.getElementById('map-svg');
+  // ── Draw map ──
   const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   g.id = 'map-g';
-  svgEl2.appendChild(g);
+  $svg.appendChild(g);
 
-  // 統計
-  const natTot = rankedPop.reduce((s, p) => s + p.value, 0);
-  const avg    = Math.round(natTot / 47);
-  const rankMap = {};
-  rankedPop.forEach((p, i) => rankMap[p.id] = i + 1);
+  for (const [prefIdStr, feats] of Object.entries(prefGroups)) {
+    const prefId = +prefIdStr;
+    const pop = popByPrefId[prefId];
+    if (!pop) continue;
 
-  // 都道府県ごとに全featureのパスを1つに結合して描画
-  // → 市区町村境界線が消え、都道府県の外枠だけになる
-  Object.entries(prefGroups).forEach(([idStr, { feats, pop }]) => {
-    const id    = parseInt(idStr, 10);
-    const color = getColor(pop.total || 0, minPopVal, maxPopVal);
+    const color = getColor(pop.total, minPop, maxPop);
 
-    // 全featureのd文字列を結合 → SVGは同一path内の複数サブパスを独立して塗る
-    const combinedD = feats.map(featureToPath).join(' ');
+    // Combine all features' path data into one <path>
+    // → eliminates internal municipality borders
+    const combinedD = feats.map(featureToPathD).join(' ');
 
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', combinedD);
     pathEl.setAttribute('fill', color);
-    pathEl.setAttribute('fill-rule', 'evenodd'); // 島・穴の処理
+    pathEl.setAttribute('fill-rule', 'evenodd');
     pathEl.setAttribute('class', 'pref-path');
-    pathEl.setAttribute('data-id', id);
+    pathEl.setAttribute('data-id', prefId);
 
     pathEl.addEventListener('mouseenter', e => {
       pathEl.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
-      showTip(e, {
+      showTooltip(e, {
         nameEn: pop.nameEn, nameJa: pop.nameJa,
-        value: pop.total, rank: rankMap[id],
-        maxVal: maxPopVal, natTot, avg
+        total: pop.total, rank: rankOf[prefId],
+        maxVal: maxPop, natTotal, avg: avgPop,
       });
-      highlightRank(id);
+      highlightRankItem(prefId);
     });
-    pathEl.addEventListener('mousemove', moveTip);
+    pathEl.addEventListener('mousemove', moveTooltip);
     pathEl.addEventListener('mouseleave', () => {
       pathEl.style.filter = '';
-      hideTip();
+      hideTooltip();
       clearRankHighlight();
     });
 
     g.appendChild(pathEl);
-  });
-
+  }
 
   hideOverlay();
 }
 
+// ── Resize handler ──
 window.addEventListener('resize', () => {
-  svgW = window.innerWidth; svgH = window.innerHeight;
-  svgEl.setAttribute('width', svgW);
-  svgEl.setAttribute('height', svgH);
+  $svg.setAttribute('width', window.innerWidth);
+  $svg.setAttribute('height', window.innerHeight);
 });
 
+// ── Start ──
 init();
 </script>
+
 </body>
 </html>
