@@ -517,36 +517,39 @@ async function init() {
   const rankMap = {};
   rankedPop.forEach((p, i) => rankMap[p.id] = i + 1);
 
-  // 都道府県ごとにpathを描画（各featureを個別のpath要素として）
+  // 都道府県ごとに全featureのパスを1つに結合して描画
+  // → 市区町村境界線が消え、都道府県の外枠だけになる
   Object.entries(prefGroups).forEach(([idStr, { feats, pop }]) => {
     const id    = parseInt(idStr, 10);
     const color = getColor(pop.total || 0, minPopVal, maxPopVal);
 
-    feats.forEach(feat => {
-      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathEl.setAttribute('d', featureToPath(feat));
-      pathEl.setAttribute('fill', color);
-      pathEl.setAttribute('class', 'pref-path');
-      pathEl.setAttribute('data-id', id);
+    // 全featureのd文字列を結合 → SVGは同一path内の複数サブパスを独立して塗る
+    const combinedD = feats.map(featureToPath).join(' ');
 
-      pathEl.addEventListener('mouseenter', e => {
-        pathEl.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
-        showTip(e, {
-          nameEn: pop.nameEn, nameJa: pop.nameJa,
-          value: pop.total, rank: rankMap[id],
-          maxVal: maxPopVal, natTot, avg
-        });
-        highlightRank(id);
-      });
-      pathEl.addEventListener('mousemove', moveTip);
-      pathEl.addEventListener('mouseleave', () => {
-        pathEl.style.filter = '';
-        hideTip();
-        clearRankHighlight();
-      });
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathEl.setAttribute('d', combinedD);
+    pathEl.setAttribute('fill', color);
+    pathEl.setAttribute('fill-rule', 'evenodd'); // 島・穴の処理
+    pathEl.setAttribute('class', 'pref-path');
+    pathEl.setAttribute('data-id', id);
 
-      g.appendChild(pathEl);
+    pathEl.addEventListener('mouseenter', e => {
+      pathEl.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.3))';
+      showTip(e, {
+        nameEn: pop.nameEn, nameJa: pop.nameJa,
+        value: pop.total, rank: rankMap[id],
+        maxVal: maxPopVal, natTot, avg
+      });
+      highlightRank(id);
     });
+    pathEl.addEventListener('mousemove', moveTip);
+    pathEl.addEventListener('mouseleave', () => {
+      pathEl.style.filter = '';
+      hideTip();
+      clearRankHighlight();
+    });
+
+    g.appendChild(pathEl);
   });
 
   hideOverlay();
