@@ -136,6 +136,15 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .err-detail { font-size:11px; color:#555; line-height:1.9; text-align:left; max-width:520px; background:#f8f8f8; padding:16px 20px; border-radius:8px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
+/* ── Prefecture border overlay (shown during municipality zoom) ── */
+.pref-border {
+  fill: none;
+  stroke: rgba(80,80,80,0.55);
+  stroke-width: 0.8px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
 /* ── Hint ── */
 #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:10px; color:#ccc; z-index:100; pointer-events:none; white-space:nowrap; }
 
@@ -611,6 +620,8 @@ const NAME_OVERRIDES = {
 async function zoomIn(id) {
   // Allow direct switch between prefectures
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
+  const prevBorder = document.getElementById('pref-border-layer');
+  if (prevBorder) prevBorder.remove();
   zoomedId = id;
   hideTip();
 
@@ -837,6 +848,20 @@ async function zoomIn(id) {
 
   mapG.appendChild(cityLayerG);
 
+  // Prefecture border overlay: draw all pref outlines on top of city layer
+  // so county boundaries remain visible regardless of highlight state
+  const borderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  borderG.id = 'pref-border-layer';
+  borderG.setAttribute('pointer-events', 'none');
+  Object.values(prefFeatMap).forEach(pFeat => {
+    const bp = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    bp.setAttribute('d', featureToPath(pFeat));
+    bp.setAttribute('fill', 'none');
+    bp.setAttribute('class', 'pref-border');
+    borderG.appendChild(bp);
+  });
+  mapG.appendChild(borderG);
+
   // Render ranking
   if (PANEL_W > 0) renderMuniRanking(ranked, rankMax, prefTotal, wardMap);
 }
@@ -856,6 +881,8 @@ function zoomOut() {
 
   document.querySelectorAll('.pref-path').forEach(p => { p.style.opacity = ''; });
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
+  const oldBorder = document.getElementById('pref-border-layer');
+  if (oldBorder) oldBorder.remove();
 
   viewX = 0; viewY = 0; viewScale = 1; applyView();
   if (window._renderPrefRanking) window._renderPrefRanking();
