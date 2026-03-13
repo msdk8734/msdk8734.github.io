@@ -17,9 +17,11 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   background:linear-gradient(180deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.95) 70%,rgba(255,255,255,0) 100%);
   pointer-events:none; transition:right .3s;
 }
+/* title and legend still ignore pointer events; only back-btn is interactive */
+.title-block, .header-right > .color-bar, .header-right > .color-minmax { pointer-events:none; }
 .title-block h1 { font-size:20px; font-weight:700; color:#1a1a1a; letter-spacing:-.01em; }
 .title-block .sub { font-size:10.5px; color:#888; margin-top:2px; }
-.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; padding-top:4px; }
+.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; padding-top:4px; pointer-events:auto; }
 .color-bar { width:140px; height:10px; border-radius:999px; border:1px solid rgba(0,0,0,.08); }
 .color-minmax { display:flex; justify-content:space-between; font-size:9.5px; color:#aaa; font-family:'JetBrains Mono',monospace; width:140px; }
 
@@ -44,10 +46,10 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 }
 .city-path.dimmed    { opacity:.2; }
 .city-path.highlighted {
-  stroke:rgba(255,255,255,.95);
-  stroke-width:.5px;
+  stroke:rgb(20,100,50);
+  stroke-width:.8px;
   opacity:1 !important;
-  filter:brightness(1.2) drop-shadow(0 0 5px rgba(0,0,0,.25));
+  filter:saturate(1.3);
 }
 
 /* ── Tooltip ── */
@@ -102,14 +104,15 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 /* ── Back button ── */
 #back-btn {
-  display:none; position:fixed; top:14px; right:16px; z-index:200;
-  background:#fff; border:1px solid #ddd; border-radius:8px;
-  padding:8px 16px; font-size:13px; font-weight:600; color:#333;
-  cursor:pointer; align-items:center; gap:6px;
-  box-shadow:0 2px 8px rgba(0,0,0,.1); font-family:'IBM Plex Sans',sans-serif;
+  display:none; position:fixed; z-index:200;
+  background:#fff; border:1px solid #ddd; border-radius:6px;
+  padding:5px 12px; font-size:12px; font-weight:600; color:#444;
+  cursor:pointer; align-items:center; gap:5px;
+  box-shadow:0 1px 5px rgba(0,0,0,.1); font-family:'IBM Plex Sans',sans-serif;
   transition:background .12s, box-shadow .12s;
+  pointer-events:auto;
 }
-#back-btn:hover { background:#f5f5f5; box-shadow:0 3px 12px rgba(0,0,0,.15); }
+#back-btn:hover { background:#f5f5f5; box-shadow:0 2px 8px rgba(0,0,0,.15); }
 #back-btn.visible { display:flex; }
 
 /* ── Zoom label ── */
@@ -154,6 +157,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   <div class="header-right">
     <div class="color-bar" id="colorBar"></div>
     <div class="color-minmax"><span id="minLabel">—</span><span id="maxLabel">—</span></div>
+    <button id="back-btn" onclick="zoomOut()">← Back to Japan</button>
   </div>
 </div>
 
@@ -165,7 +169,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   <div id="rk-list"></div>
 </div>
 
-<button id="back-btn" onclick="zoomOut()">← Back to Japan</button>
 <div id="zoom-label"></div>
 <div id="hint">Click a prefecture to zoom in &nbsp;|&nbsp; Scroll: zoom &nbsp;|&nbsp; Drag: pan</div>
 
@@ -423,25 +426,58 @@ function showPrefTip(e, { nameEn, nameJa, value, rank, maxVal, natTot, avg }, is
   tipEl.classList.add('visible'); moveTip(e);
 }
 
-function showCityTip(e, item, prefTotal, wardRows, isMobile) {
-  const share = ((item.total / prefTotal) * 100).toFixed(1);
-  let html = `
-    <div class="tt-name" style="font-size:15px">${item.nameEn}</div>
-    <div class="tt-name-ja">${item.nameJa}</div>
-    <div class="tt-row" style="margin-top:8px;">
-      <span class="tt-label">Population</span>
-      <span class="tt-val">${item.total.toLocaleString()}<span class="unit"> persons</span></span>
-    </div>
-    <div class="tt-row">
-      <span class="tt-label">Share of prefecture</span>
-      <span class="tt-val-sm">${share}%</span>
-    </div>`;
-  if (wardRows && wardRows.length > 0) {
-    html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
-    wardRows.forEach(w => {
-      html += `<div class="tt-ward-row"><span>${w.nameJa}</span><span class="tt-ward-val">${w.total.toLocaleString()}</span></div>`;
-    });
-    html += `</div>`;
+// Show tooltip for a ward (区) within a political city
+// wardItem: { nameEn, nameJa, total } — the specific ward
+// cityItem: { nameEn, nameJa, total } — the parent city (null if not a ward)
+// prefTotal: prefecture total population
+function showCityTip(e, item, prefTotal, wardRows, isMobile, wardItem, cityItem) {
+  let html = '';
+  if (wardItem && cityItem) {
+    // Ward-level tooltip: show ward first, then parent city
+    const wardShare = ((wardItem.total / cityItem.total) * 100).toFixed(1);
+    const cityShare = ((cityItem.total / prefTotal) * 100).toFixed(1);
+    html = `
+      <div class="tt-name" style="font-size:15px">${wardItem.nameEn}</div>
+      <div class="tt-name-ja">${wardItem.nameJa}</div>
+      <div class="tt-row" style="margin-top:8px;">
+        <span class="tt-label">Ward population</span>
+        <span class="tt-val">${wardItem.total.toLocaleString()}<span class="unit"> persons</span></span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Share of city</span>
+        <span class="tt-val-sm">${wardShare}%</span>
+      </div>
+      <hr class="tt-divider">
+      <div class="tt-section-label">Parent city</div>
+      <div class="tt-row">
+        <span class="tt-label" style="font-weight:600;color:#444">${cityItem.nameEn}</span>
+        <span class="tt-val-sm">${cityItem.total.toLocaleString()}</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Share of prefecture</span>
+        <span class="tt-val-sm">${cityShare}%</span>
+      </div>`;
+  } else {
+    // Regular city / municipality tooltip
+    const share = ((item.total / prefTotal) * 100).toFixed(1);
+    html = `
+      <div class="tt-name" style="font-size:15px">${item.nameEn}</div>
+      <div class="tt-name-ja">${item.nameJa}</div>
+      <div class="tt-row" style="margin-top:8px;">
+        <span class="tt-label">Population</span>
+        <span class="tt-val">${item.total.toLocaleString()}<span class="unit"> persons</span></span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Share of prefecture</span>
+        <span class="tt-val-sm">${share}%</span>
+      </div>`;
+    if (wardRows && wardRows.length > 0) {
+      html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
+      wardRows.forEach(w => {
+        html += `<div class="tt-ward-row"><span>${w.nameJa}</span><span class="tt-ward-val">${w.total.toLocaleString()}</span></div>`;
+      });
+      html += `</div>`;
+    }
   }
   tipEl.innerHTML = html;
   tipEl.classList.add('visible'); moveTip(e);
@@ -717,21 +753,44 @@ async function zoomIn(id) {
     const color   = rkColor[rankKey] || '#e0e0e0';
     const item    = rankItemMap[rankKey];
 
+    // Determine if this path is a ward with a parent city
+    const isWard   = wardToCity[mcode] !== undefined;
+    const cityCode = wardToCity[mcode];
+    const cityItem = cityCode ? rankItemMap[cityCode] : null;
+    const wardData = isWard ? muniPop[mcode] : null;
+
+    // For highlighting: wards in same city share rankKey (city code)
+    // Individual wards also get their own data-wardcode for tooltip
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     p.setAttribute('d', featureToPath(f));
     p.setAttribute('fill', color);
     p.setAttribute('fill-rule', 'evenodd');
     p.setAttribute('class', 'city-path');
     p.setAttribute('data-rankkey', rankKey);
+    p.setAttribute('data-mcode', mcode);
 
     if (item && !IS_TOUCH) {
       p.addEventListener('mouseenter', e => {
+        // Dim everything, highlight only this ward (or city if no wards)
         document.querySelectorAll('.city-path').forEach(el => el.classList.add('dimmed'));
-        document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
-          el.classList.remove('dimmed'); el.classList.add('highlighted');
-        });
+        if (isWard) {
+          // Highlight just this one ward path
+          p.classList.remove('dimmed'); p.classList.add('highlighted');
+        } else {
+          // Highlight all paths sharing this rankKey (non-ward city)
+          document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
+            el.classList.remove('dimmed'); el.classList.add('highlighted');
+          });
+        }
+        // Highlight ranking row for parent city/municipality
         document.querySelectorAll('.rk-item').forEach(el => el.classList.toggle('active', el.dataset.key === rankKey));
-        showCityTip(e, item, prefTotal, wardMap[rankKey] || null);
+        // Tooltip: ward view or regular view
+        if (isWard && wardData && cityItem) {
+          const wItem = { nameEn: wardData.nameEn, nameJa: wardData.nameJa, total: wardData.total };
+          showCityTip(e, item, prefTotal, null, false, wItem, cityItem);
+        } else {
+          showCityTip(e, item, prefTotal, wardMap[rankKey] || null, false, null, null);
+        }
       });
       p.addEventListener('mousemove', moveTip);
       p.addEventListener('mouseleave', () => {
