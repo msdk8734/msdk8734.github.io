@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; overflow:hidden; height:100vh; width:100vw; }
 
+/* ── Header ── */
 #header {
   position:fixed; top:0; left:0; right:250px; z-index:100;
   padding:14px 24px 10px; display:flex; align-items:flex-start; justify-content:space-between;
@@ -22,20 +23,39 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .color-bar { width:140px; height:10px; border-radius:999px; border:1px solid rgba(0,0,0,.08); }
 .color-minmax { display:flex; justify-content:space-between; font-size:9.5px; color:#aaa; font-family:'JetBrains Mono',monospace; width:140px; }
 
+/* ── Map ── */
 #map-container { width:100vw; height:100vh; overflow:hidden; }
-#map-svg { width:100%; height:100%; display:block; }
+#map-svg { width:100%; height:100%; display:block; touch-action:none; }
 
-.pref-path { stroke:rgba(255,255,255,.6); stroke-width:.2px; stroke-linejoin:round; cursor:pointer; transition:filter .15s; }
+/* ── Prefecture paths ── */
+.pref-path {
+  stroke:rgba(255,255,255,.6); stroke-width:.2px; stroke-linejoin:round;
+  cursor:pointer; transition:filter .15s;
+}
 .pref-path:hover { stroke:rgba(255,255,255,.9); stroke-width:.5px; filter:brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,.25)); }
 
-.city-path { stroke:rgba(255,255,255,.55); stroke-width:.2px; stroke-linejoin:round; cursor:default; transition:filter .12s; }
-.city-path:hover { stroke:rgba(255,255,255,.9); stroke-width:.5px; filter:brightness(1.12) drop-shadow(0 1px 4px rgba(0,0,0,.2)); }
+/* ── Municipality paths ── */
+.city-path {
+  stroke:rgba(255,255,255,.3);
+  stroke-width:.12px;
+  stroke-linejoin:round;
+  cursor:pointer;
+  transition:opacity .18s, filter .18s;
+}
+.city-path.dimmed    { opacity:.2; }
+.city-path.highlighted {
+  stroke:rgba(255,255,255,.95);
+  stroke-width:.5px;
+  opacity:1 !important;
+  filter:brightness(1.2) drop-shadow(0 0 5px rgba(0,0,0,.25));
+}
 
+/* ── Tooltip ── */
 .tooltip {
   position:fixed; pointer-events:none;
   background:rgba(255,255,255,.97); backdrop-filter:blur(16px);
   border:1px solid #e0e0e0; border-radius:12px; padding:16px 20px;
-  opacity:0; transition:opacity .12s; z-index:200; min-width:240px;
+  opacity:0; transition:opacity .12s; z-index:200; min-width:240px; max-width:300px;
   box-shadow:0 8px 32px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.06);
 }
 .tooltip.visible { opacity:1; }
@@ -44,16 +64,22 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .tt-rank    { margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #eee; }
 .tt-rank .num { color:#1557a0; font-size:20px; font-family:'JetBrains Mono'; font-weight:600; }
 .tt-row     { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; gap:14px; }
-.tt-label   { font-size:12px; color:#888; }
+.tt-label   { font-size:12px; color:#888; flex-shrink:0; }
 .tt-val     { font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:600; color:#1a1a1a; }
 .tt-val .unit { font-size:11px; color:#999; font-weight:400; margin-left:2px; }
 .tt-val-sm  { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:500; color:#1a1a1a; }
 .tt-bar-bg  { height:5px; background:#f0f0f0; border-radius:3px; overflow:hidden; margin-top:4px; }
 .tt-bar-fill { height:100%; border-radius:3px; }
 .tt-note    { font-size:9.5px; color:#bbb; margin-top:10px; line-height:1.4; }
-.tt-city    { font-size:15px; font-weight:600; color:#1a1a1a; }
-.tt-city-sub { font-size:11px; color:#999; margin-top:4px; }
+.tt-divider { border:none; border-top:1px solid #eee; margin:10px 0; }
+.tt-section-label { font-size:10px; font-weight:600; color:#aaa; text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; }
+.tt-ward-list { font-size:11.5px; color:#555; line-height:1.9; }
+.tt-ward-row  { display:flex; justify-content:space-between; gap:10px; }
+.tt-ward-val  { font-family:'JetBrains Mono'; color:#888; flex-shrink:0; }
+/* Mobile tooltip hint */
+.tt-tap-hint { font-size:10px; color:#bbb; margin-top:8px; text-align:center; }
 
+/* ── Ranking panel ── */
 #ranking {
   position:fixed; right:0; top:0; bottom:0; width:250px;
   background:rgba(255,255,255,.96); backdrop-filter:blur(10px);
@@ -64,18 +90,19 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 #ranking.hidden { transform:translateX(100%); }
 .rk-title { font-size:11px; font-weight:700; color:#888; margin-bottom:10px; letter-spacing:.08em; text-transform:uppercase; }
 .rk-item  { display:flex; align-items:center; gap:6px; padding:5px 6px; border-radius:5px; cursor:pointer; transition:background .12s; }
-.rk-item:hover { background:rgba(21,87,160,.08); }
+.rk-item:hover, .rk-item.active { background:rgba(21,87,160,.1); }
 .rk-num   { font-family:'JetBrains Mono'; font-size:10px; font-weight:600; color:#ccc; width:18px; text-align:right; flex-shrink:0; }
 .rk-num.gold   { color:#d4a017; }
 .rk-num.silver { color:#999; }
 .rk-num.bronze { color:#b07040; }
-.rk-name  { font-size:11.5px; color:#444; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rk-name  { font-size:11px; color:#444; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .rk-val   { font-family:'JetBrains Mono'; font-size:10px; color:#999; flex-shrink:0; }
 .rk-bar   { width:36px; height:3px; background:#f0f0f0; border-radius:2px; overflow:hidden; flex-shrink:0; }
 .rk-bar-fill { height:100%; border-radius:2px; opacity:.5; }
 
+/* ── Back button ── */
 #back-btn {
-  display:none; position:fixed; top:14px; left:16px; z-index:200;
+  display:none; position:fixed; top:14px; right:16px; z-index:200;
   background:#fff; border:1px solid #ddd; border-radius:8px;
   padding:8px 16px; font-size:13px; font-weight:600; color:#333;
   cursor:pointer; align-items:center; gap:6px;
@@ -85,6 +112,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 #back-btn:hover { background:#f5f5f5; box-shadow:0 3px 12px rgba(0,0,0,.15); }
 #back-btn.visible { display:flex; }
 
+/* ── Zoom label ── */
 #zoom-label {
   display:none; position:fixed; top:16px; left:50%; transform:translateX(-50%);
   z-index:150; background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
@@ -94,6 +122,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 }
 #zoom-label.visible { display:block; }
 
+/* ── Loading overlay ── */
 #status-overlay {
   position:fixed; inset:0; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:14px; z-index:300;
@@ -102,12 +131,17 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 #status-overlay.hidden { display:none; }
 .spinner { width:32px; height:32px; border:3px solid #eee; border-top-color:#1f7a43; border-radius:50%; animation:spin .7s linear infinite; }
 .err-detail { font-size:11px; color:#555; line-height:1.9; text-align:left; max-width:520px; background:#f8f8f8; padding:16px 20px; border-radius:8px; }
-.err-detail code { background:#eee; padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:10.5px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
+/* ── Hint ── */
 #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:10px; color:#ccc; z-index:100; pointer-events:none; white-space:nowrap; }
 
-@media (max-width:720px) { #ranking { display:none; } #header { right:0 !important; } }
+@media (max-width:720px) {
+  #ranking { display:none; }
+  #header  { right:0 !important; }
+  #back-btn { right:10px; top:10px; padding:6px 12px; font-size:12px; }
+  #zoom-label { font-size:13px; padding:5px 14px; max-width:60vw; white-space:normal; text-align:center; }
+}
 </style>
 </head>
 <body>
@@ -124,32 +158,44 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 </div>
 
 <div id="map-container"><svg id="map-svg"></svg></div>
-
 <div class="tooltip" id="tooltip"></div>
 
 <div id="ranking">
-  <div class="rk-title">Population Ranking</div>
+  <div class="rk-title" id="rk-title">Population Ranking</div>
   <div id="rk-list"></div>
 </div>
 
-<button id="back-btn" onclick="zoomOut()">← 全国に戻る</button>
+<button id="back-btn" onclick="zoomOut()">← Back to Japan</button>
 <div id="zoom-label"></div>
-<div id="hint">都道府県をクリックでズームイン &nbsp;|&nbsp; スクロール: ズーム &nbsp;|&nbsp; ドラッグ: 移動</div>
+<div id="hint">Click a prefecture to zoom in &nbsp;|&nbsp; Scroll: zoom &nbsp;|&nbsp; Drag: pan</div>
 
 <div id="status-overlay">
   <div class="spinner" id="spinner"></div>
-  <div id="status-msg">読み込み中…</div>
+  <div id="status-msg">Loading…</div>
   <div class="err-detail" id="err-detail" style="display:none"></div>
 </div>
 
 <script>
+'use strict';
+
 // ══════════════════════════════════════════════════════════
-//  メルカトル投影
+//  Device detection
+// ══════════════════════════════════════════════════════════
+const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const PANEL_W  = (window.innerWidth > 720 && !IS_TOUCH) ? 250 : 0;
+
+if (IS_TOUCH) {
+  document.querySelector('#hint').textContent = 'Tap: tooltip  •  Double-tap: zoom in  •  Pinch: zoom  •  Drag: pan';
+  if (PANEL_W === 0) document.getElementById('ranking').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════
+//  Mercator projection
 // ══════════════════════════════════════════════════════════
 let projScale, projTx, projTy;
 
 function toMerc(lon, lat) {
-  return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI/4 + lat * Math.PI/360))];
+  return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))];
 }
 function project(lon, lat) {
   const [mx, my] = toMerc(lon, lat);
@@ -162,13 +208,13 @@ function fitProjection(features, W, H, padL, padT, padR, padB) {
     const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
     polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
       const [mx, my] = toMerc(lon, lat);
-      if (mx<minX) minX=mx; if (mx>maxX) maxX=mx;
-      if (-my<minY) minY=-my; if (-my>maxY) maxY=-my;
+      if (mx < minX) minX = mx; if (mx > maxX) maxX = mx;
+      if (-my < minY) minY = -my; if (-my > maxY) maxY = -my;
     })));
   });
-  projScale = 0.95 * Math.min((W-padL-padR)/(maxX-minX), (H-padT-padB)/(maxY-minY));
-  projTx = W/2 - projScale*(minX+maxX)/2;
-  projTy = H/2 - projScale*(minY+maxY)/2;
+  projScale = 0.95 * Math.min((W - padL - padR) / (maxX - minX), (H - padT - padB) / (maxY - minY));
+  projTx = W / 2 - projScale * (minX + maxX) / 2;
+  projTy = H / 2 - projScale * (minY + maxY) / 2;
 }
 function featureToPath(feat) {
   const g = feat.geometry;
@@ -177,123 +223,290 @@ function featureToPath(feat) {
   polys.forEach(poly => poly.forEach(ring => {
     const pts = ring.map(([lon, lat]) => project(lon, lat));
     d += `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)} `;
-    for (let i=1; i<pts.length; i++) d += `L ${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)} `;
+    for (let i = 1; i < pts.length; i++) d += `L ${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)} `;
     d += 'Z ';
   }));
   return d.trim();
 }
 
 // ══════════════════════════════════════════════════════════
-//  カラースケール
+//  Color scale
 // ══════════════════════════════════════════════════════════
+const C_LO = [238, 247, 240], C_HI = [31, 122, 67];
 function getColor(v, lo, hi) {
-  const t = Math.pow((v-lo)/(hi-lo), 0.55);
-  const r = c => Math.round(c[0] + (c[1]-c[0])*t);
-  const L = [238,247,240], H = [31,122,67];
-  return `rgb(${r([L[0],H[0]])},${r([L[1],H[1]])},${r([L[2],H[2]])})`;
+  if (hi <= lo) return `rgb(${C_LO.join(',')})`;
+  const t = Math.pow(Math.max(0, Math.min(1, (v - lo) / (hi - lo))), 0.55);
+  return `rgb(${Math.round(C_LO[0] + (C_HI[0] - C_LO[0]) * t)},${Math.round(C_LO[1] + (C_HI[1] - C_LO[1]) * t)},${Math.round(C_LO[2] + (C_HI[2] - C_LO[2]) * t)})`;
 }
 
 // ══════════════════════════════════════════════════════════
-//  ズーム & パン
+//  Zoom & Pan (mouse + touch)
 // ══════════════════════════════════════════════════════════
-const PANEL_W = window.innerWidth <= 720 ? 0 : 250;
 let svgW = window.innerWidth, svgH = window.innerHeight;
 const svgEl = document.getElementById('map-svg');
 svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
 
-let viewX=0, viewY=0, viewScale=1;
-let isDragging=false, didDrag=false, dragSX, dragSY, dragVX, dragVY;
+let viewX = 0, viewY = 0, viewScale = 1;
+let isDragging = false, didDrag = false;
+let dragSX, dragSY, dragVX, dragVY;
 
+function clampView() {
+  const maxOff = Math.max(svgW, svgH) * viewScale * 2.5;
+  viewX = Math.max(-maxOff, Math.min(maxOff + svgW, viewX));
+  viewY = Math.max(-maxOff, Math.min(maxOff + svgH, viewY));
+}
 function applyView() {
+  clampView();
   const g = document.getElementById('map-g');
   if (g) g.setAttribute('transform', `translate(${viewX},${viewY}) scale(${viewScale})`);
 }
+function zoomAt(mx, my, factor) {
+  const newScale = Math.max(0.5, Math.min(40, viewScale * factor));
+  const k = newScale / viewScale;
+  viewX = mx - k * (mx - viewX);
+  viewY = my - k * (my - viewY);
+  viewScale = newScale;
+  applyView();
+}
 
+// Mouse zoom
 svgEl.addEventListener('wheel', e => {
   e.preventDefault();
-  const k = e.deltaY > 0 ? 0.85 : 1.18;
   const rect = svgEl.getBoundingClientRect();
-  const mx = e.clientX-rect.left, my = e.clientY-rect.top;
-  viewX = mx - k*(mx-viewX); viewY = my - k*(my-viewY);
-  viewScale = Math.max(0.4, Math.min(30, viewScale*k));
-  applyView();
-}, { passive:false });
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY > 0 ? 0.85 : 1.18);
+}, { passive: false });
 
+// Mouse pan
 svgEl.addEventListener('mousedown', e => {
-  isDragging=true; didDrag=false;
-  dragSX=e.clientX; dragSY=e.clientY; dragVX=viewX; dragVY=viewY;
-  svgEl.style.cursor='grabbing';
+  isDragging = true; didDrag = false;
+  dragSX = e.clientX; dragSY = e.clientY; dragVX = viewX; dragVY = viewY;
+  svgEl.style.cursor = 'grabbing';
 });
 window.addEventListener('mousemove', e => {
   if (!isDragging) return;
-  const dx=e.clientX-dragSX, dy=e.clientY-dragSY;
-  if (Math.abs(dx)>3||Math.abs(dy)>3) didDrag=true;
-  viewX=dragVX+dx; viewY=dragVY+dy; applyView();
+  const dx = e.clientX - dragSX, dy = e.clientY - dragSY;
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) didDrag = true;
+  viewX = dragVX + dx; viewY = dragVY + dy; applyView();
 });
-window.addEventListener('mouseup', () => { isDragging=false; svgEl.style.cursor=''; });
+window.addEventListener('mouseup', () => { isDragging = false; svgEl.style.cursor = ''; });
+
+// Touch support
+let lastTouchDist = null, lastTouchMid = null;
+let touchStartX, touchStartY, touchStartVX, touchStartVY;
+let touchMoved = false;
+let lastTapTime = 0, lastTapTarget = null;
+
+svgEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    isDragging = true; touchMoved = false;
+    touchStartX = t.clientX; touchStartY = t.clientY;
+    touchStartVX = viewX; touchStartVY = viewY;
+    lastTouchDist = null;
+  } else if (e.touches.length === 2) {
+    isDragging = false;
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    lastTouchDist = Math.hypot(dx, dy);
+    lastTouchMid = {
+      x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+      y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+    };
+  }
+}, { passive: false });
+
+svgEl.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && isDragging) {
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) touchMoved = true;
+    viewX = touchStartVX + dx; viewY = touchStartVY + dy; applyView();
+  } else if (e.touches.length === 2 && lastTouchDist !== null) {
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    const dist = Math.hypot(dx, dy);
+    const mid  = {
+      x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+      y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+    };
+    if (dist > 0) zoomAt(mid.x, mid.y, dist / lastTouchDist);
+    lastTouchDist = dist; lastTouchMid = mid;
+  }
+}, { passive: false });
+
+svgEl.addEventListener('touchend', e => {
+  isDragging = false;
+  if (!touchMoved && e.changedTouches.length === 1) {
+    const t = e.changedTouches[0];
+    const now = Date.now();
+    const target = document.elementFromPoint(t.clientX, t.clientY);
+    const pathEl = target?.closest('path');
+
+    if (now - lastTapTime < 400 && pathEl === lastTapTarget) {
+      // Double-tap → zoom in action
+      hideTip();
+      if (pathEl?.classList.contains('pref-path')) {
+        const id = parseInt(pathEl.dataset.id, 10);
+        zoomIn(id);
+      }
+      lastTapTime = 0; lastTapTarget = null;
+    } else {
+      // Single tap → show tooltip
+      lastTapTime = now; lastTapTarget = pathEl;
+      if (pathEl?.classList.contains('pref-path')) {
+        const id  = parseInt(pathEl.dataset.id, 10);
+        const pop = prefPopMap[id] || {};
+        if (pop.total) {
+          const natTot = window._natTot || 0;
+          const avg    = window._avg    || 0;
+          const maxVal = window._maxVal || 1;
+          const rankMap= window._rankMap || {};
+          showPrefTip({ clientX: t.clientX, clientY: t.clientY }, {
+            nameEn: pop.nameEn, nameJa: pop.nameJa, value: pop.total,
+            rank: rankMap[id], maxVal, natTot, avg
+          }, true);
+        }
+      } else if (pathEl?.classList.contains('city-path')) {
+        const key  = pathEl.dataset.rankkey;
+        const item = window._muniRanked?.find(r => r.rankKey === key);
+        if (item) {
+          const wm = window._wardMap || {};
+          showCityTip({ clientX: t.clientX, clientY: t.clientY },
+            item, window._prefTotal || 0, wm[key] || null, true);
+          // highlight
+          document.querySelectorAll('.city-path').forEach(p => p.classList.add('dimmed'));
+          document.querySelectorAll(`.city-path[data-rankkey="${key}"]`).forEach(p => {
+            p.classList.remove('dimmed'); p.classList.add('highlighted');
+          });
+          setTimeout(() => {
+            document.querySelectorAll('.city-path').forEach(p => { p.classList.remove('dimmed'); p.classList.remove('highlighted'); });
+          }, 2000);
+        }
+      } else {
+        hideTip();
+      }
+    }
+  }
+}, { passive: false });
 
 // ══════════════════════════════════════════════════════════
-//  ツールチップ
+//  Tooltip
 // ══════════════════════════════════════════════════════════
 const tipEl = document.getElementById('tooltip');
 
-function showPrefTip(e, { nameEn, nameJa, value, rank, maxVal, natTot, avg }) {
-  const pct = ((value/maxVal)*100).toFixed(0);
-  const share = ((value/natTot)*100).toFixed(1);
-  const diff = value - avg;
-  const ds = diff>=0 ? `+${diff.toLocaleString()}` : `-${Math.abs(diff).toLocaleString()}`;
+function showPrefTip(e, { nameEn, nameJa, value, rank, maxVal, natTot, avg }, isMobile) {
+  const pct   = ((value / maxVal) * 100).toFixed(0);
+  const share = ((value / natTot) * 100).toFixed(1);
+  const diff  = value - avg;
+  const ds    = diff >= 0 ? `+${diff.toLocaleString()}` : `-${Math.abs(diff).toLocaleString()}`;
   tipEl.innerHTML = `
     <div class="tt-name">${nameEn}</div>
     <div class="tt-name-ja">${nameJa}</div>
     <div class="tt-rank"><span class="num">#${rank}</span></div>
-    <div class="tt-row"><span class="tt-label">Total population</span>
-      <span class="tt-val">${value.toLocaleString()}<span class="unit"> persons</span></span></div>
+    <div class="tt-row">
+      <span class="tt-label">Total population</span>
+      <span class="tt-val">${value.toLocaleString()}<span class="unit"> persons</span></span>
+    </div>
     <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,rgb(238,247,240),rgb(31,122,67))"></div></div>
-    <div class="tt-row" style="margin-top:10px;"><span class="tt-label">Share of national total</span>
-      <span class="tt-val-sm">${share}%</span></div>
-    <div class="tt-row"><span class="tt-label">vs. prefecture average</span>
-      <span class="tt-val-sm" style="color:${diff>=0?'#1f7a43':'#666'}">${ds}</span></div>
-    <div class="tt-note">Source: Statistics Bureau of Japan</div>`;
-  tipEl.classList.add('visible'); moveTip(e);
-}
-function showCityTip(e, nameJa, nameEn, total, share) {
-  tipEl.innerHTML = `
-    <div class="tt-name" style="font-size:15px">${nameJa}</div>
-    <div class="tt-name-ja">${nameEn}</div>
-    <div class="tt-row" style="margin-top:8px;">
-      <span class="tt-label">人口</span>
-      <span class="tt-val">${total.toLocaleString()}<span class="unit"> 人</span></span>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Share of national total</span>
+      <span class="tt-val-sm">${share}%</span>
     </div>
     <div class="tt-row">
-      <span class="tt-label">県内シェア</span>
-      <span class="tt-val-sm">${share}%</span>
-    </div>`;
+      <span class="tt-label">vs. prefecture average</span>
+      <span class="tt-val-sm" style="color:${diff >= 0 ? '#1f7a43' : '#666'}">${ds}</span>
+    </div>
+    <div class="tt-note">Source: Statistics Bureau of Japan</div>
+    ${isMobile ? '<div class="tt-tap-hint">Double-tap to zoom in</div>' : ''}`;
   tipEl.classList.add('visible'); moveTip(e);
 }
+
+function showCityTip(e, item, prefTotal, wardRows, isMobile) {
+  const share = ((item.total / prefTotal) * 100).toFixed(1);
+  let html = `
+    <div class="tt-name" style="font-size:15px">${item.nameEn}</div>
+    <div class="tt-name-ja">${item.nameJa}</div>
+    <div class="tt-row" style="margin-top:8px;">
+      <span class="tt-label">Population</span>
+      <span class="tt-val">${item.total.toLocaleString()}<span class="unit"> persons</span></span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">Share of prefecture</span>
+      <span class="tt-val-sm">${share}%</span>
+    </div>`;
+  if (wardRows && wardRows.length > 0) {
+    html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
+    wardRows.forEach(w => {
+      html += `<div class="tt-ward-row"><span>${w.nameJa}</span><span class="tt-ward-val">${w.total.toLocaleString()}</span></div>`;
+    });
+    html += `</div>`;
+  }
+  tipEl.innerHTML = html;
+  tipEl.classList.add('visible'); moveTip(e);
+}
+
 function moveTip(e) {
-  tipEl.style.left='-9999px'; tipEl.style.top='-9999px';
-  const tw=tipEl.offsetWidth, th=tipEl.offsetHeight, gap=20;
-  let x=e.clientX+gap, y=e.clientY+gap;
-  if (x+tw>svgW-12) x=e.clientX-gap-tw;
-  if (y+th>svgH-12) y=e.clientY-gap-th;
-  tipEl.style.left=Math.max(12,x)+'px'; tipEl.style.top=Math.max(12,y)+'px';
+  tipEl.style.left = '-9999px'; tipEl.style.top = '-9999px';
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight, gap = 20;
+  let x = (e.clientX || 0) + gap, y = (e.clientY || 0) + gap;
+  if (x + tw > svgW - 12) x = (e.clientX || 0) - gap - tw;
+  if (y + th > svgH - 12) y = (e.clientY || 0) - gap - th;
+  tipEl.style.left = Math.max(12, x) + 'px';
+  tipEl.style.top  = Math.max(12, y) + 'px';
 }
 function hideTip() { tipEl.classList.remove('visible'); }
 
 // ══════════════════════════════════════════════════════════
-//  ランキングパネル
+//  Ward-to-city mapping (name-based, works for all city codes)
+// ══════════════════════════════════════════════════════════
+function buildWardToCityMap(muniPop) {
+  // Build map of city nameJa → code
+  const cityByName = {};
+  Object.entries(muniPop).forEach(([code, d]) => {
+    const name = d.nameJa;
+    if (name.endsWith('市') && !name.includes('区') && !name.includes('郡')) {
+      cityByName[name] = code;
+    }
+  });
+
+  // For each ward entry (contains 区), find its parent city
+  const wardToCity = {};
+  Object.entries(muniPop).forEach(([code, d]) => {
+    if (!d.nameJa.includes('区')) return;
+    // Tokyo special wards (13101-13123): independent, no parent city
+    const prefCode = code.slice(0, 2);
+    const num = parseInt(code.slice(2), 10);
+    if (prefCode === '13' && num >= 101 && num <= 123) return;
+
+    // Find parent city by matching city name as prefix
+    for (const [cityName, cityCode] of Object.entries(cityByName)) {
+      if (d.nameJa.startsWith(cityName)) {
+        wardToCity[code] = cityCode;
+        break;
+      }
+    }
+  });
+
+  return wardToCity;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Ranking panels
 // ══════════════════════════════════════════════════════════
 let prefFeatMap = {}, prefPopMap = {};
 
-function renderRanking(ranked, maxVal) {
+function renderPrefRanking(ranked, maxVal) {
+  document.getElementById('rk-title').textContent = 'Population Ranking';
   const list = document.getElementById('rk-list');
   list.innerHTML = ranked.map((p, i) => {
-    const pct = (p.value/maxVal*100).toFixed(0);
-    const nc  = i===0?'rk-num gold':i===1?'rk-num silver':i===2?'rk-num bronze':'rk-num';
+    const pct = (p.value / maxVal * 100).toFixed(0);
+    const nc  = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
     return `<div class="rk-item" data-id="${p.id}">
-      <span class="${nc}">${i+1}</span>
+      <span class="${nc}">${i + 1}</span>
       <span class="rk-name">${p.nameEn}</span>
-      <span class="rk-val">${p.value.toLocaleString()}</span>
+      <span class="rk-val">${(p.value / 10000).toFixed(0)}万</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%;background:rgb(31,122,67)"></span></span>
     </div>`;
   }).join('');
@@ -303,212 +516,325 @@ function renderRanking(ranked, maxVal) {
     el.addEventListener('mouseenter', () => {
       if (zoomedId !== null) return;
       document.querySelectorAll(`.pref-path[data-id="${id}"]`)
-        .forEach(p => p.style.filter='brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,.25))');
-      el.style.background = 'rgba(21,87,160,.15)';
+        .forEach(p => p.style.filter = 'brightness(1.12) drop-shadow(0 2px 8px rgba(0,0,0,.25))');
+      el.classList.add('active');
     });
     el.addEventListener('mouseleave', () => {
-      document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => p.style.filter='');
-      el.style.background = '';
+      document.querySelectorAll(`.pref-path[data-id="${id}"]`).forEach(p => p.style.filter = '');
+      el.classList.remove('active');
     });
-    el.addEventListener('click', () => {
-      if (prefFeatMap[id] && prefPopMap[id]) zoomIn(id);
-    });
+    el.addEventListener('click', () => { if (prefFeatMap[id]) zoomIn(id); });
   });
 }
-function highlightRank(id) {
-  document.querySelectorAll('.rk-item').forEach(el => {
-    const a = +el.dataset.id===id;
-    el.style.background = a ? 'rgba(21,87,160,.15)' : '';
-    if (a) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+function renderMuniRanking(ranked, maxVal, prefTotal, wardMap) {
+  document.getElementById('rk-title').textContent = 'Municipality Ranking';
+  const list = document.getElementById('rk-list');
+  list.innerHTML = ranked.map((item, i) => {
+    const pct = (item.total / maxVal * 100).toFixed(0);
+    const nc  = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
+    return `<div class="rk-item" data-key="${item.rankKey}">
+      <span class="${nc}">${i + 1}</span>
+      <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
+      <span class="rk-val">${item.total.toLocaleString()}</span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%;background:rgb(31,122,67)"></span></span>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.rk-item').forEach(el => {
+    const key  = el.dataset.key;
+    const item = ranked.find(r => r.rankKey === key);
+    el.addEventListener('mouseenter', e => {
+      document.querySelectorAll('.city-path').forEach(p => p.classList.add('dimmed'));
+      document.querySelectorAll(`.city-path[data-rankkey="${key}"]`).forEach(p => {
+        p.classList.remove('dimmed'); p.classList.add('highlighted');
+      });
+      el.classList.add('active');
+      if (item) showCityTip(e, item, prefTotal, wardMap[key] || null);
+    });
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', () => {
+      document.querySelectorAll('.city-path').forEach(p => { p.classList.remove('dimmed'); p.classList.remove('highlighted'); });
+      el.classList.remove('active');
+      hideTip();
+    });
   });
-}
-function clearRankHighlight() {
-  document.querySelectorAll('.rk-item').forEach(el => el.style.background='');
 }
 
 // ══════════════════════════════════════════════════════════
-//  ズームイン / アウト
+//  Zoom In / Out
 // ══════════════════════════════════════════════════════════
 let zoomedId = null, cityLayerG = null;
 const cityCache = {};
 
+// Name override table (code → override fields)
+const NAME_OVERRIDES = {
+  '22429': { nameEn: 'Kawanehoncho Town' }
+};
+
 async function zoomIn(id) {
-  if (zoomedId === id) return;
+  // Allow direct switch between prefectures
+  if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
   zoomedId = id;
   hideTip();
 
-  const pop  = prefPopMap[id];
+  const pop  = prefPopMap[id] || {};
   const feat = prefFeatMap[id];
-  const code = String(id).padStart(2,'0');
+  const code = String(id).padStart(2, '0');
 
-  // UI 切り替え
+  // UI
   document.getElementById('back-btn').classList.add('visible');
-  document.getElementById('zoom-label').textContent = `${pop.nameJa}　${pop.nameEn}`;
+  document.getElementById('zoom-label').textContent = `${pop.nameEn} / ${pop.nameJa}`;
   document.getElementById('zoom-label').classList.add('visible');
-  document.getElementById('hint').style.opacity = '0';
-  document.getElementById('ranking').classList.add('hidden');
-  document.getElementById('header').style.right = '0';
+  document.getElementById('hint').textContent = IS_TOUCH
+    ? 'Tap another prefecture to switch  •  Double-tap: zoom in  •  Drag: pan'
+    : 'Click another prefecture to switch  |  Scroll: zoom  |  Drag: pan';
+  document.getElementById('header').style.right = PANEL_W + 'px';
+  if (PANEL_W > 0) document.getElementById('ranking').classList.remove('hidden');
 
-  // 全国pathをdim・非インタラクティブに
+  // Dim pref paths
   document.querySelectorAll('.pref-path').forEach(p => {
-    p.style.opacity = '0.18';
-    p.style.pointerEvents = 'none';
+    p.style.opacity = '0.18'; p.style.pointerEvents = 'none';
   });
 
-  // 対象県にフィット
+  // Fit view to prefecture bbox
   const geom = feat.geometry;
-  const polys = geom.type==='Polygon' ? [geom.coordinates] : geom.coordinates;
-  let lo=Infinity, hi=-Infinity, la=Infinity, lb=-Infinity;
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+  let lo = Infinity, hi = -Infinity, la = Infinity, lb = -Infinity;
   polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
-    if (lon<lo) lo=lon; if (lon>hi) hi=lon;
-    if (lat<la) la=lat; if (lat>lb) lb=lat;
+    if (lon < lo) lo = lon; if (lon > hi) hi = lon;
+    if (lat < la) la = lat; if (lat > lb) lb = lat;
   })));
-  const [x0,y0] = project(lo, lb);
-  const [x1,y1] = project(hi, la);
-  const PAD = 80;
-  const fs = Math.min((svgW-PAD*2)/(x1-x0), (svgH-PAD*2)/(y1-y0)) * 0.88;
-  viewScale = fs;
-  viewX = svgW/2 - fs*(x0+x1)/2;
-  viewY = svgH/2 - fs*(y0+y1)/2;
+  const [x0, y0] = project(lo, lb);
+  const [x1, y1] = project(hi, la);
+  const PAD = IS_TOUCH ? 40 : 80;
+  const availW = svgW - PANEL_W - PAD * 2;
+  const availH = svgH - PAD * 2;
+  const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * 0.88;
+  viewScale = Math.min(fs, 40);
+  viewX = (svgW - PANEL_W) / 2 - viewScale * (x0 + x1) / 2;
+  viewY = svgH / 2 - viewScale * (y0 + y1) / 2;
   applyView();
 
-  // 既存の市区町村レイヤーを削除
-  if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
-
-  // GeoJSONと人口データを並列fetch（キャッシュ付き）
+  // Fetch GeoJSON + muni population (parallel, cached)
   const geoKey  = `geo_${code}`;
   const muniKey = `muni_${code}`;
   try {
     const fetches = [];
-    if (!cityCache[geoKey])  fetches.push(fetch(`geo-json/pref_${code}.geojson`).then(r=>r.json()).then(d=>{cityCache[geoKey]=d;}));
-    if (!cityCache[muniKey]) fetches.push(fetch(`population-json/municipalities/muni-pop-${code}.json`).then(r=>r.json()).then(d=>{cityCache[muniKey]=d;}));
+    if (!cityCache[geoKey])  fetches.push(fetch(`geo-json/pref_${code}.geojson`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[geoKey] = d; }));
+    if (!cityCache[muniKey]) fetches.push(fetch(`population-json/municipalities/muni-pop-${code}.json`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[muniKey] = d; }));
     await Promise.all(fetches);
-  } catch(e) {
-    console.warn('fetch失敗:', e);
-    return;
+  } catch (e) {
+    console.warn('Fetch failed:', e); return;
   }
 
-  const cityGeo  = cityCache[geoKey];
-  const muniPop  = cityCache[muniKey];  // { "01101": { total, nameJa, ... }, ... }
+  const cityGeo = cityCache[geoKey];
+  const muniPop = { ...cityCache[muniKey] };  // shallow copy
 
-  // 市区町村の人口範囲を計算
-  const muniVals = Object.values(muniPop).map(d => d.total).filter(Boolean);
-  const muniMin  = Math.min(...muniVals);
-  const muniMax  = Math.max(...muniVals);
+  // Apply name overrides
+  Object.entries(NAME_OVERRIDES).forEach(([c, ov]) => {
+    if (muniPop[c]) muniPop[c] = { ...muniPop[c], ...ov };
+  });
 
-  // 市区町村パスを描画（人口で色分け）
+  const prefTotal = pop.total || 0;
+  const wardToCity = buildWardToCityMap(muniPop);
+
+  // Determine rankKey for each code
+  function getRankKey(code) {
+    // Tokyo special wards: individual
+    const prefCode = code.slice(0, 2);
+    const num = parseInt(code.slice(2), 10);
+    if (prefCode === '13' && num >= 101 && num <= 123) return code;
+    // Has parent city?
+    if (wardToCity[code]) return wardToCity[code];
+    // Is a city aggregate (not a GeoJSON polygon) — skip
+    return code;
+  }
+
+  // Build rank items
+  // Keys that have their own polygon in GeoJSON
+  const geoCodes = new Set(cityGeo.features.map(f => f.properties?.code));
+
+  // Collect all rankable items
+  const rankItemMap = {};
+  const wardMap     = {};   // cityCode → [{nameJa, total}]
+
+  Object.entries(muniPop).forEach(([c, d]) => {
+    const key = getRankKey(c);
+
+    // If this is a ward (key ≠ c), contribute to the city entry
+    if (key !== c) {
+      if (!rankItemMap[key] && muniPop[key]) {
+        rankItemMap[key] = {
+          rankKey: key,
+          nameEn:  muniPop[key].nameEn,
+          nameJa:  muniPop[key].nameJa,
+          total:   muniPop[key].total || 0,
+        };
+      }
+      if (!wardMap[key]) wardMap[key] = [];
+      wardMap[key].push({ nameJa: d.nameJa, total: d.total });
+      return;
+    }
+
+    // Skip city-aggregate entries that have no own polygon (e.g. 22100, 22130)
+    if (!geoCodes.has(c)) return;
+
+    if (!rankItemMap[key]) {
+      rankItemMap[key] = { rankKey: key, nameEn: d.nameEn, nameJa: d.nameJa, total: d.total || 0 };
+    }
+  });
+
+  // Sort ward lists desc
+  Object.values(wardMap).forEach(arr => arr.sort((a, b) => b.total - a.total));
+
+  const ranked = Object.values(rankItemMap)
+    .filter(item => item.total > 0)
+    .sort((a, b) => b.total - a.total);
+  const rankMax = ranked[0]?.total || 1;
+
+  // Color scale
+  const vals = ranked.map(r => r.total);
+  const muniMin = Math.min(...vals), muniMax = Math.max(...vals);
+
+  // rankKey → color
+  const rkColor = {};
+  ranked.forEach(item => { rkColor[item.rankKey] = getColor(item.total, muniMin, muniMax); });
+
+  // Store for touch events
+  window._muniRanked = ranked;
+  window._wardMap    = wardMap;
+  window._prefTotal  = prefTotal;
+
+  // Draw municipality paths
   const mapG = document.getElementById('map-g');
   cityLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   cityLayerG.id = 'city-layer';
 
   cityGeo.features.forEach(f => {
-    const mcode = f.properties?.code || '';
-    const mdata = muniPop[mcode];
-    const color = mdata ? getColor(mdata.total, muniMin, muniMax) : '#e8e8e8';
+    const mcode   = f.properties?.code || '';
+    const rankKey = getRankKey(mcode);
+    const color   = rkColor[rankKey] || '#e0e0e0';
+    const item    = rankItemMap[rankKey];
 
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     p.setAttribute('d', featureToPath(f));
     p.setAttribute('fill', color);
     p.setAttribute('fill-rule', 'evenodd');
     p.setAttribute('class', 'city-path');
+    p.setAttribute('data-rankkey', rankKey);
 
-    if (mdata) {
-      const share = ((mdata.total / pop.total) * 100).toFixed(1);
-      p.addEventListener('mouseenter', e => showCityTip(e, mdata.nameJa, mdata.nameEn, mdata.total, share));
+    if (item && !IS_TOUCH) {
+      p.addEventListener('mouseenter', e => {
+        document.querySelectorAll('.city-path').forEach(el => el.classList.add('dimmed'));
+        document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
+          el.classList.remove('dimmed'); el.classList.add('highlighted');
+        });
+        document.querySelectorAll('.rk-item').forEach(el => el.classList.toggle('active', el.dataset.key === rankKey));
+        showCityTip(e, item, prefTotal, wardMap[rankKey] || null);
+      });
       p.addEventListener('mousemove', moveTip);
-      p.addEventListener('mouseleave', hideTip);
+      p.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.city-path').forEach(el => { el.classList.remove('dimmed'); el.classList.remove('highlighted'); });
+        document.querySelectorAll('.rk-item').forEach(el => el.classList.remove('active'));
+        hideTip();
+      });
     }
     cityLayerG.appendChild(p);
   });
 
   mapG.appendChild(cityLayerG);
+
+  // Render ranking
+  if (PANEL_W > 0) renderMuniRanking(ranked, rankMax, prefTotal, wardMap);
 }
 
 function zoomOut() {
   if (zoomedId === null) return;
   zoomedId = null;
   hideTip();
+  window._muniRanked = null; window._wardMap = null; window._prefTotal = 0;
 
-  // UI 復元
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('zoom-label').classList.remove('visible');
-  document.getElementById('hint').style.opacity = '';
-  document.getElementById('ranking').classList.remove('hidden');
+  document.getElementById('hint').textContent = IS_TOUCH
+    ? 'Double-tap to zoom in  •  Pinch: zoom  •  Drag: pan'
+    : 'Click a prefecture to zoom in  |  Scroll: zoom  |  Drag: pan';
   document.getElementById('header').style.right = PANEL_W + 'px';
 
-  // pathを復元
-  document.querySelectorAll('.pref-path').forEach(p => {
-    p.style.opacity = ''; p.style.pointerEvents = '';
-  });
-
-  // 市区町村レイヤーを削除
+  document.querySelectorAll('.pref-path').forEach(p => { p.style.opacity = ''; p.style.pointerEvents = ''; });
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
 
-  // 全国表示に戻す
-  viewX=0; viewY=0; viewScale=1; applyView();
+  viewX = 0; viewY = 0; viewScale = 1; applyView();
+  if (window._renderPrefRanking) window._renderPrefRanking();
 }
 
 // ══════════════════════════════════════════════════════════
-//  INIT
+//  Init
 // ══════════════════════════════════════════════════════════
 function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
 function hideOverlay()  { document.getElementById('status-overlay').classList.add('hidden'); }
 function showError(msg) {
   document.getElementById('spinner').style.display = 'none';
-  document.getElementById('status-msg').textContent = '⚠️ エラー';
-  const d = document.getElementById('err-detail');
-  d.innerHTML = msg; d.style.display = 'block';
+  document.getElementById('status-msg').textContent = '⚠️ Error';
+  const d = document.getElementById('err-detail'); d.innerHTML = msg; d.style.display = 'block';
 }
 
 async function init() {
-  // ① 人口データ fetch
-  setStatus('人口データを読み込み中…');
+  // ① Prefecture population
+  setStatus('Loading population data…');
   let POP_DATA;
   try {
     const r = await fetch('population-json/pref-pop.json');
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     POP_DATA = await r.json();
-  } catch(e) {
-    showError(`<b>population-json/pref-pop.json</b> が読み込めませんでした。<br>エラー: ${e.message}`);
-    return;
+  } catch (e) {
+    showError(`Could not load <b>population-json/pref-pop.json</b><br>${e.message}`); return;
   }
 
-  for (const [code, d] of Object.entries(POP_DATA)) prefPopMap[parseInt(code,10)] = d;
+  Object.entries(POP_DATA).forEach(([code, d]) => { prefPopMap[parseInt(code, 10)] = d; });
 
-  const ranked  = Object.entries(POP_DATA)
-    .map(([c,d]) => ({ id:parseInt(c,10), nameEn:d.nameEn, value:d.total }))
-    .sort((a,b) => b.value-a.value);
-  const maxVal  = ranked[0].value;
-  const minVal  = ranked[ranked.length-1].value;
-  const natTot  = ranked.reduce((s,p)=>s+p.value, 0);
-  const avg     = Math.round(natTot/47);
+  const ranked = Object.entries(POP_DATA)
+    .map(([c, d]) => ({ id: parseInt(c, 10), nameEn: d.nameEn, value: d.total }))
+    .sort((a, b) => b.value - a.value);
+  const maxVal = ranked[0].value;
+  const minVal = ranked[ranked.length - 1].value;
+  const natTot = ranked.reduce((s, p) => s + p.value, 0);
+  const avg    = Math.round(natTot / 47);
   const rankMap = {};
-  ranked.forEach((p,i) => rankMap[p.id]=i+1);
+  ranked.forEach((p, i) => { rankMap[p.id] = i + 1; });
 
-  renderRanking(ranked, maxVal);
+  // Store for touch
+  window._natTot  = natTot;
+  window._avg     = avg;
+  window._maxVal  = maxVal;
+  window._rankMap = rankMap;
+
+  window._renderPrefRanking = () => renderPrefRanking(ranked, maxVal);
+  if (PANEL_W > 0) window._renderPrefRanking();
+
   document.getElementById('colorBar').style.background = 'linear-gradient(90deg,rgb(238,247,240),rgb(31,122,67))';
   document.getElementById('minLabel').textContent = minVal.toLocaleString();
   document.getElementById('maxLabel').textContent = maxVal.toLocaleString();
 
-  // ② japan.geojson fetch
-  setStatus('地図データを読み込み中…');
+  // ② Japan GeoJSON
+  setStatus('Loading map data…');
   let japanGeo;
   try {
     const r = await fetch('geo-json/japan.geojson');
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     japanGeo = await r.json();
-  } catch(e) {
-    showError(`<b>geo-json/japan.geojson</b> が読み込めませんでした。<br>エラー: ${e.message}`);
-    return;
+  } catch (e) {
+    showError(`Could not load <b>geo-json/japan.geojson</b><br>${e.message}`); return;
   }
 
   const allFeats = japanGeo.features.filter(f => f?.geometry);
-  if (!allFeats.length) { showError('japan.geojson にデータがありません。'); return; }
+  if (!allFeats.length) { showError('No features in japan.geojson'); return; }
 
-  // ③ 投影設定
-  fitProjection(allFeats, svgW, svgH, 18, 88, 18+PANEL_W, 18);
+  // ③ Projection
+  fitProjection(allFeats, svgW, svgH, 18, 88, 18 + PANEL_W, 18);
 
-  // ④ 描画
+  // ④ Draw prefecture paths
   const mapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   mapG.id = 'map-g';
   svgEl.appendChild(mapG);
@@ -521,27 +847,28 @@ async function init() {
 
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', featureToPath(feat));
-    pathEl.setAttribute('fill', getColor(pop.total||0, minVal, maxVal));
+    pathEl.setAttribute('fill', getColor(pop.total || 0, minVal, maxVal));
     pathEl.setAttribute('fill-rule', 'evenodd');
     pathEl.setAttribute('class', 'pref-path');
     pathEl.setAttribute('data-id', id);
 
-    pathEl.addEventListener('mouseenter', e => {
-      if (zoomedId !== null) return;
-      pathEl.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,.3))';
-      showPrefTip(e, { nameEn:pop.nameEn, nameJa:pop.nameJa, value:pop.total,
-        rank:rankMap[id], maxVal, natTot, avg });
-      highlightRank(id);
-    });
-    pathEl.addEventListener('mousemove', e => { if (zoomedId===null) moveTip(e); });
-    pathEl.addEventListener('mouseleave', () => {
-      if (zoomedId !== null) return;
-      pathEl.style.filter=''; hideTip(); clearRankHighlight();
-    });
-    pathEl.addEventListener('click', () => {
-      if (didDrag) return;
-      zoomIn(id);
-    });
+    if (!IS_TOUCH) {
+      pathEl.addEventListener('mouseenter', e => {
+        if (zoomedId !== null) return;
+        pathEl.style.filter = 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,.3))';
+        showPrefTip(e, { nameEn: pop.nameEn, nameJa: pop.nameJa, value: pop.total,
+          rank: rankMap[id], maxVal, natTot, avg });
+        document.querySelectorAll('.rk-item').forEach(el => el.classList.toggle('active', +el.dataset.id === id));
+        document.querySelectorAll('.rk-item.active').forEach(el => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+      });
+      pathEl.addEventListener('mousemove', e => { if (zoomedId === null) moveTip(e); });
+      pathEl.addEventListener('mouseleave', () => {
+        if (zoomedId !== null) return;
+        pathEl.style.filter = ''; hideTip();
+        document.querySelectorAll('.rk-item').forEach(el => el.classList.remove('active'));
+      });
+      pathEl.addEventListener('click', () => { if (!didDrag) zoomIn(id); });
+    }
 
     mapG.appendChild(pathEl);
   });
@@ -550,8 +877,8 @@ async function init() {
 }
 
 window.addEventListener('resize', () => {
-  svgW=window.innerWidth; svgH=window.innerHeight;
-  svgEl.setAttribute('width',svgW); svgEl.setAttribute('height',svgH);
+  svgW = window.innerWidth; svgH = window.innerHeight;
+  svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
 });
 
 init();
