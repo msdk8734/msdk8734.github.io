@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAGE VIEW RANKING — JABC Q4 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root {
+    --bg:        #0b0b0b;
+    --bg2:       #131313;
+    --bg3:       #1a1a1a;
+    --bg4:       #222222;
+    --border:    #282828;
+    --border2:   #343434;
+    --text:      #dedad0;
+    --muted:     #696860;
+    --muted2:    #454440;
+    --own:       #c8a97e;
+    --own-dk:    #8c6f4e;
+    --ext:       #7a8c82;
+    --ext-dk:    #4e6058;
+    --uu:        #9e8fa8;
+    --uu-dk:     #6b5e75;
+    --accent:    #d4c4a0;
+    --font-head:    'Syne', sans-serif;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    padding: 36px 32px 64px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header-title h1 {
+    font-family: var(--font-display);
+    font-size: 72px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .rule-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+    min-width: 40px;
+  }
+  .rank-badge {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--own);
+    border: 1px solid var(--own-dk);
+    padding: 5px 14px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .header-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .header-meta p {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+  .period {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── METRIC CARDS ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .metric {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    position: relative;
+  }
+  .metric::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    border-radius: 0 0 6px 6px;
+  }
+  .metric.m-own::after  { background: var(--own); }
+  .metric.m-ext::after  { background: var(--ext); }
+  .metric.m-uu::after   { background: var(--uu); }
+  .metric.m-dep::after  { background: var(--accent); }
+  .metric .m-label {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .metric .m-value {
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+  .metric.m-own  .m-value { color: var(--own); }
+  .metric.m-ext  .m-value { color: var(--ext); }
+  .metric.m-uu   .m-value { color: var(--uu); }
+  .metric.m-dep  .m-value { color: var(--accent); }
+  .metric .m-sub {
+    font-size: 9px;
+    color: var(--muted2);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .panel-title {
+    font-family: var(--font-head);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .legend { display: flex; gap: 16px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .legend-dot { width: 20px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+
+  /* ── SVG ── */
+  .chart-svg-wrap { width: 100%; overflow: visible; }
+  svg { display: block; overflow: visible; }
+  .axis text { fill: #4a4944; font-family: 'DM Mono', monospace; font-size: 10px; }
+  .axis path, .axis line { stroke: #252525; stroke-width: 0.5; }
+  .axis.axis--x path { display: none; }
+  .grid line { stroke: #1d1d1d; stroke-width: 0.5; stroke-dasharray: 2 6; }
+  .grid path { display: none; }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #161616;
+    border: 1px solid #2e2e2e;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    min-width: 248px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.75);
+  }
+  .tooltip.visible { opacity: 1; }
+  .tt-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #242424;
+  }
+  .tt-jp { color: var(--muted); font-size: 10px; font-weight: 400; margin-left: 7px; }
+  .tt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5px 0;
+    gap: 16px;
+  }
+  .tt-key { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+  .tt-swatch { width: 14px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+  .tt-val { font-weight: 500; color: var(--text); font-size: 11px; }
+  .tt-sub { font-size: 9px; color: var(--muted2); text-align: right; }
+  .tt-divider { border: none; border-top: 1px solid #242424; margin: 8px 0; }
+  .tt-total { display: flex; justify-content: space-between; color: var(--accent); font-size: 11px; font-weight: 500; }
+  .tt-ratio { font-size: 9px; color: var(--muted2); text-align: right; margin-top: 2px; }
+
+  /* ── BAR HOVER ── */
+  .bar-own, .bar-ext, .bar-uu {
+    cursor: crosshair;
+    transition: filter 0.12s ease;
+  }
+  .bar-own:hover, .bar-ext:hover, .bar-uu:hover {
+    filter: brightness(1.35) saturate(1.1);
+  }
+
+  /* ── RANK NUMBERS ── */
+  .rank-num {
+    font-family: 'Bebas Neue', sans-serif;
+    fill: #272724;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 9px;
+    color: var(--muted2);
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Japan Audit Bureau of Circulations — Web Index</div>
+  <div class="header-title">
+    <h1>PAGE VIEW<br>RANKING</h1>
+    <div class="rule-line"></div>
+    <div class="rank-badge">Top 10 Media</div>
+  </div>
+  <div class="header-meta">
+    <p>
+      Ranked by total monthly page views (own-site + external distribution)<br>
+      Own-Site PV &nbsp;·&nbsp; External PV via Yahoo! News, SmartNews, LINE, Gunosy, TRILL &nbsp;·&nbsp; Unique Users
+    </p>
+    <div class="period">OCT – DEC 2025</div>
+  </div>
+</div>
+
+<div class="metrics">
+  <div class="metric m-own">
+    <div class="m-label">Top 10 Own-Site PV</div>
+    <div class="m-value" id="stat-own">—</div>
+    <div class="m-sub">monthly avg. total</div>
+  </div>
+  <div class="metric m-ext">
+    <div class="m-label">Top 10 External PV</div>
+    <div class="m-value" id="stat-ext">—</div>
+    <div class="m-sub">monthly avg. total</div>
+  </div>
+  <div class="metric m-uu">
+    <div class="m-label">Top 10 Unique Users</div>
+    <div class="m-value" id="stat-uu">—</div>
+    <div class="m-sub">monthly avg. total</div>
+  </div>
+  <div class="metric m-dep">
+    <div class="m-label">Avg. External Dependency</div>
+    <div class="m-value" id="stat-dep">—</div>
+    <div class="m-sub">ext. PV ÷ total PV</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Own-Site PV vs. External PV — ranked by total PV</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--own)"></div>Own-Site PV</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ext)"></div>External PV</div>
+    </div>
+  </div>
+  <div class="chart-svg-wrap" id="stacked-chart"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div class="panel-title">Unique Users (Own-Site) — ranked by UU</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--uu)"></div>Unique Users</div>
+    </div>
+  </div>
+  <div class="chart-svg-wrap" id="uu-chart"></div>
+</div>
+
+<div class="footer">
+  <span>Source: Japan Audit Bureau of Circulations (JABC) — publicly released data, Oct–Dec 2025 quarterly average</span>
+  <span>Own-Site PV: pages viewed on publisher's own domain &nbsp;·&nbsp; External PV: aggregated distribution platform views</span>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const raw = [
+  { name: "Bunshun Online",      jpName: "文春オンライン",      ownPV: 207669748, extPV: 193887019, uu: 26039802 },
+  { name: "Daily Shincho",       jpName: "デイリー新潮",        ownPV: 48859886,  extPV: 211596616, uu: 10548250 },
+  { name: "NEWS Post Seven",     jpName: "NEWSポストセブン",    ownPV: 146143909, extPV: 156639113, uu: 19566522 },
+  { name: "Toyo Keizai Online",  jpName: "東洋経済オンライン",  ownPV: 82246327,  extPV: 76173100,  uu: 14150419 },
+  { name: "Web Josei Jishin",    jpName: "WEB女性自身",         ownPV: 73666054,  extPV: 164371265, uu: 16112456 },
+  { name: "PRESIDENT Online",    jpName: "PRESIDENT Online",    ownPV: 66444962,  extPV: 167187509, uu: 12341095 },
+  { name: "Smart FLASH",         jpName: "Smart FLASH",         ownPV: 66764804,  extPV: 143782773, uu: 13352663 },
+  { name: "Gendai Business",     jpName: "現代ビジネス",        ownPV: 72443595,  extPV: 559675,    uu: 11920731 },
+  { name: "Shuukan Josei PRIME", jpName: "週刊女性PRIME",       ownPV: 34956918,  extPV: 120499101, uu: 15126531 },
+  { name: "AERA DIGITAL",        jpName: "AERA DIGITAL",        ownPV: 41914402,  extPV: 81141434,  uu: 9353926  },
+];
+
+const data = raw
+  .map(d => ({ ...d, total: d.ownPV + d.extPV }))
+  .sort((a, b) => b.total - a.total);
+
+const sumOwn = d3.sum(data, d => d.ownPV);
+const sumExt = d3.sum(data, d => d.extPV);
+const sumUU  = d3.sum(data, d => d.uu);
+const avgDep = d3.mean(data, d => d.extPV / d.total);
+
+function fmtBig(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e8) return (n / 1e8).toFixed(1) + '00M';
+  if (n >= 1e7) return (n / 1e7).toFixed(1) + '0M';
+  return (n / 1e6).toFixed(1) + 'M';
+}
+function fmtExact(n) { return n.toLocaleString('en-US'); }
+function fmtPct(n)   { return (n * 100).toFixed(1) + '%'; }
+
+document.getElementById('stat-own').textContent = fmtBig(sumOwn);
+document.getElementById('stat-ext').textContent = fmtBig(sumExt);
+document.getElementById('stat-uu').textContent  = fmtBig(sumUU);
+document.getElementById('stat-dep').textContent = fmtPct(avgDep);
+
+// ── TOOLTIP ──
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, d) {
+  const extPct = fmtPct(d.extPV / d.total);
+  const ownPct = fmtPct(d.ownPV / d.total);
+  tooltip.innerHTML = `
+    <div class="tt-name">${d.name}<span class="tt-jp">${d.jpName}</span></div>
+    <div class="tt-row">
+      <span class="tt-key"><span class="tt-swatch" style="background:#c8a97e"></span>Own-Site PV</span>
+      <span class="tt-val">${fmtExact(d.ownPV)}</span>
+    </div>
+    <div class="tt-row"><span></span><span class="tt-sub">${ownPct} of total PV</span></div>
+    <div class="tt-row" style="margin-top:3px">
+      <span class="tt-key"><span class="tt-swatch" style="background:#7a8c82"></span>External PV</span>
+      <span class="tt-val">${fmtExact(d.extPV)}</span>
+    </div>
+    <div class="tt-row"><span></span><span class="tt-sub">${extPct} — external dependency</span></div>
+    <div class="tt-divider"></div>
+    <div class="tt-total"><span>Total PV</span><span>${fmtExact(d.total)}</span></div>
+    <div class="tt-row" style="margin-top:10px">
+      <span class="tt-key"><span class="tt-swatch" style="background:#9e8fa8"></span>Unique Users</span>
+      <span class="tt-val">${fmtExact(d.uu)}</span>
+    </div>
+    <div class="tt-ratio">PV / UU ratio: ${(d.total / d.uu).toFixed(1)}×</div>
+  `;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+
+function showUUTooltip(e, d) {
+  tooltip.innerHTML = `
+    <div class="tt-name">${d.name}<span class="tt-jp">${d.jpName}</span></div>
+    <div class="tt-row">
+      <span class="tt-key"><span class="tt-swatch" style="background:#9e8fa8"></span>Unique Users</span>
+      <span class="tt-val">${fmtExact(d.uu)}</span>
+    </div>
+    <div class="tt-divider"></div>
+    <div class="tt-row">
+      <span class="tt-key"><span class="tt-swatch" style="background:#c8a97e"></span>Own-Site PV</span>
+      <span class="tt-val">${fmtExact(d.ownPV)}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-key"><span class="tt-swatch" style="background:#7a8c82"></span>External PV</span>
+      <span class="tt-val">${fmtExact(d.extPV)}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-key"><span class="tt-swatch" style="background:transparent;border:1px solid #343434"></span>Total PV</span>
+      <span class="tt-val">${fmtExact(d.total)}</span>
+    </div>
+    <div class="tt-ratio">PV / UU ratio: ${(d.total / d.uu).toFixed(1)}×</div>
+  `;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  const tw = 260, th = 210;
+  let x = e.clientX + 16;
+  let y = e.clientY - 16;
+  if (x + tw > window.innerWidth - 12) x = e.clientX - tw - 16;
+  if (y + th > window.innerHeight - 12) y = e.clientY - th + 16;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+document.addEventListener('mousemove', e => {
+  if (tooltip.classList.contains('visible')) moveTooltip(e);
+});
+
+// ── ANIMATION HELPER ──
+function easeCubicOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+function growBars(bars, widthFn, delay, duration, onDone) {
+  const t0 = performance.now() + delay;
+  function frame(now) {
+    const elapsed = now - t0;
+    if (elapsed < 0) { requestAnimationFrame(frame); return; }
+    const p = Math.min(elapsed / duration, 1);
+    const e = easeCubicOut(p);
+    bars.attr('width', d => widthFn(d) * e);
+    if (p < 1) { requestAnimationFrame(frame); }
+    else { bars.attr('width', widthFn); if (onDone) onDone(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+// ── STACKED BAR CHART ──
+(function () {
+  const container = document.getElementById('stacked-chart');
+  const W  = container.clientWidth || 900;
+  const mg = { top: 10, right: 28, bottom: 28, left: 174 };
+  const H  = data.length * 46 + mg.top + mg.bottom;
+  const iW = W - mg.left - mg.right;
+  const iH = H - mg.top - mg.bottom;
+
+  const svg = d3.select('#stacked-chart').append('svg').attr('width', W).attr('height', H);
+  const g   = svg.append('g').attr('transform', `translate(${mg.left},${mg.top})`);
+
+  const maxTotal = d3.max(data, d => d.total);
+  const x = d3.scaleLinear().domain([0, maxTotal * 1.05]).range([0, iW]);
+  const y = d3.scaleBand().domain(data.map(d => d.name)).range([0, iH]).padding(0.3);
+
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisBottom(x).ticks(5).tickSize(iH).tickFormat(''))
+    .attr('transform', 'translate(0,0)');
+
+  // rank numbers
+  g.selectAll('.rn').data(data).enter().append('text')
+    .attr('class', 'rank-num')
+    .attr('x', -18).attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+    .text((d, i) => String(i + 1).padStart(2, '0'));
+
+  // Own PV — animated
+  const ownBars = g.selectAll('.bar-own').data(data).enter().append('rect')
+    .attr('class', 'bar-own')
+    .attr('x', 0).attr('y', d => y(d.name))
+    .attr('height', y.bandwidth()).attr('width', 0)
+    .attr('fill', '#c8a97e').attr('rx', 2)
+    .on('mousemove', (e, d) => showTooltip(e, d))
+    .on('mouseleave', hideTooltip);
+
+  // Ext PV — animated (grows from right edge of own bar)
+  const extBars = g.selectAll('.bar-ext').data(data).enter().append('rect')
+    .attr('class', 'bar-ext')
+    .attr('x', 0).attr('y', d => y(d.name))
+    .attr('height', y.bandwidth()).attr('width', 0)
+    .attr('fill', '#7a8c82').attr('rx', 2)
+    .on('mousemove', (e, d) => showTooltip(e, d))
+    .on('mouseleave', hideTooltip);
+
+  const totalLabels = g.selectAll('.tlbl').data(data).enter().append('text')
+    .attr('x', d => x(d.total) + 8)
+    .attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('dominant-baseline', 'central')
+    .attr('fill', '#353530').attr('font-family', "'DM Mono', monospace").attr('font-size', 10)
+    .attr('opacity', 0).text(d => fmtBig(d.total));
+
+  const yAxis = g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(12));
+  yAxis.selectAll('text').attr('fill', '#6b6a63')
+    .attr('font-family', "'DM Mono', monospace").attr('font-size', 11);
+  yAxis.select('.domain').remove();
+
+  g.append('g').attr('class', 'axis axis--x').attr('transform', `translate(0,${iH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => fmtBig(d)));
+
+  const DUR = 860;
+
+  // own bars grow first
+  growBars(ownBars, d => x(d.ownPV), 60, DUR);
+
+  // ext bars: x tracks own bar right edge, width grows simultaneously
+  const t0 = performance.now() + 60;
+  function animateExt(now) {
+    const elapsed = now - t0;
+    if (elapsed < 0) { requestAnimationFrame(animateExt); return; }
+    const p = Math.min(elapsed / DUR, 1);
+    const e = easeCubicOut(p);
+    extBars
+      .attr('x',     d => x(d.ownPV) * e)
+      .attr('width', d => x(d.extPV) * e);
+    if (p < 1) { requestAnimationFrame(animateExt); }
+    else {
+      extBars.attr('x', d => x(d.ownPV)).attr('width', d => x(d.extPV));
+      totalLabels.transition().duration(280).attr('opacity', 1);
+    }
+  }
+  requestAnimationFrame(animateExt);
+})();
+
+// ── UU CHART ──
+(function () {
+  const uuData = [...data].sort((a, b) => b.uu - a.uu);
+  const container = document.getElementById('uu-chart');
+  const W  = container.clientWidth || 900;
+  const mg = { top: 10, right: 28, bottom: 28, left: 174 };
+  const H  = uuData.length * 38 + mg.top + mg.bottom;
+  const iW = W - mg.left - mg.right;
+  const iH = H - mg.top - mg.bottom;
+
+  const svg = d3.select('#uu-chart').append('svg').attr('width', W).attr('height', H);
+  const g   = svg.append('g').attr('transform', `translate(${mg.left},${mg.top})`);
+
+  const maxUU = d3.max(uuData, d => d.uu);
+  const x = d3.scaleLinear().domain([0, maxUU * 1.05]).range([0, iW]);
+  const y = d3.scaleBand().domain(uuData.map(d => d.name)).range([0, iH]).padding(0.38);
+
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisBottom(x).ticks(5).tickSize(iH).tickFormat(''))
+    .attr('transform', 'translate(0,0)');
+
+  g.selectAll('.rn2').data(uuData).enter().append('text')
+    .attr('class', 'rank-num')
+    .attr('x', -18).attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+    .text((d, i) => String(i + 1).padStart(2, '0'));
+
+  const uuBars = g.selectAll('.bar-uu').data(uuData).enter().append('rect')
+    .attr('class', 'bar-uu')
+    .attr('x', 0).attr('y', d => y(d.name))
+    .attr('height', y.bandwidth()).attr('width', 0)
+    .attr('fill', '#9e8fa8').attr('rx', 2)
+    .on('mousemove', (e, d) => showUUTooltip(e, d))
+    .on('mouseleave', hideTooltip);
+
+  const uuLabels = g.selectAll('.uulbl').data(uuData).enter().append('text')
+    .attr('x', d => x(d.uu) + 8)
+    .attr('y', d => y(d.name) + y.bandwidth() / 2)
+    .attr('dominant-baseline', 'central')
+    .attr('fill', '#353530').attr('font-family', "'DM Mono', monospace").attr('font-size', 10)
+    .attr('opacity', 0).text(d => fmtBig(d.uu));
+
+  const yAxis = g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(y).tickSize(0).tickPadding(12));
+  yAxis.selectAll('text').attr('fill', '#6b6a63')
+    .attr('font-family', "'DM Mono', monospace").attr('font-size', 11);
+  yAxis.select('.domain').remove();
+
+  g.append('g').attr('class', 'axis axis--x').attr('transform', `translate(0,${iH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => fmtBig(d)));
+
+  growBars(uuBars, d => x(d.uu), 160, 860, () => {
+    uuLabels.transition().duration(280).attr('opacity', 1);
+  });
+})();
+</script>
+</body>
+</html>
