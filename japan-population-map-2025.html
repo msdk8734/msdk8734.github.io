@@ -38,8 +38,8 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 /* ── Municipality paths ── */
 .city-path {
-  stroke:rgba(255,255,255,.3);
-  stroke-width:.12px;
+  stroke:rgba(255,255,255,.5);
+  stroke-width:.15px;
   stroke-linejoin:round;
   cursor:pointer;
   transition:opacity .18s, filter .18s;
@@ -47,12 +47,12 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .city-path.dimmed     { opacity:.15; }
 .city-path.same-pref  { opacity:.45; }
 .city-path.highlighted {
-  stroke:rgba(255,255,255,.3);
-  stroke-width:.12px;
+  stroke:rgba(255,255,255,.6);
+  stroke-width:.15px;
   opacity:1 !important;
   filter:brightness(0.65) saturate(1.4);
 }
-.pref-path.pref-dimmed { opacity:.25 !important; }
+.pref-path.pref-dimmed { opacity:.08 !important; }
 
 /* ── Tooltip ── */
 .tooltip {
@@ -126,6 +126,9 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   box-shadow:0 2px 8px rgba(0,0,0,.08); pointer-events:none;
 }
 #zoom-label.visible { display:block; }
+@media (max-width:720px) {
+  #zoom-label { top:56px; font-size:13px; padding:5px 14px; max-width:80vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+}
 
 /* ── Loading overlay ── */
 #status-overlay {
@@ -168,7 +171,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   <div class="header-right">
     <div class="color-bar" id="colorBar"></div>
     <div class="color-minmax"><span id="minLabel">—</span><span id="maxLabel">—</span></div>
-    <button id="back-btn" onclick="zoomOut()">← Back to Japan</button>
+    <button id="back-btn" onclick="zoomOut()">← Back to Overview</button>
   </div>
 </div>
 
@@ -631,9 +634,10 @@ function applyHighlight(rankKey, prefCode) {
     p.classList.remove('dimmed', 'same-pref');
     p.classList.add('highlighted');
   });
-  // Dim other prefectures' pref-paths
+  // Further dim other prefectures' pref-paths on hover
   document.querySelectorAll('.pref-path').forEach(p => {
-    p.classList.toggle('pref-dimmed', p.dataset.id !== prefCode);
+    const pid = String(p.dataset.id).padStart(2,'0');
+    p.classList.toggle('pref-dimmed', pid !== prefCode);
   });
 }
 function clearHighlight() {
@@ -667,10 +671,10 @@ async function zoomIn(id) {
   document.getElementById('header').style.right = PANEL_W + 'px';
   if (PANEL_W > 0) document.getElementById('ranking').classList.remove('hidden');
 
-  // Dim pref paths — keep pointer events so user can click another prefecture
+  // Dim other prefs; keep the zoomed prefecture at full opacity so it stands out
   document.querySelectorAll('.pref-path').forEach(p => {
-    p.style.opacity = '0.18';
-    // pointerEvents stays enabled so clicking another pref triggers zoomIn
+    const pid = String(p.dataset.id).padStart(2,'0');
+    p.style.opacity = pid === code ? '1' : '0.12';
   });
 
   // Mainland-only bbox using polygon-centroid filtering
