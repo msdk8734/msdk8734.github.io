@@ -38,8 +38,8 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 /* ── Municipality paths ── */
 .city-path {
-  stroke:rgba(255,255,255,.5);
-  stroke-width:.15px;
+  stroke:rgba(255,255,255,.45);
+  stroke-width:.06px;
   stroke-linejoin:round;
   cursor:pointer;
   transition:opacity .18s, filter .18s;
@@ -48,7 +48,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .city-path.same-pref  { opacity:.45; }
 .city-path.highlighted {
   stroke:rgba(255,255,255,.6);
-  stroke-width:.2px;
+  stroke-width:.06px;
   opacity:1 !important;
   filter:brightness(1.35) saturate(0.8);
 }
@@ -838,12 +838,18 @@ async function zoomIn(id) {
     if (item && !IS_TOUCH) {
       p.addEventListener('mouseenter', e => {
         // 3-level highlight: highlighted / same-pref / dimmed
-        applyHighlight(isWard ? mcode : rankKey, code);
-        // For ward: highlight only this ward, not all wards of the city
+        applyHighlight(rankKey, code);
+        // For ward: highlight only this specific ward path; other wards → same-pref
         if (isWard) {
           document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
-            if (el !== p) el.classList.replace('highlighted', 'same-pref') || el.classList.add('same-pref');
+            if (el !== p) {
+              el.classList.remove('highlighted');
+              el.classList.add('same-pref');
+            }
           });
+          // Ensure this ward itself is highlighted
+          p.classList.remove('dimmed', 'same-pref');
+          p.classList.add('highlighted');
         }
         // Highlight ranking row for parent city/municipality
         document.querySelectorAll('.rk-item').forEach(el => el.classList.toggle('active', el.dataset.key === rankKey));
