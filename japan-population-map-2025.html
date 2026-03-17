@@ -44,13 +44,15 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   cursor:pointer;
   transition:opacity .18s, filter .18s;
 }
-.city-path.dimmed    { opacity:.2; }
+.city-path.dimmed     { opacity:.15; }
+.city-path.same-pref  { opacity:.45; }
 .city-path.highlighted {
   stroke:rgba(255,255,255,.3);
   stroke-width:.12px;
   opacity:1 !important;
   filter:brightness(0.65) saturate(1.4);
 }
+.pref-path.pref-dimmed { opacity:.25 !important; }
 
 /* ── Tooltip ── */
 .tooltip {
@@ -387,14 +389,10 @@ svgEl.addEventListener('touchend', e => {
           const wm = window._wardMap || {};
           showCityTip({ clientX: t.clientX, clientY: t.clientY },
             item, window._prefTotal || 0, wm[key] || null, true);
-          // highlight
-          document.querySelectorAll('.city-path').forEach(p => p.classList.add('dimmed'));
-          document.querySelectorAll(`.city-path[data-rankkey="${key}"]`).forEach(p => {
-            p.classList.remove('dimmed'); p.classList.add('highlighted');
-          });
-          setTimeout(() => {
-            document.querySelectorAll('.city-path').forEach(p => { p.classList.remove('dimmed'); p.classList.remove('highlighted'); });
-          }, 2000);
+          // 3-level highlight on touch
+          const tPrefCode = pathEl.dataset.prefcode || '';
+          applyHighlight(key, tPrefCode);
+          setTimeout(() => { clearHighlight(); }, 2000);
         }
       } else {
         hideTip();
@@ -590,16 +588,13 @@ function renderMuniRanking(ranked, maxVal, prefTotal, wardMap) {
     const key  = el.dataset.key;
     const item = ranked.find(r => r.rankKey === key);
     el.addEventListener('mouseenter', e => {
-      document.querySelectorAll('.city-path').forEach(p => p.classList.add('dimmed'));
-      document.querySelectorAll(`.city-path[data-rankkey="${key}"]`).forEach(p => {
-        p.classList.remove('dimmed'); p.classList.add('highlighted');
-      });
+      applyHighlight(key, String(Math.floor(parseInt(key)/1000)).padStart(2,'0'));
       el.classList.add('active');
       if (item) showCityTip(e, item, prefTotal, wardMap[key] || null);
     });
     el.addEventListener('mousemove', moveTip);
     el.addEventListener('mouseleave', () => {
-      document.querySelectorAll('.city-path').forEach(p => { p.classList.remove('dimmed'); p.classList.remove('highlighted'); });
+      clearHighlight();
       el.classList.remove('active');
       hideTip();
     });
@@ -616,6 +611,39 @@ const cityCache = {};
 const NAME_OVERRIDES = {
   '22429': { nameEn: 'Kawanehoncho Town' }
 };
+
+// ── 3-level highlight helpers ──────────────────────────────
+function applyHighlight(rankKey, prefCode) {
+  // Level 1: highlighted (the hovered municipality/ward)
+  // Level 2: same-pref (other municipalities in same prefecture)  
+  // Level 3: dimmed (municipalities in other prefectures)
+  document.querySelectorAll('.city-path').forEach(p => {
+    const pc = p.dataset.prefcode;
+    p.classList.remove('dimmed', 'same-pref', 'highlighted');
+    if (pc === prefCode) {
+      p.classList.add('same-pref');
+    } else {
+      p.classList.add('dimmed');
+    }
+  });
+  // Highlight the specific municipality/ward
+  document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(p => {
+    p.classList.remove('dimmed', 'same-pref');
+    p.classList.add('highlighted');
+  });
+  // Dim other prefectures' pref-paths
+  document.querySelectorAll('.pref-path').forEach(p => {
+    p.classList.toggle('pref-dimmed', p.dataset.id !== prefCode);
+  });
+}
+function clearHighlight() {
+  document.querySelectorAll('.city-path').forEach(p => {
+    p.classList.remove('dimmed', 'same-pref', 'highlighted');
+  });
+  document.querySelectorAll('.pref-path').forEach(p => {
+    p.classList.remove('pref-dimmed');
+  });
+}
 
 async function zoomIn(id) {
   // Allow direct switch between prefectures
@@ -812,18 +840,16 @@ async function zoomIn(id) {
     p.setAttribute('class', 'city-path');
     p.setAttribute('data-rankkey', rankKey);
     p.setAttribute('data-mcode', mcode);
+    p.setAttribute('data-prefcode', code);  // prefecture code for 3-level highlight
 
     if (item && !IS_TOUCH) {
       p.addEventListener('mouseenter', e => {
-        // Dim everything, highlight only this ward (or city if no wards)
-        document.querySelectorAll('.city-path').forEach(el => el.classList.add('dimmed'));
+        // 3-level highlight: highlighted / same-pref / dimmed
+        applyHighlight(isWard ? mcode : rankKey, code);
+        // For ward: highlight only this ward, not all wards of the city
         if (isWard) {
-          // Highlight just this one ward path
-          p.classList.remove('dimmed'); p.classList.add('highlighted');
-        } else {
-          // Highlight all paths sharing this rankKey (non-ward city)
           document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
-            el.classList.remove('dimmed'); el.classList.add('highlighted');
+            if (el !== p) el.classList.replace('highlighted', 'same-pref') || el.classList.add('same-pref');
           });
         }
         // Highlight ranking row for parent city/municipality
@@ -838,7 +864,7 @@ async function zoomIn(id) {
       });
       p.addEventListener('mousemove', moveTip);
       p.addEventListener('mouseleave', () => {
-        document.querySelectorAll('.city-path').forEach(el => { el.classList.remove('dimmed'); el.classList.remove('highlighted'); });
+        clearHighlight();
         document.querySelectorAll('.rk-item').forEach(el => el.classList.remove('active'));
         hideTip();
       });
@@ -880,6 +906,7 @@ function zoomOut() {
   document.getElementById('header').style.right = PANEL_W + 'px';
 
   document.querySelectorAll('.pref-path').forEach(p => { p.style.opacity = ''; });
+  clearHighlight();
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
   const oldBorder = document.getElementById('pref-border-layer');
   if (oldBorder) oldBorder.remove();
