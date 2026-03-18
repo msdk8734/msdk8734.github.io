@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <!-- OGP -->
 <meta property="og:title" content="Japan Population Map 2025">
@@ -354,15 +354,19 @@ function bsTY(state) {
 }
 
 function bsListH(ty) {
-  // Available height for the scrollable list given current translateY
-  const handleHeaderH = bsHandleArea.offsetHeight
-                      + document.getElementById('bs-header').offsetHeight;
-  return Math.max(60, bsSheetH - ty - handleHeaderH - 8);
+  // Available height = viewport - current translateY - handle/header - safe area bottom
+  const handleHeaderH = (bsHandleArea.offsetHeight || 42)
+                      + (document.getElementById('bs-header').offsetHeight || 40);
+  const safeBottom = parseInt(
+    getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0', 10
+  );
+  return Math.max(60, window.innerHeight - ty - handleHeaderH - safeBottom - 8);
 }
 
 function bsSetState(state, animate = true) {
   bsState = state;
   const ty = bsTY(state);
+  const delay = animate ? 360 : 0; // wait for transition to finish before recalculating height
 
   if (animate) {
     bsEl.style.transition = 'transform .35s cubic-bezier(.32,1,.42,1)';
@@ -372,16 +376,28 @@ function bsSetState(state, animate = true) {
   bsEl.style.transform = `translateY(${ty}px)`;
   bsEl.classList.toggle('bs-state-peek', state === 'peek');
 
-  // Defer list height update until after transition
+  // Update list height after transition settles
   setTimeout(() => {
     bsListWrap.style.height = bsListH(bsTY(state)) + 'px';
-  }, animate ? 0 : 0);
+  }, delay);
 }
 
 function bsInit() {
   // Show only on mobile / touch
   if (window.innerWidth > 720 && !IS_TOUCH) return;
   bsMobile = true;
+
+  // Set CSS variable for safe-area-inset-bottom so bsListH can read it
+  function updateSafeArea() {
+    // env() only works in CSS, so we use a hidden probe element
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden';
+    document.body.appendChild(probe);
+    const sab = probe.offsetHeight || 0;
+    document.documentElement.style.setProperty('--sab', sab + 'px');
+    probe.remove();
+  }
+  updateSafeArea();
 
   bsSheetH = Math.round(window.innerHeight * BS_FULL_R);
   bsEl.style.height  = bsSheetH + 'px';
@@ -452,6 +468,7 @@ function bsInit() {
 
   // Resize → re-snap
   window.addEventListener('resize', () => {
+    updateSafeArea();
     bsSheetH = Math.round(window.innerHeight * BS_FULL_R);
     bsEl.style.height = bsSheetH + 'px';
     bsSetState(bsState, false);
@@ -498,6 +515,8 @@ function bsRenderMuniRanking(ranked, maxVal, prefTotal, wardMap) {
 
 // Call bsInit() after DOM is ready — placed here so prefFeatMap is in scope
 // (actual invocation is at the end of init())
+// [FIX] Actually call it immediately so touch events work before data loads
+bsInit();
 
 
 // ══════════════════════════════════════════════════════════
@@ -1398,7 +1417,6 @@ async function init() {
   });
 
   hideOverlay();
-  bsInit(); // initialise mobile bottom sheet (no-op on desktop)
 }
 
 window.addEventListener('resize', () => {
