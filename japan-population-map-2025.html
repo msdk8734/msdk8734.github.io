@@ -222,15 +222,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 }
 #bs-list .rk-item:active { background: rgba(21,87,160,.12); }
 
-/* ── "Peek" state: hide header, show swipe hint ── */
-#bs-peek-label {
-  position: absolute;
-  top: 14px; left: 50%; transform: translateX(-50%);
-  font-size: 11px; font-weight: 600; color: #aaa;
-  white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity .2s;
-}
-#bottom-sheet.bs-state-peek #bs-peek-label { opacity: 1; }
+/* ── "Peek" state: hide header ── */
 #bottom-sheet.bs-state-peek #bs-header     { opacity: 0; pointer-events: none; }
 #bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; }
 
@@ -268,8 +260,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 <!-- Mobile bottom sheet (shown only on touch/narrow screens) -->
 <div id="bottom-sheet" role="region" aria-label="Population Ranking">
-  <!-- Peek state label — visible only when sheet is collapsed -->
-  <div id="bs-peek-label">Swipe up ↑</div>
   <!-- Drag handle -->
   <div id="bs-handle-area" aria-label="Drag to resize panel">
     <div id="bs-handle"></div>
@@ -347,7 +337,7 @@ function bsTY(state) {
 function bsListHeight(ty) {
   const vh = window.innerHeight;
   const fixedH = 42 + 44;  // handle-area ~42px + header ~44px
-  const buffer = 34;        // Safari home indicator / URL bar buffer
+  const buffer = 60;        // Safari URL bar + home indicator buffer
   return Math.max(40, vh - ty - fixedH - bsSafeB - buffer);
 }
 
@@ -390,26 +380,35 @@ function bsInit() {
   // ── Close button removed (swipe down to close) ──
 
   // ── Drag logic ─────────────────────────────────────────
-  // touchstart  → handle area only (so list scrolling doesn't trigger sheet drag)
-  // touchmove / touchend → window (finger may leave handle area during drag)
+  // KEY INSIGHT: in peek state the sheet is translated down so only the top
+  // BS_PEEK_H pixels are visible. bsHandleArea sits in those visible pixels,
+  // but its DOM bounding rect is BELOW the viewport — element hit-testing fails.
+  // Solution: listen on bsEl (always full-height), detect the handle zone by
+  // checking whether the touch Y is within the currently-visible top strip.
+  //
+  // "Handle zone" = top BS_PEEK_H px of the VISIBLE sheet area.
+  // In any state the visible top of the sheet is at bsTY(bsState).
+  // So handle zone = clientY >= bsTY(bsState) && clientY <= bsTY(bsState) + BS_PEEK_H
+  //
+  // Outside the handle zone we let the list scroll normally.
+  // touchmove / touchend are on bsEl (not window) so stopPropagation keeps
+  // the map untouched, and the events still fire because they started on bsEl.
+
   let dragActive  = false;
   let dragStartY  = 0;
   let dragStartTY = 0;
   let dragDeltaY  = 0;
-  let touchId     = null;
 
-  const bsHandleArea = document.getElementById('bs-handle-area');
+  function inHandleZone(clientY) {
+    const sheetTop = bsTY(bsState); // current visible top of sheet in screen coords
+    return clientY >= sheetTop && clientY <= sheetTop + BS_PEEK_H + 10; // +10px tolerance
+  }
 
-  // Stop ALL touches on the sheet from reaching the SVG map below
-  bsEl.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
-  bsEl.addEventListener('touchmove',  e => { e.stopPropagation(); }, { passive: true });
-  bsEl.addEventListener('touchend',   e => { e.stopPropagation(); }, { passive: true });
-  bsEl.addEventListener('touchcancel',e => { e.stopPropagation(); }, { passive: true });
-
-  // Drag STARTS on handle area only
-  bsHandleArea.addEventListener('touchstart', e => {
+  bsEl.addEventListener('touchstart', e => {
+    e.stopPropagation();
     const t = e.changedTouches[0];
-    touchId     = t.identifier;
+    // Start drag only if touch is in the handle zone OR sheet is in peek state
+    if (!inHandleZone(t.clientY) && bsState !== 'peek') return;
     dragActive  = true;
     dragDeltaY  = 0;
     dragStartY  = t.clientY;
@@ -418,14 +417,10 @@ function bsInit() {
     bsEl.classList.add('bs-dragging');
   }, { passive: true });
 
-  // touchmove / touchend on WINDOW so tracking continues even if finger leaves handle
-  window.addEventListener('touchmove', e => {
+  bsEl.addEventListener('touchmove', e => {
+    e.stopPropagation();
     if (!dragActive) return;
-    let t = null;
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      if (e.changedTouches[i].identifier === touchId) { t = e.changedTouches[i]; break; }
-    }
-    if (!t) return;
+    const t = e.changedTouches[0];
     dragDeltaY = t.clientY - dragStartY;
     const minTY = bsTY('full'), maxTY = bsTY('peek');
     const raw   = Math.max(minTY, Math.min(maxTY, dragStartTY + dragDeltaY));
@@ -433,17 +428,10 @@ function bsInit() {
     bsListWrap.style.height = bsListHeight(raw) + 'px';
   }, { passive: true });
 
-  window.addEventListener('touchend', e => {
+  bsEl.addEventListener('touchend', e => {
+    e.stopPropagation();
     if (!dragActive) return;
-    // Check the touch that ended is ours
-    let found = false;
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      if (e.changedTouches[i].identifier === touchId) { found = true; break; }
-    }
-    if (!found) return;
-
     dragActive = false;
-    touchId    = null;
     bsEl.classList.remove('bs-dragging');
 
     const absDelta = Math.abs(dragDeltaY);
@@ -473,9 +461,10 @@ function bsInit() {
     bsSetState(best);
   }, { passive: true });
 
-  window.addEventListener('touchcancel', () => {
+  bsEl.addEventListener('touchcancel', e => {
+    e.stopPropagation();
     if (!dragActive) return;
-    dragActive = false; touchId = null;
+    dragActive = false;
     bsEl.classList.remove('bs-dragging');
     bsSetState(bsState);
   }, { passive: true });
@@ -1285,8 +1274,8 @@ function drawCities(id, code, pop) {
 
   renderMuniRanking(ranked, rankMax, prefTotal, wardMap); // works for both desktop & mobile
   bsRenderMuniRanking(ranked, rankMax, prefTotal, wardMap);
-  // Auto-expand bottom sheet to half when zooming into a prefecture
-  if (bsMobile && bsState === 'peek') bsSetState('half');
+  // Keep bottom sheet closed (peek) on zoom-in so the map is fully visible
+  if (bsMobile) bsSetState('peek');
 }
 
 // ══════════════════════════════════════════════════════════
