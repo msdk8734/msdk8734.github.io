@@ -161,29 +161,27 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 #zoom-anim-overlay.flashing { opacity:1; }
 
 /* ══════════════════════════════════════════
-   Mobile bottom sheet
-   3 states controlled via JS:
-     peek   — only handle bar visible (64px)
-     half   — 40vh
-     full   — 82vh
+   Mobile bottom sheet  (v3)
+   Height = 100dvh; translateY reveals/hides.
+   peek  → translateY = vh - 64px  (handle only)
+   half  → translateY = vh * 0.55
+   full  → translateY = vh * 0.12
    ══════════════════════════════════════════ */
 #bottom-sheet {
-  display: none;                       /* JS sets to 'flex' on mobile */
+  display: none;              /* JS sets to 'flex' on mobile */
   flex-direction: column;
   position: fixed; left: 0; right: 0; bottom: 0;
+  /* height set to 100dvh by JS so translateY is always in sync */
   z-index: 200;
   background: rgba(255,255,255,.97);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -2px 20px rgba(0,0,0,.10), 0 -1px 4px rgba(0,0,0,.06);
-  /* height set dynamically; translateY animates between states */
   will-change: transform;
-  touch-action: none;
-}
-/* Animated state: CSS transition only when NOT dragging */
-#bottom-sheet.bs-animated {
-  transition: transform .38s cubic-bezier(.32,1,.42,1);
+  touch-action: none;    /* we manage all touches manually */
+  /* padding for iPhone home indicator */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ── Drag handle bar ── */
@@ -191,24 +189,22 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   padding: 12px 0 6px;
-  cursor: grab; user-select: none;
-  /* tap target zone for the whole strip */
+  user-select: none;
 }
-#bs-handle-area:active { cursor: grabbing; }
 #bs-handle {
   width: 40px; height: 4px; border-radius: 2px;
   background: #d0d0d0;
   transition: background .15s, width .15s;
 }
-#bottom-sheet.bs-dragging #bs-handle,
-#bs-handle-area:hover    #bs-handle { background: #aaa; width: 48px; }
+#bottom-sheet.bs-dragging #bs-handle { background: #aaa; width: 48px; }
 
-/* ── Sheet header (title + optional close) ── */
+/* ── Sheet header (title + close) ── */
 #bs-header {
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
   padding: 2px 16px 10px;
   border-bottom: 1px solid #f0f0f0;
+  transition: opacity .2s;
 }
 #bs-rk-title {
   font-size: 11px; font-weight: 700; color: #888;
@@ -216,23 +212,23 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 }
 #bs-close {
   font-size: 16px; color: #ccc; background: none; border: none;
-  cursor: pointer; padding: 4px 6px; line-height: 1;
-  border-radius: 50%;
+  cursor: pointer; padding: 4px 8px; line-height: 1; border-radius: 50%;
   transition: background .12s, color .12s;
 }
-#bs-close:hover { background: #f0f0f0; color: #888; }
+#bs-close:active { background: #f0f0f0; color: #888; }
 
-/* ── Scrollable list area ── */
+/* ── Scrollable list ── */
 #bs-list-wrap {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 8px 10px 32px;
+  flex: 1;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 8px 10px 16px;
   scrollbar-width: thin; scrollbar-color: #ddd transparent;
-  overscroll-behavior: contain;        /* prevent map pan leak */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
-/* Reuse existing .rk-item styles inside the sheet */
 #bs-list .rk-item:active { background: rgba(21,87,160,.12); }
 
-/* ── "Peek" label shown when sheet is collapsed ── */
+/* ── "Peek" state: hide header, show swipe hint ── */
 #bs-peek-label {
   position: absolute;
   top: 14px; left: 50%; transform: translateX(-50%);
@@ -241,15 +237,15 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   opacity: 0; transition: opacity .2s;
 }
 #bottom-sheet.bs-state-peek #bs-peek-label { opacity: 1; }
-#bottom-sheet.bs-state-peek #bs-header     { opacity: 0; pointer-events:none; transition: opacity .15s; }
-#bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; transition: opacity .2s .05s; }
+#bottom-sheet.bs-state-peek #bs-header     { opacity: 0; pointer-events: none; }
+#bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; }
 
 @media (max-width:720px) {
   #ranking    { display: none !important; }
   #header     { right: 0 !important; }
   #back-btn   { padding: 6px 12px; font-size: 12px; }
   #zoom-label { font-size: 13px; padding: 5px 14px; max-width: 60vw; white-space: normal; text-align: center; }
-  #hint       { bottom: 76px; } /* lifted above peek handle */
+  #hint       { bottom: 76px; }
 }
 </style>
 </head>
@@ -318,161 +314,188 @@ if (IS_TOUCH) {
 }
 
 // ══════════════════════════════════════════════════════════
-//  Mobile Bottom Sheet
-//  3 snap states:
-//    peek  — only handle visible  (BS_PEEK_H px from bottom)
-//    half  — 42% of viewport height
-//    full  — 84% of viewport height
+//  Mobile Bottom Sheet  (v3 — rewritten for reliability)
 //
-//  Architecture:
-//    • The sheet element is position:fixed, bottom:0, height = full height.
-//    • We translateY() to hide/reveal it.
-//    • During drag we remove CSS transition; on snap we add it back.
-//    • Touch events on the sheet are stopped from reaching the SVG map.
+//  Key design decisions:
+//    • Sheet height = 100vh, translateY moves it up/down.
+//      This means the sheet is ALWAYS in the DOM hit-test area,
+//      so touchstart fires even when fully collapsed (peek).
+//    • Drag is detected on the WHOLE sheet, not just the handle.
+//      When the list is scrolled we only drag if the list is at
+//      the top AND the user is pulling down, or always when in
+//      peek/half state. This avoids scroll/drag conflicts.
+//    • No tap-to-cycle. Only swipe up/down + close button.
+//      Simpler = fewer edge cases.
 // ══════════════════════════════════════════════════════════
-const BS_PEEK_H  = 64;   // px  — handle bar only
-const BS_HALF_R  = 0.42; // fraction of vh for half state
-const BS_FULL_R  = 0.84; // fraction of vh for full state
+const BS_PEEK_H = 64;    // px visible in peek state (handle bar)
+const BS_HALF_R = 0.45;  // fraction of vh for half state
+const BS_FULL_R = 0.88;  // fraction of vh for full state (leaves small gap at top)
+const BS_ANIM   = 320;   // transition duration ms
 
-const bsEl      = document.getElementById('bottom-sheet');
+const bsEl       = document.getElementById('bottom-sheet');
 const bsListWrap = document.getElementById('bs-list-wrap');
-const bsClose   = document.getElementById('bs-close');
-const bsHandleArea = document.getElementById('bs-handle-area');
-const bsList    = document.getElementById('bs-list');
-const bsTitleEl = document.getElementById('bs-rk-title');
+const bsClose    = document.getElementById('bs-close');
+const bsList     = document.getElementById('bs-list');
+const bsTitleEl  = document.getElementById('bs-rk-title');
 
-let bsState    = 'peek';
-let bsSheetH   = 0;     // pixel height of the sheet element (= full-state height)
-let bsMobile   = false; // true when bottom sheet is active
+let bsState  = 'peek';
+let bsMobile = false;
+let bsSafeB  = 0;  // safe-area-inset-bottom in px
 
-// Compute translateY for a given state
+// translateY values — computed from viewport height each call
+// so resize is automatically handled
 function bsTY(state) {
-  const h = bsSheetH;
-  if (state === 'full') return 0;
-  if (state === 'half') return h - Math.round(window.innerHeight * BS_HALF_R);
-  return h - BS_PEEK_H; // peek
+  const vh = window.innerHeight;
+  if (state === 'full') return vh * (1 - BS_FULL_R);
+  if (state === 'half') return vh * (1 - BS_HALF_R);
+  return vh - BS_PEEK_H;  // peek: only handle visible
 }
 
-function bsListH(ty) {
-  // Available height = viewport - current translateY - handle/header - safe area bottom
-  const handleHeaderH = (bsHandleArea.offsetHeight || 42)
-                      + (document.getElementById('bs-header').offsetHeight || 40);
-  const safeBottom = parseInt(
-    getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0', 10
-  );
-  return Math.max(60, window.innerHeight - ty - handleHeaderH - safeBottom - 8);
+// Height of the scrollable list area for a given translateY
+function bsListHeight(ty) {
+  const vh = window.innerHeight;
+  const fixedH = 42 + 44; // handle-area ~42px + header ~44px (measured values)
+  return Math.max(40, vh - ty - fixedH - bsSafeB - 4);
+}
+
+function bsApply(ty, animate) {
+  bsEl.style.transition = animate ? `transform ${BS_ANIM}ms cubic-bezier(.25,1,.5,1)` : 'none';
+  bsEl.style.transform  = `translateY(${ty}px)`;
+  bsEl.classList.toggle('bs-state-peek', bsState === 'peek');
+  // Update list height immediately (no need to wait for animation)
+  bsListWrap.style.height = bsListHeight(ty) + 'px';
 }
 
 function bsSetState(state, animate = true) {
   bsState = state;
-  const ty = bsTY(state);
-  const delay = animate ? 360 : 0; // wait for transition to finish before recalculating height
-
-  if (animate) {
-    bsEl.style.transition = 'transform .35s cubic-bezier(.32,1,.42,1)';
-  } else {
-    bsEl.style.transition = 'none';
-  }
-  bsEl.style.transform = `translateY(${ty}px)`;
-  bsEl.classList.toggle('bs-state-peek', state === 'peek');
-
-  // Update list height after transition settles
-  setTimeout(() => {
-    bsListWrap.style.height = bsListH(bsTY(state)) + 'px';
-  }, delay);
+  bsApply(bsTY(state), animate);
 }
 
 function bsInit() {
-  // Show only on mobile / touch
   if (window.innerWidth > 720 && !IS_TOUCH) return;
   bsMobile = true;
 
-  // Set CSS variable for safe-area-inset-bottom so bsListH can read it
-  function updateSafeArea() {
-    // env() only works in CSS, so we use a hidden probe element
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden';
-    document.body.appendChild(probe);
-    const sab = probe.offsetHeight || 0;
-    document.documentElement.style.setProperty('--sab', sab + 'px');
-    probe.remove();
-  }
-  updateSafeArea();
+  // Measure safe-area-inset-bottom via a probe element
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none';
+  document.body.appendChild(probe);
+  bsSafeB = probe.offsetHeight || 0;
+  probe.remove();
 
-  bsSheetH = Math.round(window.innerHeight * BS_FULL_R);
-  bsEl.style.height  = bsSheetH + 'px';
+  // Sheet fills full viewport height; translateY hides/reveals it
+  bsEl.style.height  = '100dvh';  // dvh = dynamic viewport height (handles iOS toolbar)
   bsEl.style.display = 'flex';
 
-  // Initial position without animation (after first paint)
   requestAnimationFrame(() => bsSetState('peek', false));
 
-  // ── Close button ──
+  // ── Close button → peek ──
   bsClose.addEventListener('click', e => {
     e.stopPropagation();
     bsSetState('peek');
   });
 
-  // ── Handle tap → cycle states ──
-  let bsTapActive = false;
-  bsHandleArea.addEventListener('touchstart', () => { bsTapActive = true; }, { passive: true });
+  // ── Drag logic ─────────────────────────────────────────
+  // We listen on the SHEET ELEMENT itself (not just handle)
+  // so the touch target is always the full visible area.
+  let dragActive  = false;
+  let dragStartY  = 0;
+  let dragStartTY = 0;
+  let dragDeltaY  = 0;
+  let touchId     = null;  // track the specific touch
 
-  // ── Drag logic ──
-  let dragActive = false, dragStartY = 0, dragStartTY = 0, dragMovedPx = 0;
-
-  bsHandleArea.addEventListener('touchstart', e => {
+  bsEl.addEventListener('touchstart', e => {
+    // Always stop propagation so the SVG map doesn't receive this touch
     e.stopPropagation();
-    dragActive   = true;
-    dragMovedPx  = 0;
-    dragStartY   = e.touches[0].clientY;
-    dragStartTY  = bsTY(bsState);
+
+    // If the list is open and the user touches INSIDE the list area
+    // and the list is not at scroll-top, let the list scroll normally
+    // (don't start a sheet drag)
+    if (bsState === 'full') {
+      const inList = e.target.closest('#bs-list-wrap');
+      if (inList && bsListWrap.scrollTop > 2) return;
+    }
+
+    const t = e.changedTouches[0];
+    touchId     = t.identifier;
+    dragActive  = true;
+    dragDeltaY  = 0;
+    dragStartY  = t.clientY;
+    dragStartTY = bsTY(bsState);
     bsEl.style.transition = 'none';
-    bsEl.classList.add('bs-dragging');
   }, { passive: true });
 
-  window.addEventListener('touchmove', e => {
+  bsEl.addEventListener('touchmove', e => {
+    e.stopPropagation();
     if (!dragActive) return;
-    const dy  = e.touches[0].clientY - dragStartY;
-    dragMovedPx = Math.abs(dy);
-    const minTY = bsTY('full'), maxTY = bsTY('peek');
-    const raw = Math.max(minTY, Math.min(maxTY, dragStartTY + dy));
-    bsEl.style.transform = `translateY(${raw}px)`;
-    bsListWrap.style.height = bsListH(raw) + 'px';
+
+    // Find our tracked touch
+    let t = null;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === touchId) { t = e.changedTouches[i]; break; }
+    }
+    if (!t) return;
+
+    dragDeltaY = t.clientY - dragStartY;
+
+    // If in full state and scrolling UP inside list, don't drag sheet
+    if (bsState === 'full' && dragDeltaY < 0) { dragActive = false; return; }
+
+    const minTY = bsTY('full');
+    const maxTY = bsTY('peek');
+    const raw   = Math.max(minTY, Math.min(maxTY, dragStartTY + dragDeltaY));
+    bsEl.style.transform  = `translateY(${raw}px)`;
+    bsListWrap.style.height = bsListHeight(raw) + 'px';
   }, { passive: true });
 
-  window.addEventListener('touchend', () => {
+  bsEl.addEventListener('touchend', e => {
+    e.stopPropagation();
     if (!dragActive) return;
     dragActive = false;
-    bsEl.classList.remove('bs-dragging');
+    touchId    = null;
 
-    if (dragMovedPx < 6) {
-      // Treat as tap: cycle through states
-      const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
-      bsSetState(next);
+    const absDelta = Math.abs(dragDeltaY);
+
+    // Tiny movement = tap on handle area → cycle up
+    if (absDelta < 8) {
+      const inHandle = e.target.closest('#bs-handle-area');
+      if (inHandle || bsState === 'peek') {
+        const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
+        bsSetState(next);
+      }
       return;
     }
 
-    // Snap to closest state
-    const curTY = parseFloat(bsEl.style.transform.match(/-?[\d.]+/)?.[0] || bsTY(bsState));
+    // Snap: use velocity hint (direction of drag)
+    const goingDown = dragDeltaY > 0;
+    const curTY = parseFloat(bsEl.style.transform.replace(/[^0-9.\-]/g, '')) || bsTY(bsState);
+
+    // Fast flick shortcut
+    if (absDelta > 60) {
+      if (goingDown) {
+        bsSetState(bsState === 'full' ? 'half' : 'peek');
+      } else {
+        bsSetState(bsState === 'peek' ? 'half' : 'full');
+      }
+      return;
+    }
+
+    // Otherwise snap to nearest
     let best = 'peek', bestDist = Infinity;
     ['peek', 'half', 'full'].forEach(s => {
       const d = Math.abs(curTY - bsTY(s));
       if (d < bestDist) { bestDist = d; best = s; }
     });
     bsSetState(best);
-  });
+  }, { passive: true });
 
-  // Stop all touch events on the sheet from reaching the SVG map
-  bsEl.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
-  bsEl.addEventListener('touchmove',  e => { e.stopPropagation(); }, { passive: true });
-  bsEl.addEventListener('touchend',   e => { e.stopPropagation(); }, { passive: true });
+  // Also stop touchcancel
+  bsEl.addEventListener('touchcancel', e => {
+    e.stopPropagation();
+    if (dragActive) { dragActive = false; touchId = null; bsSetState(bsState); }
+  }, { passive: true });
 
-  // Resize → re-snap
-  window.addEventListener('resize', () => {
-    updateSafeArea();
-    bsSheetH = Math.round(window.innerHeight * BS_FULL_R);
-    bsEl.style.height = bsSheetH + 'px';
-    bsSetState(bsState, false);
-  });
+  // Resize → recalculate (no height reassignment needed since we use 100dvh)
+  window.addEventListener('resize', () => bsSetState(bsState, false));
 }
 
 // ── Populate bottom-sheet ranking list (called alongside desktop renderXxxRanking) ──
