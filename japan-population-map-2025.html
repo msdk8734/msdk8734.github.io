@@ -210,12 +210,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   font-size: 11px; font-weight: 700; color: #888;
   letter-spacing: .08em; text-transform: uppercase;
 }
-#bs-close {
-  font-size: 16px; color: #ccc; background: none; border: none;
-  cursor: pointer; padding: 4px 8px; line-height: 1; border-radius: 50%;
-  transition: background .12s, color .12s;
-}
-#bs-close:active { background: #f0f0f0; color: #888; }
 
 /* ── Scrollable list ── */
 #bs-list-wrap {
@@ -283,7 +277,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   <!-- Header (hidden in peek state) -->
   <div id="bs-header">
     <span id="bs-rk-title">Population Ranking</span>
-    <button id="bs-close" aria-label="Close ranking panel">✕</button>
   </div>
   <!-- Scrollable ranking list -->
   <div id="bs-list-wrap">
@@ -334,7 +327,6 @@ const BS_ANIM   = 320;   // transition duration ms
 
 const bsEl       = document.getElementById('bottom-sheet');
 const bsListWrap = document.getElementById('bs-list-wrap');
-const bsClose    = document.getElementById('bs-close');
 const bsList     = document.getElementById('bs-list');
 const bsTitleEl  = document.getElementById('bs-rk-title');
 
@@ -354,8 +346,9 @@ function bsTY(state) {
 // Height of the scrollable list area for a given translateY
 function bsListHeight(ty) {
   const vh = window.innerHeight;
-  const fixedH = 42 + 44; // handle-area ~42px + header ~44px (measured values)
-  return Math.max(40, vh - ty - fixedH - bsSafeB - 4);
+  const fixedH = 42 + 44;   // handle-area ~42px + header ~44px
+  const safariToolbarBuffer = 80; // ~3 items — prevents Safari URL bar overlap
+  return Math.max(40, vh - ty - fixedH - bsSafeB - safariToolbarBuffer);
 }
 
 function bsApply(ty, animate) {
@@ -388,11 +381,7 @@ function bsInit() {
 
   requestAnimationFrame(() => bsSetState('peek', false));
 
-  // ── Close button → peek ──
-  bsClose.addEventListener('click', e => {
-    e.stopPropagation();
-    bsSetState('peek');
-  });
+  // ── Close button removed (swipe down to close) ──
 
   // ── Drag logic ─────────────────────────────────────────
   // We listen on the SHEET ELEMENT itself (not just handle)
