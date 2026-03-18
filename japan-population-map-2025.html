@@ -222,9 +222,9 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 }
 #bs-list .rk-item:active { background: rgba(21,87,160,.12); }
 
-/* ── "Peek" state: hide header ── */
-#bottom-sheet.bs-state-peek #bs-header     { opacity: 0; pointer-events: none; }
-#bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; }
+/* ── "Peek" state: show title but disable interaction on rest ── */
+#bottom-sheet.bs-state-peek #bs-header     { opacity: 1; pointer-events: none; }
+#bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; pointer-events: auto; }
 
 @media (max-width:720px) {
   #ranking    { display: none !important; }
@@ -310,7 +310,7 @@ if (IS_TOUCH) {
 //    • No tap-to-cycle. Only swipe up/down + close button.
 //      Simpler = fewer edge cases.
 // ══════════════════════════════════════════════════════════
-const BS_PEEK_H = 64;    // px visible in peek state (handle bar)
+const BS_PEEK_H = 96;    // px visible in peek state (handle bar + title header)
 const BS_HALF_R = 0.45;  // fraction of vh for half state
 const BS_FULL_R = 0.88;  // fraction of vh for full state (leaves small gap at top)
 const BS_ANIM   = 320;   // transition duration ms
@@ -337,7 +337,7 @@ function bsTY(state) {
 function bsListHeight(ty) {
   const vh = window.innerHeight;
   const fixedH = 42 + 44;  // handle-area ~42px + header ~44px
-  const buffer = 60;        // Safari URL bar + home indicator buffer
+  const buffer = 0;         // no extra buffer needed
   return Math.max(40, vh - ty - fixedH - bsSafeB - buffer);
 }
 
