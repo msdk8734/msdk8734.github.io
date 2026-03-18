@@ -28,7 +28,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
   background:linear-gradient(180deg,rgba(255,255,255,1) 0%,rgba(255,255,255,.95) 70%,rgba(255,255,255,0) 100%);
   pointer-events:none; transition:right .3s;
 }
-/* title and legend still ignore pointer events; only back-btn is interactive */
 .title-block, .header-right > .color-bar, .header-right > .color-minmax { pointer-events:none; }
 .title-block h1 { font-size:20px; font-weight:700; color:#1a1a1a; letter-spacing:-.01em; }
 .title-block .sub { font-size:10.5px; color:#888; margin-top:2px; }
@@ -90,7 +89,6 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 .tt-ward-list { font-size:11.5px; color:#555; line-height:1.9; }
 .tt-ward-row  { display:flex; justify-content:space-between; gap:10px; }
 .tt-ward-val  { font-family:'JetBrains Mono'; color:#888; flex-shrink:0; }
-/* Mobile tooltip hint */
 .tt-tap-hint { font-size:10px; color:#bbb; margin-top:8px; text-align:center; }
 
 /* ── Ranking panel ── */
@@ -154,6 +152,14 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 /* ── Hint ── */
 #hint { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:10px; color:#ccc; z-index:100; pointer-events:none; white-space:nowrap; }
 
+/* ── [NEW] Zoom animation overlay indicator ── */
+#zoom-anim-overlay {
+  position:fixed; inset:0; pointer-events:none; z-index:50;
+  opacity:0; background:rgba(255,255,255,0);
+  transition:opacity .25s ease;
+}
+#zoom-anim-overlay.flashing { opacity:1; }
+
 @media (max-width:720px) {
   #ranking { display:none; }
   #header  { right:0 !important; }
@@ -178,6 +184,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 <div id="map-container"><svg id="map-svg"></svg></div>
 <div class="tooltip" id="tooltip"></div>
+<div id="zoom-anim-overlay"></div>
 
 <div id="ranking">
   <div class="rk-title" id="rk-title">Population Ranking</div>
@@ -268,6 +275,9 @@ let viewX = 0, viewY = 0, viewScale = 1;
 let isDragging = false, didDrag = false;
 let dragSX, dragSY, dragVX, dragVY;
 
+// [CHANGED] Animation state
+let animRaf = null;
+
 function clampView() {
   const maxOff = Math.max(svgW, svgH) * viewScale * 2.5;
   viewX = Math.max(-maxOff, Math.min(maxOff + svgW, viewX));
@@ -287,15 +297,52 @@ function zoomAt(mx, my, factor) {
   applyView();
 }
 
+// [NEW] Smooth animated zoom to a target view state
+// Uses an ease-out cubic easing over ~380ms
+function animateToView(targetX, targetY, targetScale, onComplete) {
+  if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
+
+  const startX = viewX, startY = viewY, startScale = viewScale;
+  const DURATION = 380; // ms
+  let startTime = null;
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    const raw = Math.min(elapsed / DURATION, 1);
+    const t   = easeOutCubic(raw);
+
+    viewScale = startScale + (targetScale - startScale) * t;
+    viewX     = startX     + (targetX     - startX)     * t;
+    viewY     = startY     + (targetY     - startY)     * t;
+    applyView();
+
+    if (raw < 1) {
+      animRaf = requestAnimationFrame(step);
+    } else {
+      animRaf = null;
+      if (onComplete) onComplete();
+    }
+  }
+
+  animRaf = requestAnimationFrame(step);
+}
+
 // Mouse zoom
 svgEl.addEventListener('wheel', e => {
   e.preventDefault();
+  // [CHANGED] Cancel any running animation on manual wheel
+  if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
   const rect = svgEl.getBoundingClientRect();
   zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY > 0 ? 0.85 : 1.18);
 }, { passive: false });
 
 // Mouse pan
 svgEl.addEventListener('mousedown', e => {
+  // [CHANGED] Cancel animation on drag start
+  if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
   isDragging = true; didDrag = false;
   dragSX = e.clientX; dragSY = e.clientY; dragVX = viewX; dragVY = viewY;
   svgEl.style.cursor = 'grabbing';
@@ -316,6 +363,8 @@ let lastTapTime = 0, lastTapTarget = null;
 
 svgEl.addEventListener('touchstart', e => {
   e.preventDefault();
+  // [CHANGED] Cancel animation on touch
+  if (animRaf) { cancelAnimationFrame(animRaf); animRaf = null; }
   if (e.touches.length === 1) {
     const t = e.touches[0];
     isDragging = true; touchMoved = false;
@@ -363,7 +412,6 @@ svgEl.addEventListener('touchend', e => {
     const pathEl = target?.closest('path');
 
     if (now - lastTapTime < 400 && pathEl === lastTapTarget) {
-      // Double-tap → zoom in action
       hideTip();
       if (pathEl?.classList.contains('pref-path')) {
         const id = parseInt(pathEl.dataset.id, 10);
@@ -371,7 +419,6 @@ svgEl.addEventListener('touchend', e => {
       }
       lastTapTime = 0; lastTapTarget = null;
     } else {
-      // Single tap → show tooltip
       lastTapTime = now; lastTapTarget = pathEl;
       if (pathEl?.classList.contains('pref-path')) {
         const id  = parseInt(pathEl.dataset.id, 10);
@@ -393,7 +440,6 @@ svgEl.addEventListener('touchend', e => {
           const wm = window._wardMap || {};
           showCityTip({ clientX: t.clientX, clientY: t.clientY },
             item, window._prefTotal || 0, wm[key] || null, true);
-          // 3-level highlight on touch
           const tPrefCode = pathEl.dataset.prefcode || '';
           applyHighlight(key, tPrefCode);
           setTimeout(() => { clearHighlight(); }, 2000);
@@ -437,14 +483,9 @@ function showPrefTip(e, { nameEn, nameJa, value, rank, maxVal, natTot, avg }, is
   tipEl.classList.add('visible'); moveTip(e);
 }
 
-// Show tooltip for a ward (区) within a political city
-// wardItem: { nameEn, nameJa, total } — the specific ward
-// cityItem: { nameEn, nameJa, total } — the parent city (null if not a ward)
-// prefTotal: prefecture total population
 function showCityTip(e, item, prefTotal, wardRows, isMobile, wardItem, cityItem) {
   let html = '';
   if (wardItem && cityItem) {
-    // Ward-level tooltip: show ward first, then parent city
     const wardShare = ((wardItem.total / cityItem.total) * 100).toFixed(1);
     const cityShare = ((cityItem.total / prefTotal) * 100).toFixed(1);
     html = `
@@ -469,7 +510,6 @@ function showCityTip(e, item, prefTotal, wardRows, isMobile, wardItem, cityItem)
         <span class="tt-val-sm">${cityShare}%</span>
       </div>`;
   } else {
-    // Regular city / municipality tooltip
     const share = ((item.total / prefTotal) * 100).toFixed(1);
     html = `
       <div class="tt-name" style="font-size:15px">${item.nameEn}</div>
@@ -506,10 +546,9 @@ function moveTip(e) {
 function hideTip() { tipEl.classList.remove('visible'); }
 
 // ══════════════════════════════════════════════════════════
-//  Ward-to-city mapping (name-based, works for all city codes)
+//  Ward-to-city mapping
 // ══════════════════════════════════════════════════════════
 function buildWardToCityMap(muniPop) {
-  // Build map of city nameJa → code
   const cityByName = {};
   Object.entries(muniPop).forEach(([code, d]) => {
     const name = d.nameJa;
@@ -518,16 +557,13 @@ function buildWardToCityMap(muniPop) {
     }
   });
 
-  // For each ward entry (contains 区), find its parent city
   const wardToCity = {};
   Object.entries(muniPop).forEach(([code, d]) => {
     if (!d.nameJa.includes('区')) return;
-    // Tokyo special wards (13101-13123): independent, no parent city
     const prefCode = code.slice(0, 2);
     const num = parseInt(code.slice(2), 10);
     if (prefCode === '13' && num >= 101 && num <= 123) return;
 
-    // Find parent city by matching city name as prefix
     for (const [cityName, cityCode] of Object.entries(cityByName)) {
       if (d.nameJa.startsWith(cityName)) {
         wardToCity[code] = cityCode;
@@ -606,51 +642,99 @@ function renderMuniRanking(ranked, maxVal, prefTotal, wardMap) {
 }
 
 // ══════════════════════════════════════════════════════════
-//  Zoom In / Out
+//  [CHANGED] Highlight helpers — batched DOM writes
+//  Instead of calling classList.add/remove one by one in a
+//  forEach loop (which triggers multiple style recalcs),
+//  we collect paths into buckets first, then write once.
 // ══════════════════════════════════════════════════════════
 let zoomedId = null, cityLayerG = null;
 const cityCache = {};
 
-// Name override table (code → override fields)
 const NAME_OVERRIDES = {
   '22429': { nameEn: 'Kawanehoncho Town' }
 };
 
-// ── 3-level highlight helpers ──────────────────────────────
-// Fixed hover fill: a mid-range green that works for both light and dark municipalities
 const HOVER_FILL = 'rgb(90, 160, 110)';
 
-function applyHighlight(rankKey, prefCode, singlePath) {
-  // Level 1: highlighted — fixed hover color
-  // Level 2: same-pref — other municipalities in same prefecture
-  // Level 3: dimmed — municipalities in other prefectures
+// [NEW] Index: rankKey → NodeList built once after drawCities
+// Avoids querySelectorAll inside every mouseenter event
+let _cityByRankKey = null;   // Map<rankKey, Element[]>
+let _cityByPrefCode = null;  // Map<prefCode, Element[]>
+let _prefPathById = null;    // Map<id-string, Element[]>
+
+function buildCityIndex() {
+  _cityByRankKey  = new Map();
+  _cityByPrefCode = new Map();
+
   document.querySelectorAll('.city-path').forEach(p => {
+    const rk = p.dataset.rankkey;
     const pc = p.dataset.prefcode;
-    p.classList.remove('dimmed', 'same-pref', 'highlighted');
-    // Restore original fill if it was overridden
-    if (p.dataset.origfill) { p.setAttribute('fill', p.dataset.origfill); delete p.dataset.origfill; }
-    if (pc === prefCode) {
-      p.classList.add('same-pref');
-    } else {
-      p.classList.add('dimmed');
-    }
+
+    if (!_cityByRankKey.has(rk))  _cityByRankKey.set(rk, []);
+    if (!_cityByPrefCode.has(pc)) _cityByPrefCode.set(pc, []);
+
+    _cityByRankKey.get(rk).push(p);
+    _cityByPrefCode.get(pc).push(p);
   });
-  // Apply fixed hover color to highlighted path(s)
+
+  _prefPathById = new Map();
+  document.querySelectorAll('.pref-path').forEach(p => {
+    const id = String(p.dataset.id).padStart(2, '0');
+    if (!_prefPathById.has(id)) _prefPathById.set(id, []);
+    _prefPathById.get(id).push(p);
+  });
+}
+
+function applyHighlight(rankKey, prefCode, singlePath) {
+  // [CHANGED] Use pre-built index, batch all class writes
+  // Step 1: clear everything in one pass
+  document.querySelectorAll('.city-path').forEach(p => {
+    p.classList.remove('dimmed', 'same-pref', 'highlighted');
+    if (p.dataset.origfill) { p.setAttribute('fill', p.dataset.origfill); delete p.dataset.origfill; }
+  });
+
+  // Step 2: batch assign dimmed / same-pref using index
+  if (_cityByPrefCode) {
+    // All city paths not in this prefecture → dimmed
+    _cityByPrefCode.forEach((paths, pc) => {
+      if (pc === prefCode) {
+        paths.forEach(p => p.classList.add('same-pref'));
+      } else {
+        paths.forEach(p => p.classList.add('dimmed'));
+      }
+    });
+  } else {
+    // Fallback (index not yet built)
+    document.querySelectorAll('.city-path').forEach(p => {
+      p.classList.add(p.dataset.prefcode === prefCode ? 'same-pref' : 'dimmed');
+    });
+  }
+
+  // Step 3: apply hover color to highlighted path(s)
   const targets = singlePath
     ? [singlePath]
-    : Array.from(document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`));
+    : (_cityByRankKey?.get(rankKey) || Array.from(document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`)));
+
   targets.forEach(p => {
     p.classList.remove('dimmed', 'same-pref');
     p.classList.add('highlighted');
     if (!p.dataset.origfill) p.dataset.origfill = p.getAttribute('fill');
     p.setAttribute('fill', HOVER_FILL);
   });
-  // Further dim other prefectures' pref-paths on hover
-  document.querySelectorAll('.pref-path').forEach(p => {
-    const pid = String(p.dataset.id).padStart(2,'0');
-    p.classList.toggle('pref-dimmed', pid !== prefCode);
-  });
+
+  // Step 4: dim other prefectures' pref-paths
+  if (_prefPathById) {
+    _prefPathById.forEach((paths, id) => {
+      paths.forEach(p => p.classList.toggle('pref-dimmed', id !== prefCode));
+    });
+  } else {
+    document.querySelectorAll('.pref-path').forEach(p => {
+      const pid = String(p.dataset.id).padStart(2,'0');
+      p.classList.toggle('pref-dimmed', pid !== prefCode);
+    });
+  }
 }
+
 function clearHighlight() {
   document.querySelectorAll('.city-path').forEach(p => {
     p.classList.remove('dimmed', 'same-pref', 'highlighted');
@@ -661,8 +745,10 @@ function clearHighlight() {
   });
 }
 
+// ══════════════════════════════════════════════════════════
+//  [CHANGED] zoomIn — now uses animateToView for smooth zoom
+// ══════════════════════════════════════════════════════════
 async function zoomIn(id) {
-  // Allow direct switch between prefectures
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
   zoomedId = id;
   hideTip();
@@ -671,7 +757,6 @@ async function zoomIn(id) {
   const feat = prefFeatMap[id];
   const code = String(id).padStart(2, '0');
 
-  // UI
   document.getElementById('back-btn').classList.add('visible');
   document.getElementById('zoom-label').textContent = `${pop.nameEn} / ${pop.nameJa}`;
   document.getElementById('zoom-label').classList.add('visible');
@@ -681,19 +766,17 @@ async function zoomIn(id) {
   document.getElementById('header').style.right = PANEL_W + 'px';
   if (PANEL_W > 0) document.getElementById('ranking').classList.remove('hidden');
 
-  // Dim other prefs; keep the zoomed prefecture at full opacity so it stands out
   document.querySelectorAll('.pref-path').forEach(p => {
     const pid = String(p.dataset.id).padStart(2,'0');
     p.style.opacity = pid === code ? '1' : '0.12';
   });
 
-  // Mainland-only bbox using polygon-centroid filtering
-  // Each polygon's centroid must pass the filter to be included in bbox calc
+  // Compute target view
   const MAINLAND_CENTROID_FILTER = {
-    '13': { minCy: 35.0,  maxCx: 141.0  },  // Tokyo: exclude Izu/Ogasawara
-    '46': { minCy: 30.0               },  // Kagoshima: exclude Amami
-    '47': { minCx: 127.0              },  // Okinawa: exclude Miyako/Yaeyama
-    '01': { maxCx: 145.5              },  // Hokkaido: exclude Northern Territories
+    '13': { minCy: 35.0,  maxCx: 141.0  },
+    '46': { minCy: 30.0               },
+    '47': { minCx: 127.0              },
+    '01': { maxCx: 145.5              },
   };
   const mcf = MAINLAND_CENTROID_FILTER[code];
 
@@ -704,7 +787,6 @@ async function zoomIn(id) {
 
   polys.forEach(poly => {
     if (mcf) {
-      // Compute centroid of outer ring
       const ring = poly[0];
       const cx = ring.reduce((s, p) => s + p[0], 0) / ring.length;
       const cy = ring.reduce((s, p) => s + p[1], 0) / ring.length;
@@ -720,40 +802,54 @@ async function zoomIn(id) {
     }));
   });
 
-  // Fallback: if all polygons filtered out, use full bbox
   if (!hasMainland) {
     polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
       if (lon < lo) lo = lon; if (lon > hi) hi = lon;
       if (lat < la) la = lat; if (lat > lb) lb = lat;
     })));
   }
+
   const [x0, y0] = project(lo, lb);
   const [x1, y1] = project(hi, la);
   const PAD = IS_TOUCH ? 40 : 80;
   const availW = svgW - PANEL_W - PAD * 2;
   const availH = svgH - PAD * 2;
   const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * 0.88;
-  viewScale = Math.min(fs, 40);
-  viewX = (svgW - PANEL_W) / 2 - viewScale * (x0 + x1) / 2;
-  viewY = svgH / 2 - viewScale * (y0 + y1) / 2;
-  applyView();
+  const targetScale = Math.min(fs, 40);
+  const targetX = (svgW - PANEL_W) / 2 - targetScale * (x0 + x1) / 2;
+  const targetY = svgH / 2 - targetScale * (y0 + y1) / 2;
 
-  // Fetch GeoJSON + muni population (parallel, cached)
+  // [CHANGED] Fetch data in parallel WHILE animating — no blocked wait
   const geoKey  = `geo_${code}`;
   const muniKey = `muni_${code}`;
-  try {
-    const fetches = [];
-    if (!cityCache[geoKey])  fetches.push(fetch(`geo-json/pref_${code}.geojson`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[geoKey] = d; }));
-    if (!cityCache[muniKey]) fetches.push(fetch(`population-json/municipalities/muni-pop-${code}.json`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[muniKey] = d; }));
-    await Promise.all(fetches);
-  } catch (e) {
-    console.warn('Fetch failed:', e); return;
-  }
 
-  const cityGeo = cityCache[geoKey];
-  const muniPop = { ...cityCache[muniKey] };  // shallow copy
+  const fetchPromise = (async () => {
+    try {
+      const fetches = [];
+      if (!cityCache[geoKey])  fetches.push(fetch(`geo-json/pref_${code}.geojson`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[geoKey] = d; }));
+      if (!cityCache[muniKey]) fetches.push(fetch(`population-json/municipalities/muni-pop-${code}.json`).then(r => { if (!r.ok) throw r.status; return r.json(); }).then(d => { cityCache[muniKey] = d; }));
+      await Promise.all(fetches);
+      return true;
+    } catch (e) {
+      console.warn('Fetch failed:', e); return false;
+    }
+  })();
 
-  // Apply name overrides
+  // [CHANGED] Start animation; draw municipalities after both anim + fetch done
+  await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
+
+  const fetchOk = await fetchPromise;
+  if (!fetchOk) return;
+  if (zoomedId !== id) return; // user navigated away during animation
+
+  drawCities(id, code, pop);
+}
+
+// [NEW] Extracted city drawing into its own function for clarity
+function drawCities(id, code, pop) {
+  const cityGeo = cityCache[`geo_${code}`];
+  const muniPop = { ...cityCache[`muni_${code}`] };
+
   Object.entries(NAME_OVERRIDES).forEach(([c, ov]) => {
     if (muniPop[c]) muniPop[c] = { ...muniPop[c], ...ov };
   });
@@ -761,77 +857,54 @@ async function zoomIn(id) {
   const prefTotal = pop.total || 0;
   const wardToCity = buildWardToCityMap(muniPop);
 
-  // Determine rankKey for each code
   function getRankKey(code) {
-    // Tokyo special wards: individual
     const prefCode = code.slice(0, 2);
     const num = parseInt(code.slice(2), 10);
     if (prefCode === '13' && num >= 101 && num <= 123) return code;
-    // Has parent city?
     if (wardToCity[code]) return wardToCity[code];
-    // Is a city aggregate (not a GeoJSON polygon) — skip
     return code;
   }
 
-  // Build rank items
-  // Keys that have their own polygon in GeoJSON
   const geoCodes = new Set(cityGeo.features.map(f => f.properties?.code));
-
-  // Collect all rankable items
   const rankItemMap = {};
-  const wardMap     = {};   // cityCode → [{nameJa, total}]
+  const wardMap     = {};
 
   Object.entries(muniPop).forEach(([c, d]) => {
     const key = getRankKey(c);
-
-    // If this is a ward (key ≠ c), contribute to the city entry
     if (key !== c) {
       if (!rankItemMap[key] && muniPop[key]) {
-        rankItemMap[key] = {
-          rankKey: key,
-          nameEn:  muniPop[key].nameEn,
-          nameJa:  muniPop[key].nameJa,
-          total:   muniPop[key].total || 0,
-        };
+        rankItemMap[key] = { rankKey: key, nameEn: muniPop[key].nameEn, nameJa: muniPop[key].nameJa, total: muniPop[key].total || 0 };
       }
       if (!wardMap[key]) wardMap[key] = [];
       wardMap[key].push({ nameJa: d.nameJa, total: d.total });
       return;
     }
-
-    // Skip city-aggregate entries that have no own polygon (e.g. 22100, 22130)
     if (!geoCodes.has(c)) return;
-
     if (!rankItemMap[key]) {
       rankItemMap[key] = { rankKey: key, nameEn: d.nameEn, nameJa: d.nameJa, total: d.total || 0 };
     }
   });
 
-  // Sort ward lists desc
   Object.values(wardMap).forEach(arr => arr.sort((a, b) => b.total - a.total));
 
-  const ranked = Object.values(rankItemMap)
-    .filter(item => item.total > 0)
-    .sort((a, b) => b.total - a.total);
+  const ranked = Object.values(rankItemMap).filter(item => item.total > 0).sort((a, b) => b.total - a.total);
   const rankMax = ranked[0]?.total || 1;
 
-  // Color scale
   const vals = ranked.map(r => r.total);
   const muniMin = Math.min(...vals), muniMax = Math.max(...vals);
 
-  // rankKey → color
   const rkColor = {};
   ranked.forEach(item => { rkColor[item.rankKey] = getColor(item.total, muniMin, muniMax); });
 
-  // Store for touch events
   window._muniRanked = ranked;
   window._wardMap    = wardMap;
   window._prefTotal  = prefTotal;
 
-  // Draw municipality paths
+  // [CHANGED] Use DocumentFragment to batch SVG DOM insertions
   const mapG = document.getElementById('map-g');
   cityLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   cityLayerG.id = 'city-layer';
+  const frag = document.createDocumentFragment();
 
   cityGeo.features.forEach(f => {
     const mcode   = f.properties?.code || '';
@@ -839,14 +912,11 @@ async function zoomIn(id) {
     const color   = rkColor[rankKey] || '#e0e0e0';
     const item    = rankItemMap[rankKey];
 
-    // Determine if this path is a ward with a parent city
     const isWard   = wardToCity[mcode] !== undefined;
     const cityCode = wardToCity[mcode];
     const cityItem = cityCode ? rankItemMap[cityCode] : null;
     const wardData = isWard ? muniPop[mcode] : null;
 
-    // For highlighting: wards in same city share rankKey (city code)
-    // Individual wards also get their own data-wardcode for tooltip
     const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     p.setAttribute('d', featureToPath(f));
     p.setAttribute('fill', color);
@@ -854,27 +924,21 @@ async function zoomIn(id) {
     p.setAttribute('class', 'city-path');
     p.setAttribute('data-rankkey', rankKey);
     p.setAttribute('data-mcode', mcode);
-    p.setAttribute('data-prefcode', code);  // prefecture code for 3-level highlight
+    p.setAttribute('data-prefcode', code);
 
     if (item && !IS_TOUCH) {
       p.addEventListener('mouseenter', e => {
-        // 3-level highlight: highlighted / same-pref / dimmed
-        // For wards: pass the single path so only this ward gets the hover color
         applyHighlight(rankKey, code, isWard ? p : null);
-        // For ward: other wards of same city → same-pref
         if (isWard) {
-          document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`).forEach(el => {
+          (_cityByRankKey?.get(rankKey) || []).forEach(el => {
             if (el !== p) {
               el.classList.remove('highlighted');
               el.classList.add('same-pref');
-              // Restore their original fill (applyHighlight may not have touched them)
               if (el.dataset.origfill) { el.setAttribute('fill', el.dataset.origfill); delete el.dataset.origfill; }
             }
           });
         }
-        // Highlight ranking row for parent city/municipality
         document.querySelectorAll('.rk-item').forEach(el => el.classList.toggle('active', el.dataset.key === rankKey));
-        // Tooltip: ward view or regular view
         if (isWard && wardData && cityItem) {
           const wItem = { nameEn: wardData.nameEn, nameJa: wardData.nameJa, total: wardData.total };
           showCityTip(e, item, prefTotal, null, false, wItem, cityItem);
@@ -889,24 +953,30 @@ async function zoomIn(id) {
         hideTip();
       });
     }
-    cityLayerG.appendChild(p);
+    frag.appendChild(p);
   });
 
+  cityLayerG.appendChild(frag);
   mapG.appendChild(cityLayerG);
 
-  // Update legend bar with municipality min/max for this prefecture
+  // [NEW] Build search index after all paths are in DOM
+  buildCityIndex();
+
   document.getElementById('minLabel').textContent = muniMin.toLocaleString();
   document.getElementById('maxLabel').textContent = muniMax.toLocaleString();
 
-  // Render ranking
   if (PANEL_W > 0) renderMuniRanking(ranked, rankMax, prefTotal, wardMap);
 }
 
+// ══════════════════════════════════════════════════════════
+//  [CHANGED] zoomOut — animated
+// ══════════════════════════════════════════════════════════
 function zoomOut() {
   if (zoomedId === null) return;
   zoomedId = null;
   hideTip();
   window._muniRanked = null; window._wardMap = null; window._prefTotal = 0;
+  _cityByRankKey = null; _cityByPrefCode = null;
 
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('zoom-label').classList.remove('visible');
@@ -918,13 +988,15 @@ function zoomOut() {
   document.querySelectorAll('.pref-path').forEach(p => { p.style.opacity = ''; });
   clearHighlight();
   if (cityLayerG) { cityLayerG.remove(); cityLayerG = null; }
-  viewX = 0; viewY = 0; viewScale = 1; applyView();
-  if (window._renderPrefRanking) window._renderPrefRanking();
-  // Restore national legend values
-  if (window._prefMinVal !== undefined) {
-    document.getElementById('minLabel').textContent = window._prefMinVal.toLocaleString();
-    document.getElementById('maxLabel').textContent = window._prefMaxVal.toLocaleString();
-  }
+
+  // [CHANGED] Animate back to origin (1:1 scale, no offset)
+  animateToView(0, 0, 1, () => {
+    if (window._renderPrefRanking) window._renderPrefRanking();
+    if (window._prefMinVal !== undefined) {
+      document.getElementById('minLabel').textContent = window._prefMinVal.toLocaleString();
+      document.getElementById('maxLabel').textContent = window._prefMaxVal.toLocaleString();
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -939,7 +1011,6 @@ function showError(msg) {
 }
 
 async function init() {
-  // ① Prefecture population
   setStatus('Loading population data…');
   let POP_DATA;
   try {
@@ -962,7 +1033,6 @@ async function init() {
   const rankMap = {};
   ranked.forEach((p, i) => { rankMap[p.id] = i + 1; });
 
-  // Store for touch
   window._natTot  = natTot;
   window._avg     = avg;
   window._maxVal  = maxVal;
@@ -974,11 +1044,9 @@ async function init() {
   document.getElementById('colorBar').style.background = 'linear-gradient(90deg,rgb(238,247,240),rgb(31,122,67))';
   document.getElementById('minLabel').textContent = minVal.toLocaleString();
   document.getElementById('maxLabel').textContent = maxVal.toLocaleString();
-  // Store national values for restoring after zoom-out
   window._prefMinVal = minVal;
   window._prefMaxVal = maxVal;
 
-  // ② Japan GeoJSON
   setStatus('Loading map data…');
   let japanGeo;
   try {
@@ -992,10 +1060,8 @@ async function init() {
   const allFeats = japanGeo.features.filter(f => f?.geometry);
   if (!allFeats.length) { showError('No features in japan.geojson'); return; }
 
-  // ③ Projection
   fitProjection(allFeats, svgW, svgH, 18, 88, 18 + PANEL_W, 18);
 
-  // ④ Draw prefecture paths
   const mapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   mapG.id = 'map-g';
   svgEl.appendChild(mapG);
