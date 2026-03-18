@@ -213,7 +213,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 
 /* ── Scrollable list ── */
 #bs-list-wrap {
-  flex: 1;
+  flex: none;          /* must be none — flex:1 overrides JS height */
   overflow-y: auto; overflow-x: hidden;
   padding: 8px 10px 16px;
   scrollbar-width: thin; scrollbar-color: #ddd transparent;
@@ -269,7 +269,7 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 <!-- Mobile bottom sheet (shown only on touch/narrow screens) -->
 <div id="bottom-sheet" role="region" aria-label="Population Ranking">
   <!-- Peek state label — visible only when sheet is collapsed -->
-  <div id="bs-peek-label">📊 Population Ranking — swipe up</div>
+  <div id="bs-peek-label">Swipe up ↑</div>
   <!-- Drag handle -->
   <div id="bs-handle-area" aria-label="Drag to resize panel">
     <div id="bs-handle"></div>
@@ -362,6 +362,12 @@ function bsApply(ty, animate) {
 function bsSetState(state, animate = true) {
   bsState = state;
   bsApply(bsTY(state), animate);
+  // Re-measure after paint in case layout shifted (e.g. Safari toolbar appearing)
+  if (animate) {
+    setTimeout(() => {
+      bsListWrap.style.height = bsListHeight(bsTY(state)) + 'px';
+    }, BS_ANIM + 20);
+  }
 }
 
 function bsInit() {
@@ -384,26 +390,24 @@ function bsInit() {
   // ── Close button removed (swipe down to close) ──
 
   // ── Drag logic ─────────────────────────────────────────
-  // We listen on the SHEET ELEMENT itself (not just handle)
-  // so the touch target is always the full visible area.
+  // Drag is initiated ONLY from the handle area.
+  // The sheet still stops all touches from reaching the SVG map.
   let dragActive  = false;
   let dragStartY  = 0;
   let dragStartTY = 0;
   let dragDeltaY  = 0;
-  let touchId     = null;  // track the specific touch
+  let touchId     = null;
 
-  bsEl.addEventListener('touchstart', e => {
-    // Always stop propagation so the SVG map doesn't receive this touch
-    e.stopPropagation();
+  const bsHandleArea = document.getElementById('bs-handle-area');
 
-    // If the list is open and the user touches INSIDE the list area
-    // and the list is not at scroll-top, let the list scroll normally
-    // (don't start a sheet drag)
-    if (bsState === 'full') {
-      const inList = e.target.closest('#bs-list-wrap');
-      if (inList && bsListWrap.scrollTop > 2) return;
-    }
+  // Stop ALL touches on the sheet from reaching the map below
+  bsEl.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
+  bsEl.addEventListener('touchmove',  e => { e.stopPropagation(); }, { passive: true });
+  bsEl.addEventListener('touchend',   e => { e.stopPropagation(); }, { passive: true });
+  bsEl.addEventListener('touchcancel',e => { e.stopPropagation(); }, { passive: true });
 
+  // Drag starts ONLY on the handle area
+  bsHandleArea.addEventListener('touchstart', e => {
     const t = e.changedTouches[0];
     touchId     = t.identifier;
     dragActive  = true;
@@ -411,64 +415,48 @@ function bsInit() {
     dragStartY  = t.clientY;
     dragStartTY = bsTY(bsState);
     bsEl.style.transition = 'none';
+    bsEl.classList.add('bs-dragging');
   }, { passive: true });
 
-  bsEl.addEventListener('touchmove', e => {
-    e.stopPropagation();
+  bsHandleArea.addEventListener('touchmove', e => {
     if (!dragActive) return;
-
-    // Find our tracked touch
     let t = null;
     for (let i = 0; i < e.changedTouches.length; i++) {
       if (e.changedTouches[i].identifier === touchId) { t = e.changedTouches[i]; break; }
     }
     if (!t) return;
-
     dragDeltaY = t.clientY - dragStartY;
-
-    // If in full state and scrolling UP inside list, don't drag sheet
-    if (bsState === 'full' && dragDeltaY < 0) { dragActive = false; return; }
-
-    const minTY = bsTY('full');
-    const maxTY = bsTY('peek');
+    const minTY = bsTY('full'), maxTY = bsTY('peek');
     const raw   = Math.max(minTY, Math.min(maxTY, dragStartTY + dragDeltaY));
-    bsEl.style.transform  = `translateY(${raw}px)`;
+    bsEl.style.transform    = `translateY(${raw}px)`;
     bsListWrap.style.height = bsListHeight(raw) + 'px';
   }, { passive: true });
 
-  bsEl.addEventListener('touchend', e => {
-    e.stopPropagation();
+  bsHandleArea.addEventListener('touchend', e => {
     if (!dragActive) return;
     dragActive = false;
     touchId    = null;
+    bsEl.classList.remove('bs-dragging');
 
     const absDelta = Math.abs(dragDeltaY);
 
-    // Tiny movement = tap on handle area → cycle up
+    // Tap (no real movement) → cycle states
     if (absDelta < 8) {
-      const inHandle = e.target.closest('#bs-handle-area');
-      if (inHandle || bsState === 'peek') {
-        const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
-        bsSetState(next);
-      }
+      const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
+      bsSetState(next);
       return;
     }
 
-    // Snap: use velocity hint (direction of drag)
-    const goingDown = dragDeltaY > 0;
-    const curTY = parseFloat(bsEl.style.transform.replace(/[^0-9.\-]/g, '')) || bsTY(bsState);
-
-    // Fast flick shortcut
+    // Fast flick → jump one step in drag direction
     if (absDelta > 60) {
-      if (goingDown) {
-        bsSetState(bsState === 'full' ? 'half' : 'peek');
-      } else {
-        bsSetState(bsState === 'peek' ? 'half' : 'full');
-      }
+      bsSetState(dragDeltaY > 0
+        ? (bsState === 'full' ? 'half' : 'peek')
+        : (bsState === 'peek' ? 'half' : 'full'));
       return;
     }
 
-    // Otherwise snap to nearest
+    // Snap to nearest state
+    const curTY = parseFloat(bsEl.style.transform.replace(/[^0-9.\-]/g, '')) || bsTY(bsState);
     let best = 'peek', bestDist = Infinity;
     ['peek', 'half', 'full'].forEach(s => {
       const d = Math.abs(curTY - bsTY(s));
@@ -477,10 +465,8 @@ function bsInit() {
     bsSetState(best);
   }, { passive: true });
 
-  // Also stop touchcancel
-  bsEl.addEventListener('touchcancel', e => {
-    e.stopPropagation();
-    if (dragActive) { dragActive = false; touchId = null; bsSetState(bsState); }
+  bsHandleArea.addEventListener('touchcancel', () => {
+    if (dragActive) { dragActive = false; touchId = null; bsEl.classList.remove('bs-dragging'); bsSetState(bsState); }
   }, { passive: true });
 
   // Resize → recalculate (no height reassignment needed since we use 100dvh)
