@@ -346,9 +346,9 @@ function bsTY(state) {
 // Height of the scrollable list area for a given translateY
 function bsListHeight(ty) {
   const vh = window.innerHeight;
-  const fixedH = 42 + 44;   // handle-area ~42px + header ~44px
-  const safariToolbarBuffer = 80; // ~3 items — prevents Safari URL bar overlap
-  return Math.max(40, vh - ty - fixedH - bsSafeB - safariToolbarBuffer);
+  const fixedH = 42 + 44;  // handle-area ~42px + header ~44px
+  const buffer = 34;        // Safari home indicator / URL bar buffer
+  return Math.max(40, vh - ty - fixedH - bsSafeB - buffer);
 }
 
 function bsApply(ty, animate) {
@@ -390,8 +390,8 @@ function bsInit() {
   // ── Close button removed (swipe down to close) ──
 
   // ── Drag logic ─────────────────────────────────────────
-  // Drag is initiated ONLY from the handle area.
-  // The sheet still stops all touches from reaching the SVG map.
+  // touchstart  → handle area only (so list scrolling doesn't trigger sheet drag)
+  // touchmove / touchend → window (finger may leave handle area during drag)
   let dragActive  = false;
   let dragStartY  = 0;
   let dragStartTY = 0;
@@ -400,13 +400,13 @@ function bsInit() {
 
   const bsHandleArea = document.getElementById('bs-handle-area');
 
-  // Stop ALL touches on the sheet from reaching the map below
+  // Stop ALL touches on the sheet from reaching the SVG map below
   bsEl.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
   bsEl.addEventListener('touchmove',  e => { e.stopPropagation(); }, { passive: true });
   bsEl.addEventListener('touchend',   e => { e.stopPropagation(); }, { passive: true });
   bsEl.addEventListener('touchcancel',e => { e.stopPropagation(); }, { passive: true });
 
-  // Drag starts ONLY on the handle area
+  // Drag STARTS on handle area only
   bsHandleArea.addEventListener('touchstart', e => {
     const t = e.changedTouches[0];
     touchId     = t.identifier;
@@ -418,7 +418,8 @@ function bsInit() {
     bsEl.classList.add('bs-dragging');
   }, { passive: true });
 
-  bsHandleArea.addEventListener('touchmove', e => {
+  // touchmove / touchend on WINDOW so tracking continues even if finger leaves handle
+  window.addEventListener('touchmove', e => {
     if (!dragActive) return;
     let t = null;
     for (let i = 0; i < e.changedTouches.length; i++) {
@@ -432,15 +433,22 @@ function bsInit() {
     bsListWrap.style.height = bsListHeight(raw) + 'px';
   }, { passive: true });
 
-  bsHandleArea.addEventListener('touchend', e => {
+  window.addEventListener('touchend', e => {
     if (!dragActive) return;
+    // Check the touch that ended is ours
+    let found = false;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === touchId) { found = true; break; }
+    }
+    if (!found) return;
+
     dragActive = false;
     touchId    = null;
     bsEl.classList.remove('bs-dragging');
 
     const absDelta = Math.abs(dragDeltaY);
 
-    // Tap (no real movement) → cycle states
+    // Tap (barely moved) → cycle states
     if (absDelta < 8) {
       const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
       bsSetState(next);
@@ -465,8 +473,11 @@ function bsInit() {
     bsSetState(best);
   }, { passive: true });
 
-  bsHandleArea.addEventListener('touchcancel', () => {
-    if (dragActive) { dragActive = false; touchId = null; bsEl.classList.remove('bs-dragging'); bsSetState(bsState); }
+  window.addEventListener('touchcancel', () => {
+    if (!dragActive) return;
+    dragActive = false; touchId = null;
+    bsEl.classList.remove('bs-dragging');
+    bsSetState(bsState);
   }, { passive: true });
 
   // Resize → recalculate (no height reassignment needed since we use 100dvh)
