@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shinkansen — Japan's High-Speed Rail Evolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface2: #1e1e21;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e6e0;
+    --text-muted: #888680;
+    --text-dim: #4a4846;
+    --accent: #e8c87a;
+    --accent2: #c8a855;
+    --red: #e05c4a;
+
+    --tokaido: #4a9eff;
+    --sanyo: #e05c4a;
+    --tohoku: #5cba7a;
+    --joetsu: #b07aff;
+    --hokuriku: #ff8c42;
+    --kyushu: #42c8c8;
+    --hokkaido: #9b7aff;
+    --nishikyushu: #42c8a0;
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; }
+
+  body { min-height: 100vh; display: grid; grid-template-columns: 340px 1fr; grid-template-rows: auto 1fr; }
+
+  /* ── Header ── */
+  header {
+    grid-column: 1 / -1;
+    padding: 28px 36px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 24px;
+  }
+  header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300; font-size: 22px; letter-spacing: 0.04em;
+    color: var(--text);
+  }
+  header .subtitle {
+    font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .header-right {
+    margin-left: auto; display: flex; align-items: center; gap: 12px;
+  }
+  .source-note { font-size: 11px; color: var(--text-dim); }
+
+  /* ── Left panel ── */
+  .panel {
+    border-right: 1px solid var(--border);
+    padding: 28px 28px;
+    display: flex; flex-direction: column; gap: 28px;
+    overflow-y: auto;
+  }
+
+  /* Year */
+  .year-block { }
+  .year-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 72px; font-weight: 400; line-height: 1;
+    color: var(--accent); letter-spacing: -0.02em;
+  }
+  .year-era {
+    font-size: 12px; color: var(--text-muted); margin-top: 6px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; }
+  .btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-muted); font-family: 'DM Mono', monospace;
+    font-size: 12px; padding: 8px 16px; border-radius: 3px;
+    cursor: pointer; letter-spacing: 0.05em; transition: all 0.15s;
+  }
+  .btn:hover { background: var(--surface); color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .btn.active { color: var(--accent); border-color: var(--accent2); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .stat { background: var(--surface); padding: 14px 16px; }
+  .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 20px; color: var(--text); }
+  .stat-value.highlight { color: var(--accent); }
+  .stat-unit { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
+
+  /* Event log */
+  .event-log {
+    border-left: 2px solid var(--accent2);
+    padding: 10px 14px;
+    font-size: 12px; line-height: 1.6; color: var(--text-muted);
+    min-height: 48px;
+    font-style: italic;
+  }
+  .event-log:empty { border-color: var(--text-dim); }
+
+  /* Speed chart */
+  .chart-block {}
+  .chart-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .chart-wrap { position: relative; height: 72px; }
+
+  /* Legend */
+  .legend { display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted); transition: opacity 0.3s; }
+  .legend-item.inactive { opacity: 0.2; }
+  .legend-dot { width: 20px; height: 2.5px; border-radius: 2px; flex-shrink: 0; }
+  .legend-year { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); margin-left: auto; }
+
+  /* Data note */
+  .data-note { font-size: 10px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── Map ── */
+  .map-area { position: relative; overflow: hidden; }
+  #map-svg {
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .pref-path { fill: #1a1a1e; stroke: #2e2e35; stroke-width: 0.4; }
+  .pref-path:hover { fill: #222228; }
+
+  /* Loading overlay */
+  #loading {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); flex-direction: column; gap: 12px;
+    transition: opacity 0.4s;
+  }
+  #loading.done { opacity: 0; pointer-events: none; }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); letter-spacing: 0.1em; }
+  .loading-bar { width: 120px; height: 1px; background: var(--border); position: relative; overflow: hidden; }
+  .loading-bar::after { content:''; position: absolute; left: -100%; top:0; width:100%; height:100%; background: var(--accent); animation: slide 1.2s ease-in-out infinite; }
+  @keyframes slide { to { left: 100%; } }
+
+  /* Timeline scrubber */
+  .scrubber-wrap {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    width: min(500px, 80%);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .scrubber-wrap input[type=range] {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 2px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  .scrubber-wrap input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 12px;
+    background: var(--accent); border-radius: 50%; cursor: pointer;
+  }
+  .scrubber-year { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); min-width: 30px; }
+
+  @media (max-width: 700px) {
+    body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+    .panel { border-right: none; border-bottom: 1px solid var(--border); padding: 20px; gap: 16px; }
+    .map-area { height: 60vw; min-height: 320px; }
+    .year-num { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>新幹線 Shinkansen</h1>
+  <span class="subtitle">Japan's High-Speed Rail — 1964 to present</span>
+  <div class="header-right">
+    <span class="source-note">Sources: JR各社公式 · JR東海発表 · Wikipedia</span>
+  </div>
+</header>
+
+<!-- Left panel -->
+<aside class="panel">
+  <div class="year-block">
+    <div class="year-num" id="year-display">1960</div>
+    <div class="year-era" id="era-label">Before the Shinkansen</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn active" id="btn-play" onclick="togglePlay()">▶ PLAY</button>
+    <button class="btn" onclick="resetAnim()">↺ RESET</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Lines open</div>
+      <div class="stat-value highlight" id="stat-lines">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Top speed</div>
+      <div class="stat-value" id="stat-speed">—<span class="stat-unit" id="speed-unit"></span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Avg. delay</div>
+      <div class="stat-value" id="stat-delay">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Network km</div>
+      <div class="stat-value" id="stat-km">—</div>
+    </div>
+  </div>
+
+  <div class="event-log" id="event-log"></div>
+
+  <div class="chart-block">
+    <div class="chart-label">Max speed (km/h) by year</div>
+    <div class="chart-wrap"><canvas id="speed-canvas"></canvas></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="data-note">
+    <strong style="color:var(--text-muted)">Data sources</strong><br>
+    Opening years: JR各社公式・鉄道要覧<br>
+    Max speed: JR東日本・JR東海・JR西日本公式<br>
+    Avg. delay: JR東海発表 / Statista<br>
+    &emsp;2019: 0.2 min · 2023: 1.6 min<br>
+    Map: GeoJSON 都道府県境界（簡略化済）
+  </div>
+</aside>
+
+<!-- Map -->
+<main class="map-area">
+  <svg id="map-svg" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid meet">
+    <g id="prefectures-g"></g>
+    <g id="lines-g"></g>
+    <g id="stations-g"></g>
+  </svg>
+
+  <div class="scrubber-wrap">
+    <span class="scrubber-year">1960</span>
+    <input type="range" min="1960" max="2025" value="1960" id="scrubber" oninput="onScrub(this.value)">
+    <span class="scrubber-year">2025</span>
+  </div>
+
+  <div id="loading">
+    <div class="loading-text">Loading map data…</div>
+    <div class="loading-bar"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const LINES = [
+  { id:'tokaido', name:'Tokaido', color:'var(--tokaido)', hex:'#4a9eff', openYear:1964, km:515,
+    coords:[[135.50,34.70],[135.73,35.02],[136.88,35.17],[137.38,34.98],[138.39,35.00],[139.13,35.11],[139.70,35.68]],
+    stations:[['Shin-Osaka',135.50,34.70],['Kyoto',135.73,35.02],['Nagoya',136.88,35.17],['Shizuoka',138.39,35.00],['Tokyo',139.70,35.68]] },
+  { id:'sanyo', name:'Sanyo', color:'var(--sanyo)', hex:'#e05c4a', openYear:1975, km:554,
+    coords:[[130.42,33.59],[131.00,33.78],[132.46,34.39],[133.92,34.66],[134.60,34.84],[135.16,34.69],[135.50,34.70]],
+    stations:[['Hakata',130.42,33.59],['Hiroshima',132.46,34.39],['Okayama',133.92,34.66],['Shin-Osaka',135.50,34.70]] },
+  { id:'tohoku', name:'Tohoku', color:'var(--tohoku)', hex:'#5cba7a', openYear:1982, km:675,
+    coords:[[139.70,35.68],[139.62,36.10],[140.36,36.55],[140.86,37.73],[141.13,38.26],[141.14,39.70],[140.77,40.82]],
+    stations:[['Tokyo',139.70,35.68],['Omiya',139.62,36.10],['Sendai',140.86,37.73],['Morioka',141.13,39.70],['Shin-Aomori',140.77,40.82]] },
+  { id:'joetsu', name:'Joetsu', color:'var(--joetsu)', hex:'#b07aff', openYear:1982, km:270,
+    coords:[[139.62,36.10],[138.95,37.17],[138.94,37.82],[139.02,37.92]],
+    stations:[['Omiya',139.62,36.10],['Niigata',139.02,37.92]] },
+  { id:'hokuriku', name:'Hokuriku', color:'var(--hokuriku)', hex:'#ff8c42', openYear:1997, km:345,
+    coords:[[139.62,36.10],[138.24,36.65],[137.21,36.72],[136.63,36.58]],
+    ext2024:[[136.63,36.58],[136.22,36.14],[135.84,35.91],[135.68,35.93]],
+    stations:[['Omiya',139.62,36.10],['Nagano',138.24,36.65],['Kanazawa',136.63,36.58]] },
+  { id:'kyushu', name:'Kyushu', color:'var(--kyushu)', hex:'#42c8c8', openYear:2004, km:257,
+    coords:[[130.42,33.59],[130.50,33.00],[130.70,32.80],[130.74,31.56]],
+    stations:[['Hakata',130.42,33.59],['Kumamoto',130.70,32.80],['Kagoshima-Chuo',130.74,31.56]] },
+  { id:'hokkaido', name:'Hokkaido', color:'var(--hokkaido)', hex:'#9b7aff', openYear:2016, km:149,
+    coords:[[140.77,40.82],[141.40,41.48],[141.40,41.73]],
+    stations:[['Shin-Aomori',140.77,40.82],['Shin-Hakodate',141.40,41.73]] },
+  { id:'nishikyushu', name:'Nishi-Kyushu', color:'var(--nishikyushu)', hex:'#42c8a0', openYear:2022, km:66,
+    coords:[[130.01,33.27],[129.87,32.74]],
+    stations:[['Takeo-Onsen',130.01,33.27],['Nagasaki',129.87,32.74]] },
+];
+
+const SPEED_HISTORY = [
+  { year:1964, speed:210, event:"Tokaido Shinkansen opens — world's first high-speed rail at 210 km/h" },
+  { year:1972, speed:210, event:'Sanyo line extends to Okayama' },
+  { year:1975, speed:210, event:'Sanyo line reaches Hakata — western Japan connected' },
+  { year:1982, speed:240, event:'Tohoku & Joetsu lines open; max speed raised to 240 km/h' },
+  { year:1992, speed:270, event:'Nozomi service debuts — 270 km/h, Tokyo to Osaka in 2h30m' },
+  { year:1997, speed:300, event:'Hokuriku (Nagano) opens for Winter Olympics; 300 km/h on Tokaido' },
+  { year:2004, speed:300, event:'Kyushu Shinkansen opens partially (Shin-Yatsushiro to Kagoshima-Chuo)' },
+  { year:2007, speed:300, event:'N700 series: average delay falls below 1 minute per train' },
+  { year:2011, speed:320, event:'E5 series achieves 320 km/h on Tohoku. Kyushu Shinkansen fully opens' },
+  { year:2015, speed:320, event:'Hokuriku extended to Kanazawa' },
+  { year:2016, speed:320, event:'Hokkaido Shinkansen opens (Shin-Aomori to Shin-Hakodate)' },
+  { year:2022, speed:320, event:'Nishi-Kyushu Shinkansen opens (Takeo-Onsen to Nagasaki)' },
+  { year:2024, speed:320, event:'Hokuriku extended to Tsuruga; N700S trials target 360 km/h' },
+];
+
+const DELAY_DATA = [
+  [1964,'~1.5 min'],[1982,'~1.0 min'],[1992,'~0.8 min'],
+  [2007,'~0.6 min'],[2019,'0.2 min'],[2023,'1.6 min'],
+];
+
+const ERA = [
+  [1960,'Before the Shinkansen'],[1964,'The Shinkansen Era Begins'],
+  [1972,'Westward Expansion'],[1975,'Reaching Kyushu'],
+  [1982,'The Network Grows North'],[1992,'Speed Revolution'],
+  [1997,'Into the Mountains'],[2004,'Island Bridges'],
+  [2011,'320 km/h Achieved'],[2016,'Crossing to Hokkaido'],
+  [2022,'Nishi-Kyushu Opens'],[2024,'Toward 360 km/h'],
+];
+
+// ── Map setup ────────────────────────────────────────────────────────────────
+const W = 800, H = 900;
+const proj = d3.geoMercator().center([136.5, 37.5]).scale(2000).translate([W/2, H/2]);
+const pathGen = d3.geoPath().projection(proj);
+const svg = d3.select('#map-svg');
+
+// Load GeoJSON
+const GEOJSON_URL = './japan-simplified.geojson';
+
+fetch(GEOJSON_URL)
+  .then(r => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+  .then(geojson => {
+    svg.select('#prefectures-g')
+      .selectAll('path')
+      .data(geojson.features)
+      .join('path')
+      .attr('class', 'pref-path')
+      .attr('d', pathGen);
+    document.getElementById('loading').classList.add('done');
+    render(currentYear);
+  })
+  .catch(err => {
+    console.error('GeoJSON load failed:', err);
+    document.querySelector('.loading-text').textContent = 'Map load failed. Check CORS on GitHub Pages.';
+  });
+
+// ── Speed Chart ──────────────────────────────────────────────────────────────
+let speedChart;
+function initChart() {
+  speedChart = new Chart(document.getElementById('speed-canvas'), {
+    type: 'line',
+    data: {
+      labels: SPEED_HISTORY.map(h => h.year),
+      datasets: [
+        { data: SPEED_HISTORY.map(h => h.speed), borderColor: '#c8a855', backgroundColor: 'rgba(200,168,85,0.06)', borderWidth: 1.5, pointRadius: 2, pointBackgroundColor: '#c8a855', fill: true, tension: 0.3 },
+        { data: SPEED_HISTORY.map(() => null), borderColor: '#e8c87a', borderWidth: 0, pointRadius: 7, pointBackgroundColor: '#e8c87a', showLine: false },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false, min: 150, max: 380 } },
+      animation: { duration: 200 },
+    }
+  });
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+let currentYear = 1960, playing = false, timer = null;
+
+function render(year) {
+  currentYear = year;
+  document.getElementById('year-display').textContent = year;
+  document.getElementById('scrubber').value = year;
+
+  // Era
+  let era = ERA[0][1];
+  for (const [y, l] of ERA) if (year >= y) era = l;
+  document.getElementById('era-label').textContent = era;
+
+  // Speed
+  let speed = 0, sidx = 0;
+  for (let i = 0; i < SPEED_HISTORY.length; i++) {
+    if (SPEED_HISTORY[i].year <= year) { speed = SPEED_HISTORY[i].speed; sidx = i; }
+  }
+  document.getElementById('stat-speed').textContent = speed || '—';
+  document.getElementById('speed-unit').textContent = speed ? ' km/h' : '';
+
+  // Delay
+  let delay = '—';
+  for (const [y, d] of DELAY_DATA) if (year >= y) delay = d;
+  document.getElementById('stat-delay').textContent = delay;
+
+  // Open lines & km
+  const openLines = LINES.filter(l => l.openYear <= year);
+  document.getElementById('stat-lines').textContent = openLines.length;
+  const km = openLines.reduce((s, l) => s + l.km, 0) + (year >= 2024 && openLines.find(l=>l.id==='hokuriku') ? 113 : 0);
+  document.getElementById('stat-km').textContent = km ? km.toLocaleString() + ' km' : '—';
+
+  // Event
+  const ev = SPEED_HISTORY.find(h => h.year === year);
+  document.getElementById('event-log').textContent = ev ? ev.event : '';
+
+  // Draw lines
+  const lG = svg.select('#lines-g');
+  lG.selectAll('*').remove();
+  for (const line of openLines) {
+    const pts = line.coords.map(c => proj(c));
+    const d = 'M' + pts.map((p, i) => (i === 0 ? '' : ' L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+    // glow
+    lG.append('path').attr('d', d).attr('fill', 'none').attr('stroke', line.hex).attr('stroke-width', '10').attr('opacity', '0.12').attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    // line
+    lG.append('path').attr('d', d).attr('fill', 'none').attr('stroke', line.hex).attr('stroke-width', '3').attr('opacity', '0.95').attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    // Hokuriku 2024 ext
+    if (line.id === 'hokuriku' && year >= 2024 && line.ext2024) {
+      const last = pts[pts.length - 1];
+      const ext = line.ext2024.map(c => proj(c));
+      const de = 'M' + last[0].toFixed(1) + ' ' + last[1].toFixed(1) + ext.map(p => ' L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+      lG.append('path').attr('d', de).attr('fill', 'none').attr('stroke', line.hex).attr('stroke-width', '3').attr('opacity', '0.95').attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+    }
+  }
+
+  // Draw stations
+  const sG = svg.select('#stations-g');
+  sG.selectAll('*').remove();
+  const drawn = new Set();
+  const major = new Set(['Tokyo','Shin-Osaka','Hakata','Nagoya','Sendai','Shin-Aomori','Shin-Hakodate','Kagoshima-Chuo','Kanazawa','Niigata','Nagasaki','Morioka']);
+  for (const line of openLines) {
+    for (const [name, lon, lat] of line.stations) {
+      if (drawn.has(name)) continue;
+      drawn.add(name);
+      const [px, py] = proj([lon, lat]);
+      sG.append('circle').attr('cx', px).attr('cy', py).attr('r', 5).attr('fill', '#0e0e0f').attr('stroke', line.hex).attr('stroke-width', '2');
+      if (major.has(name)) {
+        const anchor = lon < 136 ? 'end' : 'start';
+        const dx = lon < 136 ? -10 : 10;
+        sG.append('text').attr('x', px + dx).attr('y', py + 4).attr('text-anchor', anchor)
+          .attr('font-size', '11').attr('fill', '#888680').attr('font-family', "'DM Sans', sans-serif").text(name);
+      }
+    }
+  }
+
+  // Legend
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '';
+  for (const line of LINES) {
+    const isOpen = line.openYear <= year;
+    legend.innerHTML += `
+      <div class="legend-item${isOpen ? '' : ' inactive'}">
+        <div class="legend-dot" style="background:${line.hex}"></div>
+        <span>${line.name}</span>
+        <span class="legend-year">${line.openYear}</span>
+      </div>`;
+  }
+
+  // Chart
+  if (speedChart) {
+    speedChart.data.datasets[1].data = SPEED_HISTORY.map((h, i) => i === sidx ? h.speed : null);
+    speedChart.update('none');
+  }
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('btn-play');
+  btn.textContent = playing ? '⏸ PAUSE' : '▶ PLAY';
+  btn.classList.toggle('active', !playing);
+  if (playing) tick();
+  else clearTimeout(timer);
+}
+
+function tick() {
+  if (!playing) return;
+  if (currentYear >= 2025) { playing = false; document.getElementById('btn-play').textContent = '▶ PLAY'; return; }
+  render(currentYear + 1);
+  const hasEv = SPEED_HISTORY.some(h => h.year === currentYear);
+  timer = setTimeout(tick, hasEv ? 1800 : 280);
+}
+
+function resetAnim() {
+  playing = false; clearTimeout(timer);
+  document.getElementById('btn-play').textContent = '▶ PLAY';
+  document.getElementById('btn-play').classList.add('active');
+  render(1960);
+}
+
+function onScrub(val) {
+  playing = false; clearTimeout(timer);
+  document.getElementById('btn-play').textContent = '▶ PLAY';
+  render(parseInt(val));
+}
+
+initChart();
+render(1960);
+// Auto-start after map loads
+setTimeout(() => { playing = true; document.getElementById('btn-play').textContent = '⏸ PAUSE'; tick(); }, 1200);
+</script>
+</body>
+</html>
