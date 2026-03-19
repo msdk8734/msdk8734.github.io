@@ -36,7 +36,7 @@
 </div>
 
 <div style="position:relative;width:100%;">
-  <svg id="map-svg" width="100%" viewBox="0 0 520 600" style="display:block;">
+  <svg id="map-svg" width="100%" viewBox="0 0 520 600" style="display:block;height:auto;min-height:400px;">
     <g id="prefectures"></g>
     <g id="lines-group"></g>
     <g id="stations-group"></g>
@@ -107,7 +107,7 @@ const LINES = [
 ];
 
 const SPEED_HISTORY = [
-  {year:1964,speed:210,event:'Tokaido Shinkansen opens — world's first high-speed rail at 210 km/h'},
+  {year:1964,speed:210,event:"Tokaido Shinkansen opens \u2014 world's first high-speed rail at 210 km/h"},
   {year:1972,speed:210,event:'Sanyo line reaches Okayama'},
   {year:1975,speed:210,event:'Sanyo line extended to Hakata (Fukuoka)'},
   {year:1982,speed:240,event:'Tohoku & Joetsu lines open; speed raised to 240 km/h'},
@@ -135,6 +135,9 @@ const ERA_LABELS = {
   2011:'320 km/h Achieved',2016:'Crossing to Hokkaido',
   2022:'Nishi-Kyushu Opens',2024:'Toward 360 km/h',
 };
+
+// ── Init after scripts load ───────────────────────────────────────────────────
+window.addEventListener('load', function() {
 
 // ── Map setup ─────────────────────────────────────────────────────────────────
 const svg = d3.select('#map-svg');
@@ -320,4 +323,6 @@ function resetAnim() {
 initChart();
 render(1960);
 setTimeout(()=>{ playing=true; document.getElementById('btn-play').textContent='⏸ Pause'; tick(); }, 800);
+
+}); // end window.addEventListener('load')
 </script>
