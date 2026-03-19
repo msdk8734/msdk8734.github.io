@@ -225,6 +225,8 @@ body { background:#fff; color:#2a2a2a; font-family:'IBM Plex Sans',sans-serif; o
 /* ── "Peek" state: show title but disable interaction on rest ── */
 #bottom-sheet.bs-state-peek #bs-header     { opacity: 1; pointer-events: none; }
 #bottom-sheet:not(.bs-state-peek) #bs-header { opacity: 1; pointer-events: auto; }
+/* Disable list interaction in peek state so items don't intercept swipe */
+#bottom-sheet.bs-state-peek #bs-list-wrap  { pointer-events: none; }
 
 @media (max-width:720px) {
   #ranking    { display: none !important; }
@@ -401,14 +403,19 @@ function bsInit() {
 
   function inHandleZone(clientY) {
     const sheetTop = bsTY(bsState); // current visible top of sheet in screen coords
-    return clientY >= sheetTop && clientY <= sheetTop + BS_PEEK_H + 10; // +10px tolerance
+    const handleBarH = 42;          // only the physical handle bar, not the title below
+    return clientY >= sheetTop && clientY <= sheetTop + handleBarH;
   }
 
   bsEl.addEventListener('touchstart', e => {
     e.stopPropagation();
     const t = e.changedTouches[0];
-    // Start drag only if touch is in the handle zone OR sheet is in peek state
-    if (!inHandleZone(t.clientY) && bsState !== 'peek') return;
+    // In peek state: whole visible area is handle zone (BS_PEEK_H px)
+    // In other states: only the physical handle bar triggers drag
+    const sheetTop = bsTY(bsState);
+    const dragZoneH = bsState === 'peek' ? BS_PEEK_H : 42;
+    const inDragZone = t.clientY >= sheetTop && t.clientY <= sheetTop + dragZoneH;
+    if (!inDragZone) return;
     dragActive  = true;
     dragDeltaY  = 0;
     dragStartY  = t.clientY;
