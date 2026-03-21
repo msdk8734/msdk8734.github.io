@@ -281,7 +281,7 @@ html, body {
       <div class="control-label">Display</div>
       <div class="mode-group">
         <button class="mode-btn active" data-mode="shinto"><span class="dot"></span>Shinto shrines ⛩️</button>
-        <button class="mode-btn" data-mode="buddhist"><span class="dot"></span>Buddhist temples 🪷</button>
+        <button class="mode-btn" data-mode="buddhist"><span class="dot"></span>Buddhist temples 卍</button>
         <button class="mode-btn" data-mode="both"><span class="dot"></span>Total religious orgs</button>
       </div>
     </div>
@@ -315,7 +315,7 @@ html, body {
       <div class="control-label">National total</div>
       <div class="nat-stats">
         <div class="nat-cell"><div class="nat-val" id="nat-shrines">—</div><div class="nat-label">⛩️ Shinto<br>shrines</div></div>
-        <div class="nat-cell"><div class="nat-val" id="nat-temples">—</div><div class="nat-label">🪷 Buddhist<br>temples</div></div>
+        <div class="nat-cell"><div class="nat-val" id="nat-temples">—</div><div class="nat-label">卍 Buddhist temples<br><span style="font-size:9px;opacity:0.6">卍 = Japanese map symbol for Buddhist temples</span></div></div>
         <div class="nat-cell"><div class="nat-val" id="nat-shinto-b">—</div><div class="nat-label">Shinto<br>believers</div></div>
         <div class="nat-cell"><div class="nat-val" id="nat-buddhist-b">—</div><div class="nat-label">Buddhist<br>believers</div></div>
       </div>
@@ -484,7 +484,7 @@ function updateLegend() {
 // ── Ranking panel ─────────────────────────────────────────
 function renderRanking() {
   const label = mode==='shinto'   ? '⛩️ Shrines'
-              : mode==='buddhist' ? '🪷 Temples'
+              : mode==='buddhist' ? '卍 Temples'
               : '🏛 Orgs';
   const suffix = metric==='perCapita' ? '/10k' : '';
   document.getElementById('rk-title').textContent =
@@ -560,7 +560,7 @@ function updateInfoCard(code) {
     <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
     <div class="info-row"><span class="info-row-label">⛩️ Shrines</span><span class="info-row-val">${fmt(r.shinto.shrines)}</span></div>
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${shrPC}</span></div>
-    <div class="info-row"><span class="info-row-label">🪷 Temples</span><span class="info-row-val">${fmt(r.buddhist.temples)}</span></div>
+    <div class="info-row"><span class="info-row-label">卍 Temples</span><span class="info-row-val">${fmt(r.buddhist.temples)}</span></div>
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${tmpPC}</span></div>
     <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${shintoB}</span></div>
     <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${buddhistB}</span></div>`;
@@ -592,7 +592,7 @@ function showTooltipNearRanking(code) {
             : mode==='buddhist' ? r.buddhist.temples
             : r.total.orgs;
   const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '🪷 Temples'
+              : mode==='buddhist' ? '卍 Temples'
               : '🏛 Total orgs';
   const valStr = metric==='perCapita'
     ? `${fmtDec(raw/p.total*10000)} per 10k`
@@ -644,7 +644,7 @@ function showTooltip(event, code) {
             : mode==='buddhist' ? r.buddhist.temples
             : r.total.orgs;
   const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '🪷 Temples'
+              : mode==='buddhist' ? '卍 Temples'
               : '🏛 Total orgs';
   const valStr = metric==='perCapita'
     ? `${fmtDec(raw/p.total*10000)} per 10k`
