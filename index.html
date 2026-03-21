@@ -3,825 +3,591 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shrines & Temples — Japan Religion Map</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>Data Visualizations</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>📊</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-:root {
-  --ink: #1a1612;
-  --ink-mid: #4a3f35;
-  --ink-soft: #8a7a6e;
-  --paper: #f5f0e8;
-  --paper-warm: #ede6d8;
-  --paper-deep: #d9cfc0;
-  --map-lo: #e8dece;
-  --map-hi: #5c3d1e;
-  --accent: #7a5830;
-}
+  body {
+    background: #fafafa;
+    color: #1a1a1a;
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
 
-html, body {
-  width: 100%; height: 100vh; overflow: hidden;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: 'DM Mono', monospace;
-  font-weight: 300;
-}
+  header {
+    padding: 60px 40px 40px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
 
-/* ── Layout: left sidebar | map | right ranking ── */
-.shell {
-  display: grid;
-  grid-template-columns: 274px 1fr 220px;
-  grid-template-rows: auto 1fr;
-  height: 100vh;
-}
+  header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #111;
+    margin-bottom: 8px;
+  }
 
-/* ── Header ── */
-.header {
-  grid-column: 1 / -1;
-  padding: 14px 24px 12px;
-  border-bottom: 1px solid var(--paper-deep);
-  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  background: var(--paper);
-}
-.header-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 26px; font-weight: 300; font-style: italic;
-  color: var(--ink); line-height: 1;
-}
-.header-title em { font-style: normal; font-weight: 600; }
-.header-sub {
-  font-size: 11px; letter-spacing: 0.10em;
-  color: var(--ink-soft); text-transform: uppercase;
-}
-.header-source {
-  margin-left: auto; font-size: 10px; color: var(--ink-soft);
-  letter-spacing: 0.04em; line-height: 1.7; text-align: right;
-}
+  header p {
+    font-size: 15px;
+    font-weight: 400;
+    color: #888;
+    line-height: 1.6;
+    max-width: 620px;
+  }
 
-/* ── Left sidebar ── */
-.sidebar {
-  border-right: 1px solid var(--paper-deep);
-  padding: 18px 16px;
-  display: flex; flex-direction: column; gap: 18px;
-  overflow-y: auto; background: var(--paper);
-}
-.control-label {
-  font-size: 10px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
-}
+  .divider {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .divider hr {
+    border: none;
+    border-top: 1px solid #e8e8e8;
+  }
 
-.mode-group { display: flex; flex-direction: column; gap: 5px; }
-.mode-btn {
-  display: flex; align-items: center; gap: 9px;
-  padding: 9px 12px; background: transparent;
-  border: 1px solid var(--paper-deep); cursor: pointer;
-  font-family: 'DM Mono', monospace; font-size: 12px;
-  font-weight: 300; color: var(--ink-mid);
-  letter-spacing: 0.04em; transition: all 0.15s; text-align: left;
-}
-.mode-btn .dot {
-  width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
-  border: 1.5px solid var(--paper-deep); transition: all 0.15s;
-}
-.mode-btn.active { border-color: var(--ink-mid); color: var(--ink); }
-.mode-btn.active .dot { border-color: transparent; background: var(--map-hi); }
+  .gallery {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 40px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
 
-.metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
-.metric-btn {
-  flex: 1; padding: 8px 4px; background: transparent; border: none;
-  border-right: 1px solid var(--paper-deep);
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  letter-spacing: 0.08em; color: var(--ink-soft);
-  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
-}
-.metric-btn:last-child { border-right: none; }
-.metric-btn.active { background: var(--ink); color: var(--paper); }
+  .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
 
-.legend-bar { height: 9px; border-radius: 2px; margin-bottom: 6px; }
-.legend-ticks {
-  display: flex; justify-content: space-between;
-  font-size: 10px; color: var(--ink-soft);
-}
+  .card-preview {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-.info-card {
-  background: var(--paper-warm); border: 1px solid var(--paper-deep);
-  padding: 13px; min-height: 130px;
-}
-.info-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 20px; font-weight: 400; margin-bottom: 1px; color: var(--ink);
-}
-.info-name-ja { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 9px; }
-.info-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 11px;
-}
-.info-row-label { color: var(--ink-soft); }
-.info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
-.info-placeholder {
-  color: var(--ink-soft); font-size: 11px; font-style: italic;
-  padding-top: 10px; font-family: 'Cormorant Garamond', serif;
-}
+  /* ── Themes ── */
+  .card-preview.population-theme {
+    background: linear-gradient(135deg, #eef7f0 0%, #e1f1e6 50%, #cfe6d7 100%);
+  }
+  .card-preview.pyramid-theme {
+    background: linear-gradient(135deg, #eef3fb 0%, #dce8f8 50%, #c8d8f0 100%);
+  }
+  .card-preview.shrine-theme {
+    background: linear-gradient(135deg, #f5f0e8 0%, #ede6d8 50%, #d9cfc0 100%);
+  }
+  .card-preview.heatmap-theme {
+    background: linear-gradient(135deg, #eef3fb 0%, #dfeaf9 38%, #fff6cf 58%, #fddbb6 76%, #f4b0a6 100%);
+  }
+  .card-preview.ramen-theme {
+    background: linear-gradient(135deg, #fef2f0 0%, #fde8e4 50%, #f8d5cf 100%);
+  }
+  .card-preview.pvranking-theme {
+    background: linear-gradient(135deg, #0e0e0e 0%, #161410 50%, #1a1710 100%);
+    overflow: hidden;
+  }
+  .card-preview.newspaper-theme {
+    background: linear-gradient(135deg, #1a1610 0%, #2a2118 50%, #1e1a12 100%);
+  }
 
-.nat-stats {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
-}
-.nat-cell { background: var(--paper); padding: 9px 8px 7px; }
-.nat-val {
-  font-size: 13px; font-family: 'Cormorant Garamond', serif;
-  font-weight: 600; line-height: 1.2; margin-bottom: 3px; color: var(--ink);
-}
-.nat-label { font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
+  /* ── Shrine/Temple map preview ── */
+  .shrine-preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .shrine-map-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 24px;
+    width: 100%;
+    height: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .shrine-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    min-height: 4px;
+  }
+  .shrine-icons {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    font-size: 20px;
+    letter-spacing: 2px;
+    opacity: 0.6;
+  }
+  .shrine-label {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: #7a5830;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
 
-.divider { height: 1px; background: var(--paper-deep); }
+  /* ── Population map ── */
+  .population-rings {
+    position: absolute;
+    inset: 0;
+  }
+  .ring {
+    position: absolute;
+    border: 3px solid rgba(31,122,67,0.35);
+    border-radius: 999px;
+  }
 
-.paradox {
-  background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
-  padding: 11px 11px 11px 13px;
-}
-.paradox-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink);
-}
-.paradox-body { font-size: 10px; color: var(--ink-soft); line-height: 1.75; letter-spacing: 0.03em; }
-.paradox-body strong { color: var(--ink-mid); font-weight: 400; }
+  /* ── Pyramid ── */
+  .pyramid-preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pyramid-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 16px 24px;
+  }
+  .pb-row { display: flex; align-items: center; justify-content: center; gap: 0; }
+  .pb-m { height: 10px; background: #4a90d9; border-radius: 3px 0 0 3px; opacity: 0.75; }
+  .pb-center { width: 8px; flex-shrink: 0; }
+  .pb-f { height: 10px; background: #d04a5a; border-radius: 0 3px 3px 0; opacity: 0.75; }
 
-/* ── Map ── */
-.map-area {
-  position: relative; overflow: hidden; background: var(--paper);
-  cursor: grab;
-}
-.map-area:active { cursor: grabbing; }
-#map-svg { width: 100%; height: 100%; display: block; }
+  /* ── Heat grid ── */
+  .heat-grid {
+    position: absolute;
+    inset: 20px 22px 26px 22px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 3px;
+    opacity: 0.92;
+  }
+  .heat-cell { border-radius: 2px; }
 
-.pref-path {
-  stroke: rgba(255,255,255,0.55);
-  stroke-width: 0.25px;
-  stroke-linejoin: round;
-  cursor: pointer;
-  transition: filter 0.15s;
-}
-.pref-path:hover,
-.pref-path.hovered {
-  stroke: rgba(255,255,255,0.92);
-  stroke-width: 0.6px;
-  filter: brightness(1.14) drop-shadow(0 2px 8px rgba(0,0,0,0.28));
-}
-.pref-path.dimmed {
-  opacity: 0.22;
-  filter: none;
-}
+  /* ── Ramen ── */
+  .card-preview .preview-icon { font-size: 56px; opacity: 0.9; }
+  .mini-bars {
+    position: absolute;
+    bottom: 28px;
+    right: 28px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+  }
+  .mini-bars .mb { width: 4px; border-radius: 2px 2px 0 0; opacity: 0.55; background: #1a6fc4; }
 
-/* ── Tooltip (人口マップ準拠) ── */
-.map-tooltip {
-  position: absolute; pointer-events: none;
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(12px);
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 14px 18px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
-  opacity: 0; transition: opacity 0.12s;
-  min-width: 210px; max-width: 270px;
-  color: var(--ink);
-}
-.tt-name    { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; font-family: 'Cormorant Garamond', serif; }
-.tt-name-ja { font-size: 11px; color: #999; margin-bottom: 3px; font-family: 'DM Mono', monospace; font-weight: 300; }
-.tt-rank    { font-size: 11px; color: #888; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
-.tt-rank .tt-rank-num { color: var(--accent); font-size: 18px; font-family: 'DM Mono', monospace; font-weight: 400; }
-.tt-row     { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 10px; }
-.tt-label   { font-size: 11px; color: #888; flex-shrink: 0; }
-.tt-val-num { font-size: 16px; font-weight: 600; color: #1a1a1a; font-family: 'DM Mono', monospace; }
-.tt-bar-bg  { height: 4px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 8px; }
-.tt-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); transition: width 0.2s; }
+  /* ── PV Ranking ── */
+  .pvranking-preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 16px 20px;
+  }
+  .pvr-row { display: flex; align-items: center; gap: 6px; }
+  .pvr-rank {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px; color: #3a3830;
+    width: 14px; text-align: right; flex-shrink: 0;
+  }
+  .pvr-bars { display: flex; align-items: center; flex: 1; height: 10px; }
+  .pvr-own { height: 100%; background: #c8a97e; border-radius: 2px 0 0 2px; opacity: 0.85; }
+  .pvr-ext { height: 100%; background: #7a8c82; border-radius: 0 2px 2px 0; opacity: 0.75; }
+  .pvranking-label {
+    position: absolute; top: 12px; right: 14px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 8px;
+    letter-spacing: 0.1em; color: #c8a97e; opacity: 0.7; text-transform: uppercase;
+  }
 
-/* ── Zoom controls ── */
-.zoom-ctrl {
-  position: absolute; bottom: 16px; right: 16px;
-  display: flex; flex-direction: column; gap: 1px; z-index: 10;
-}
-.zoom-btn {
-  width: 32px; height: 32px;
-  background: rgba(245,240,232,0.95); border: 1px solid var(--paper-deep);
-  color: var(--ink-mid); font-size: 18px; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-family: monospace; transition: background 0.12s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-}
-.zoom-btn:hover { background: var(--paper-warm); }
+  /* ── Newspaper ── */
+  .newspaper-bars-preview {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-end; gap: 3px; padding: 0 18px;
+  }
+  .newspaper-bars-preview .nb { flex: 1; border-radius: 2px 2px 0 0; }
+  .newspaper-peak-line {
+    position: absolute; left: 18px; right: 18px; height: 1px;
+    background: #c8a96e; opacity: 0.5; top: 62px;
+    border-top: 1px dashed #c8a96e;
+  }
+  .newspaper-label {
+    position: absolute; top: 14px; left: 18px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    letter-spacing: 0.12em; color: #c8a96e; opacity: 0.8;
+  }
 
-/* ── Right ranking panel (人口マップ準拠) ── */
-.ranking {
-  border-left: 1px solid var(--paper-deep);
-  padding: 14px 10px 12px;
-  overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: var(--paper-deep) transparent;
-  background: rgba(245,240,232,0.96);
-}
-.rk-title {
-  font-size: 10px; font-weight: 400; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--ink-soft);
-  margin-bottom: 10px; padding-bottom: 8px;
-  border-bottom: 1px solid var(--paper-deep);
-}
-.rk-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 6px; border-radius: 4px;
-  cursor: pointer; transition: background 0.12s;
-}
-.rk-item:hover, .rk-item.active {
-  background: rgba(92, 61, 30, 0.10);
-}
-.rk-num {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  font-weight: 400; color: var(--ink-soft);
-  width: 18px; text-align: right; flex-shrink: 0;
-}
-.rk-num.gold   { color: #b8860b; }
-.rk-num.silver { color: #888; }
-.rk-num.bronze { color: #8b5c2a; }
-.rk-name {
-  font-size: 11px; color: var(--ink-mid); flex: 1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rk-val {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  color: var(--ink-soft); flex-shrink: 0;
-}
-.rk-bar { width: 32px; height: 3px; background: var(--paper-deep); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
-.rk-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); opacity: 0.6; }
+  /* ── Card body ── */
+  .card-body { padding: 18px 20px 20px; }
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #b0b0b0; margin-bottom: 6px;
+  }
+  .card-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; line-height: 1.3; }
+  .card-desc { font-size: 13px; color: #888; line-height: 1.5; }
+  .card-meta {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid #f2f2f2; flex-wrap: wrap;
+  }
+  .meta-tag {
+    font-size: 11px; font-weight: 500; color: #aaa;
+    background: #f7f7f7; padding: 3px 8px; border-radius: 4px;
+  }
+  .card-arrow {
+    font-size: 13px; color: #ccc; margin-left: auto;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .card:hover .card-arrow { color: #666; transform: translateX(3px); }
 
-#loading {
-  position: absolute; inset: 0; display: flex;
-  align-items: center; justify-content: center;
-  font-size: 12px; color: var(--ink-soft); letter-spacing: 0.1em;
-  pointer-events: none;
-}
+  footer {
+    max-width: 960px; margin: 0 auto;
+    padding: 0 40px 40px; font-size: 12px; color: #ccc;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 40px 20px 28px; }
+    header h1 { font-size: 24px; }
+    .divider { padding: 0 20px; }
+    .gallery { padding: 24px 20px 60px; grid-template-columns: 1fr; }
+    footer { padding: 0 20px 32px; }
+  }
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <header class="header">
-    <div>
-      <div class="header-title">Shrines &amp; <em>Temples</em></div>
-      <div class="header-sub" style="margin-top:4px">Religion in Japan — Prefecture Map</div>
-    </div>
-    <div class="header-source">
-      Agency for Cultural Affairs<br>
-      Religious Statistics Survey · Dec 31, 2024
-    </div>
-  </header>
+<header>
+  <h1>Data Visualizations</h1>
+  <p>Interactive data visualizations built with D3.js, exploring Japanese population, religion, consumption, and media data through charts, maps, and heatmaps.</p>
+</header>
 
-  <!-- Left sidebar -->
-  <aside class="sidebar">
-    <div>
-      <div class="control-label">Display</div>
-      <div class="mode-group">
-        <button class="mode-btn active" data-mode="shinto"><span class="dot"></span>Shinto shrines ⛩️</button>
-        <button class="mode-btn" data-mode="buddhist"><span class="dot"></span>Buddhist temples 卍</button>
-        <button class="mode-btn" data-mode="both"><span class="dot"></span>Total religious orgs</button>
+<div class="divider"><hr></div>
+
+<div class="gallery">
+
+  <!-- 1. Japan Population Map -->
+  <a class="card" href="japan-population-map-2025.html">
+    <div class="card-preview population-theme">
+      <span class="preview-icon">👥</span>
+      <div class="population-rings">
+        <div class="ring" style="width:120px;height:120px;left:38px;top:34px;"></div>
+        <div class="ring" style="width:76px;height:76px;right:50px;top:44px;"></div>
+        <div class="ring" style="width:92px;height:92px;right:92px;bottom:22px;"></div>
       </div>
     </div>
-
-    <div>
-      <div class="control-label">Metric</div>
-      <div class="metric-group">
-        <button class="metric-btn active" data-metric="perCapita">Per 10k pop.</button>
-        <button class="metric-btn" data-metric="absolute">Absolute #</button>
+    <div class="card-body">
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Japan Population Map 2025</div>
+      <div class="card-desc">A prefecture-level population map with switches for total, male, and female population, plus rankings and national-share tooltips.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Choropleth</span>
+        <span class="meta-tag">Population</span>
+        <span class="card-arrow">→</span>
       </div>
     </div>
+  </a>
 
-    <div>
-      <div class="control-label">Scale</div>
-      <div class="legend-bar" id="legend-bar"></div>
-      <div class="legend-ticks" id="legend-ticks"><span>Low</span><span>High</span></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div>
-      <div class="control-label">Prefecture</div>
-      <div class="info-card" id="info-card">
-        <div class="info-placeholder">Hover over a prefecture to see details.</div>
+  <!-- 2. Population Pyramid -->
+  <a class="card" href="japan-population-pyramid.html">
+    <div class="card-preview pyramid-theme">
+      <div class="pyramid-preview">
+        <div class="pyramid-bars">
+          <div class="pb-row"><div class="pb-m" style="width:52px"></div><div class="pb-center"></div><div class="pb-f" style="width:50px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:58px"></div><div class="pb-center"></div><div class="pb-f" style="width:56px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:64px"></div><div class="pb-center"></div><div class="pb-f" style="width:62px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:70px"></div><div class="pb-center"></div><div class="pb-f" style="width:72px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:76px"></div><div class="pb-center"></div><div class="pb-f" style="width:80px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:60px"></div><div class="pb-center"></div><div class="pb-f" style="width:66px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:44px"></div><div class="pb-center"></div><div class="pb-f" style="width:50px"></div></div>
+          <div class="pb-row"><div class="pb-m" style="width:30px"></div><div class="pb-center"></div><div class="pb-f" style="width:40px"></div></div>
+        </div>
       </div>
     </div>
-
-    <div class="divider"></div>
-
-    <div>
-      <div class="control-label">National total</div>
-      <div class="nat-stats">
-        <div class="nat-cell"><div class="nat-val" id="nat-shrines">—</div><div class="nat-label">⛩️ Shinto<br>shrines</div></div>
-        <div class="nat-cell"><div class="nat-val" id="nat-temples">—</div><div class="nat-label">卍 Buddhist temples<br><span style="font-size:9px;opacity:0.6">卍 = Japanese map symbol for Buddhist temples</span></div></div>
-        <div class="nat-cell"><div class="nat-val" id="nat-shinto-b">—</div><div class="nat-label">Shinto<br>believers</div></div>
-        <div class="nat-cell"><div class="nat-val" id="nat-buddhist-b">—</div><div class="nat-label">Buddhist<br>believers</div></div>
+    <div class="card-body">
+      <div class="card-tag">Population Pyramid</div>
+      <div class="card-title">Japan Population Pyramid 1965–2070</div>
+      <div class="card-desc">An animated population pyramid tracing Japan's demographic shift from a young society to a super-aged one, with census data and future projections.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Animation</span>
+        <span class="meta-tag">Demographics</span>
+        <span class="card-arrow">→</span>
       </div>
     </div>
+  </a>
 
-    <div class="divider"></div>
-
-    <div class="paradox">
-      <div class="paradox-headline">The paradox</div>
-      <div class="paradox-body">
-        Japan has more shrines than convenience stores.
-        Yet <strong>69.6% follow no religion</strong> (JGSS 2015) —
-        because seasonal shrine visits are considered <em>culture</em>, not faith.
+  <!-- 3. Shrines & Temples Map (NEW) -->
+  <a class="card" href="shrines-temples-map.html">
+    <div class="card-preview shrine-theme">
+      <div class="shrine-icons">⛩️ 卍</div>
+      <div class="shrine-label">Prefecture Map · 2024</div>
+      <div class="shrine-map-bars">
+        <!-- 47本のバー、神社密度を模したグラデーション -->
+        <div class="shrine-bar" style="height:18%;background:#d4c4a8"></div>
+        <div class="shrine-bar" style="height:22%;background:#c4b090"></div>
+        <div class="shrine-bar" style="height:30%;background:#b89e7a"></div>
+        <div class="shrine-bar" style="height:25%;background:#c4b090"></div>
+        <div class="shrine-bar" style="height:42%;background:#9a7a52"></div>
+        <div class="shrine-bar" style="height:38%;background:#a88860"></div>
+        <div class="shrine-bar" style="height:20%;background:#c4b090"></div>
+        <div class="shrine-bar" style="height:28%;background:#b89e7a"></div>
+        <div class="shrine-bar" style="height:35%;background:#a88860"></div>
+        <div class="shrine-bar" style="height:55%;background:#8a6840"></div>
+        <div class="shrine-bar" style="height:48%;background:#947048"></div>
+        <div class="shrine-bar" style="height:70%;background:#7a5830"></div>
+        <div class="shrine-bar" style="height:65%;background:#825e36"></div>
+        <div class="shrine-bar" style="height:58%;background:#8a6840"></div>
+        <div class="shrine-bar" style="height:100%;background:#5c3d1e"></div>
+        <div class="shrine-bar" style="height:85%;background:#6a4a28"></div>
+        <div class="shrine-bar" style="height:88%;background:#644424"></div>
+        <div class="shrine-bar" style="height:80%;background:#6e5030"></div>
+        <div class="shrine-bar" style="height:72%;background:#785838"></div>
+        <div class="shrine-bar" style="height:60%;background:#846040"></div>
+        <div class="shrine-bar" style="height:45%;background:#967050"></div>
+        <div class="shrine-bar" style="height:32%;background:#aa8460"></div>
+        <div class="shrine-bar" style="height:26%;background:#b89272"></div>
+        <div class="shrine-bar" style="height:15%;background:#ccaa88"></div>
       </div>
     </div>
-  </aside>
-
-  <!-- Map -->
-  <main class="map-area" id="map-area">
-    <svg id="map-svg"><g id="map-g"></g></svg>
-    <div class="map-tooltip" id="tooltip">
-      <div class="tt-name"    id="tt-name"></div>
-      <div class="tt-name-ja" id="tt-name-ja"></div>
-      <div class="tt-rank"    id="tt-rank"></div>
-      <div class="tt-row">
-        <span class="tt-label"   id="tt-label"></span>
-        <span class="tt-val-num" id="tt-val"></span>
+    <div class="card-body">
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Japan Shrines &amp; Temples Map</div>
+      <div class="card-desc">A prefecture-level choropleth showing Shinto shrine and Buddhist temple distribution across Japan, with per-capita rankings and believers data. Source: Agency for Cultural Affairs, 2024.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Choropleth</span>
+        <span class="meta-tag">Religion</span>
+        <span class="card-arrow">→</span>
       </div>
-      <div class="tt-bar-bg"><div class="tt-bar-fill" id="tt-bar"></div></div>
     </div>
-    <div class="zoom-ctrl">
-      <button class="zoom-btn" id="btn-zoom-in"    title="Zoom in">+</button>
-      <button class="zoom-btn" id="btn-zoom-out"   title="Zoom out">−</button>
-      <button class="zoom-btn" id="btn-zoom-reset" title="Reset" style="font-size:14px">⌂</button>
-    </div>
-    <div id="loading">Loading…</div>
-  </main>
+  </a>
 
-  <!-- Right ranking panel -->
-  <aside class="ranking" id="ranking">
-    <div class="rk-title" id="rk-title">Ranking</div>
-    <div id="rk-list"></div>
-  </aside>
+  <!-- 4. Tokyo Heatmap -->
+  <a class="card" href="tokyo-heatmap.html">
+    <div class="card-preview heatmap-theme">
+      <div class="heat-grid">
+        <div class="heat-cell" style="background:#6ea9d9"></div>
+        <div class="heat-cell" style="background:#8bc1d8"></div>
+        <div class="heat-cell" style="background:#b7ddc9"></div>
+        <div class="heat-cell" style="background:#f2efaf"></div>
+        <div class="heat-cell" style="background:#f9d585"></div>
+        <div class="heat-cell" style="background:#f4bb74"></div>
+        <div class="heat-cell" style="background:#ec8c6d"></div>
+        <div class="heat-cell" style="background:#db6f68"></div>
+        <div class="heat-cell" style="background:#c85966"></div>
+        <div class="heat-cell" style="background:#b14e65"></div>
+        <div class="heat-cell" style="background:#964d67"></div>
+        <div class="heat-cell" style="background:#7a5b7e"></div>
+        <div class="heat-cell" style="background:#88bddb"></div>
+        <div class="heat-cell" style="background:#a5d2d0"></div>
+        <div class="heat-cell" style="background:#d8e7bf"></div>
+        <div class="heat-cell" style="background:#f8e7a0"></div>
+        <div class="heat-cell" style="background:#f8cf7b"></div>
+        <div class="heat-cell" style="background:#f0ad6d"></div>
+        <div class="heat-cell" style="background:#e38468"></div>
+        <div class="heat-cell" style="background:#d66966"></div>
+        <div class="heat-cell" style="background:#c25967"></div>
+        <div class="heat-cell" style="background:#aa5067"></div>
+        <div class="heat-cell" style="background:#8a5672"></div>
+        <div class="heat-cell" style="background:#745f83"></div>
+        <div class="heat-cell" style="background:#9cc8d8"></div>
+        <div class="heat-cell" style="background:#b9dbca"></div>
+        <div class="heat-cell" style="background:#e3eab8"></div>
+        <div class="heat-cell" style="background:#fbe0a3"></div>
+        <div class="heat-cell" style="background:#f8c67f"></div>
+        <div class="heat-cell" style="background:#eea870"></div>
+        <div class="heat-cell" style="background:#df8169"></div>
+        <div class="heat-cell" style="background:#d36767"></div>
+        <div class="heat-cell" style="background:#be5967"></div>
+        <div class="heat-cell" style="background:#a65268"></div>
+        <div class="heat-cell" style="background:#885a76"></div>
+        <div class="heat-cell" style="background:#716489"></div>
+        <div class="heat-cell" style="background:#aacfd5"></div>
+        <div class="heat-cell" style="background:#c7e0c8"></div>
+        <div class="heat-cell" style="background:#ececb7"></div>
+        <div class="heat-cell" style="background:#fcd8a0"></div>
+        <div class="heat-cell" style="background:#f7c07f"></div>
+        <div class="heat-cell" style="background:#eb9f70"></div>
+        <div class="heat-cell" style="background:#dd7b69"></div>
+        <div class="heat-cell" style="background:#d06467"></div>
+        <div class="heat-cell" style="background:#bb5868"></div>
+        <div class="heat-cell" style="background:#a05269"></div>
+        <div class="heat-cell" style="background:#855b79"></div>
+        <div class="heat-cell" style="background:#6f678d"></div>
+        <div class="heat-cell" style="background:#bad6d2"></div>
+        <div class="heat-cell" style="background:#d4e4c5"></div>
+        <div class="heat-cell" style="background:#f1edb6"></div>
+        <div class="heat-cell" style="background:#fdd39f"></div>
+        <div class="heat-cell" style="background:#f6ba7f"></div>
+        <div class="heat-cell" style="background:#ea9a70"></div>
+        <div class="heat-cell" style="background:#dc786a"></div>
+        <div class="heat-cell" style="background:#ce6268"></div>
+        <div class="heat-cell" style="background:#b85769"></div>
+        <div class="heat-cell" style="background:#9d536c"></div>
+        <div class="heat-cell" style="background:#825c7d"></div>
+        <div class="heat-cell" style="background:#6d6a90"></div>
+        <div class="heat-cell" style="background:#c5dbd0"></div>
+        <div class="heat-cell" style="background:#dde7c3"></div>
+        <div class="heat-cell" style="background:#f5efb6"></div>
+        <div class="heat-cell" style="background:#fdcf9d"></div>
+        <div class="heat-cell" style="background:#f5b67d"></div>
+        <div class="heat-cell" style="background:#e99670"></div>
+        <div class="heat-cell" style="background:#db766a"></div>
+        <div class="heat-cell" style="background:#cc6169"></div>
+        <div class="heat-cell" style="background:#b6586a"></div>
+        <div class="heat-cell" style="background:#9b546d"></div>
+        <div class="heat-cell" style="background:#815d80"></div>
+        <div class="heat-cell" style="background:#6c6c93"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Heatmap</div>
+      <div class="card-title">Tokyo Temperature Heatmap</div>
+      <div class="card-desc">A monthly climate heatmap for Tokyo with switches for mean, maximum, and minimum temperature anomalies using JMA data.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Heatmap</span>
+        <span class="meta-tag">Climate</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 5. Ramen Map -->
+  <a class="card" href="ramen-map.html">
+    <div class="card-preview ramen-theme">
+      <span class="preview-icon">🍜</span>
+      <div class="mini-bars">
+        <div class="mb" style="height:14px;"></div>
+        <div class="mb" style="height:24px;"></div>
+        <div class="mb" style="height:11px;"></div>
+        <div class="mb" style="height:40px;"></div>
+        <div class="mb" style="height:18px;"></div>
+        <div class="mb" style="height:30px;"></div>
+        <div class="mb" style="height:13px;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Japan Ramen Consumption Map</div>
+      <div class="card-desc">An interactive bar-chart map of ramen consumption in Japan, with responsive tooltips and ranking.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Bar Chart</span>
+        <span class="meta-tag">Ramen</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 6. PV Ranking -->
+  <a class="card" href="page-view-ranking.html">
+    <div class="card-preview pvranking-theme">
+      <div class="pvranking-label">Top 10 · Q4 2025</div>
+      <div class="pvranking-preview">
+        <div class="pvr-row"><span class="pvr-rank">01</span><div class="pvr-bars"><div class="pvr-own" style="width:52%"></div><div class="pvr-ext" style="width:48%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">02</span><div class="pvr-bars"><div class="pvr-own" style="width:19%"></div><div class="pvr-ext" style="width:60%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">03</span><div class="pvr-bars"><div class="pvr-own" style="width:37%"></div><div class="pvr-ext" style="width:40%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">04</span><div class="pvr-bars"><div class="pvr-own" style="width:19%"></div><div class="pvr-ext" style="width:42%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">05</span><div class="pvr-bars"><div class="pvr-own" style="width:20%"></div><div class="pvr-ext" style="width:38%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">06</span><div class="pvr-bars"><div class="pvr-own" style="width:18%"></div><div class="pvr-ext" style="width:37%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">07</span><div class="pvr-bars"><div class="pvr-own" style="width:17%"></div><div class="pvr-ext" style="width:36%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">08</span><div class="pvr-bars"><div class="pvr-own" style="width:19%"></div><div class="pvr-ext" style="width:1%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">09</span><div class="pvr-bars"><div class="pvr-own" style="width:9%"></div><div class="pvr-ext" style="width:31%"></div></div></div>
+        <div class="pvr-row"><span class="pvr-rank">10</span><div class="pvr-bars"><div class="pvr-own" style="width:11%"></div><div class="pvr-ext" style="width:21%"></div></div></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Bar Chart · Ranking</div>
+      <div class="card-title">Japanese Web Media Page View Ranking</div>
+      <div class="card-desc">Top 10 web media by total monthly page views (Q4 2025), comparing own-site PV vs. external distribution via Yahoo! News, SmartNews, and LINE, with unique user data. Source: JABC.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Stacked Bar</span>
+        <span class="meta-tag">Media</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 7. Newspaper -->
+  <a class="card" href="newspaper-circulation.html">
+    <div class="card-preview newspaper-theme">
+      <div class="newspaper-peak-line"></div>
+      <div class="newspaper-label">PEAK 1997 ▲</div>
+      <div class="newspaper-bars-preview">
+        <div class="nb" style="height:62px;background:#5a4a2e;"></div>
+        <div class="nb" style="height:68px;background:#6a5535;"></div>
+        <div class="nb" style="height:74px;background:#7a6040;"></div>
+        <div class="nb" style="height:82px;background:#8a6e48;"></div>
+        <div class="nb" style="height:88px;background:#9a7c52;"></div>
+        <div class="nb" style="height:94px;background:#a88a5e;"></div>
+        <div class="nb" style="height:100px;background:#b8986a;"></div>
+        <div class="nb" style="height:104px;background:#c8a96e;"></div>
+        <div class="nb" style="height:106px;background:#c8a96e;"></div>
+        <div class="nb" style="height:104px;background:#cda068;"></div>
+        <div class="nb" style="height:100px;background:#cc9560;"></div>
+        <div class="nb" style="height:96px;background:#c48a58;"></div>
+        <div class="nb" style="height:90px;background:#bc7e52;"></div>
+        <div class="nb" style="height:82px;background:#b07048;"></div>
+        <div class="nb" style="height:72px;background:#a36040;"></div>
+        <div class="nb" style="height:60px;background:#954e38;"></div>
+        <div class="nb" style="height:50px;background:#883e30;"></div>
+        <div class="nb" style="height:40px;background:#7a3028;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Bar Chart</div>
+      <div class="card-title">Japanese Newspaper Circulation 1965–2025</div>
+      <div class="card-desc">An animated bar chart tracing Japan's newspaper circulation over 60 years, from postwar growth to the digital-era decline.</div>
+      <div class="card-meta">
+        <span class="meta-tag">D3.js</span>
+        <span class="meta-tag">Animation</span>
+        <span class="meta-tag">Media</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
 
 </div>
 
-<script>
-'use strict';
+<footer>
+  Built with D3.js and open public data sources.
+</footer>
 
-const RAMP = ['#e8dece','#d4c4a8','#b89e7a','#9a7a52','#7a5830','#5c3d1e','#3e2410'];
-const fmt    = v => v.toLocaleString();
-const fmtDec = v => v.toFixed(1);
-
-let mode   = 'shinto';
-let metric = 'perCapita';
-let geoData, popData, relData;
-let hoveredCode = null;
-let ranked = [];      // 現在のランキング配列 [{code, nameEn, nameJa, value, rank}]
-let rankMap = {};     // code → rank (1-indexed)
-let _valMin, _valMax;
-
-// ── Custom Mercator projection ────────────────────────────
-let projScale, projTx, projTy;
-
-function toMerc(lon, lat) {
-  return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))];
-}
-function project(lon, lat) {
-  const [mx, my] = toMerc(lon, lat);
-  return [projScale * mx + projTx, projScale * -my + projTy];
-}
-function fitProjection(features, W, H, pL, pT, pR, pB) {
-  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
-  features.forEach(feat => {
-    const code = feat.properties.code;
-    const g = feat.geometry;
-    const polys = g.type==='Polygon' ? [g.coordinates] : g.coordinates;
-    polys.forEach(poly => {
-      if (code==='13'||code==='46') {
-        const ring=poly[0];
-        const cx=ring.reduce((s,p)=>s+p[0],0)/ring.length;
-        const cy=ring.reduce((s,p)=>s+p[1],0)/ring.length;
-        if (code==='13'&&cx>141.0) return;
-        if (code==='46'&&cy<30.0)  return;
-      }
-      poly.forEach(ring=>ring.forEach(([lon,lat])=>{
-        const [mx,my]=toMerc(lon,lat); const ny=-my;
-        if(mx<minX)minX=mx; if(mx>maxX)maxX=mx;
-        if(ny<minY)minY=ny; if(ny>maxY)maxY=ny;
-      }));
-    });
-  });
-  projScale = 0.98 * Math.min((W-pL-pR)/(maxX-minX),(H-pT-pB)/(maxY-minY));
-  projTx = (W+pL-pR)/2 - projScale*(minX+maxX)/2;
-  projTy = (H+pT-pB)/2 - projScale*(minY+maxY)/2;
-}
-function featureToPath(feat) {
-  const g = feat.geometry;
-  const polys = g.type==='Polygon'?[g.coordinates]:g.coordinates;
-  let d='';
-  polys.forEach(poly=>poly.forEach(ring=>{
-    const pts=ring.map(([lon,lat])=>project(lon,lat));
-    d+=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-    for(let i=1;i<pts.length;i++) d+=`L${pts[i][0].toFixed(1)},${pts[i][1].toFixed(1)}`;
-    d+='Z';
-  }));
-  return d;
-}
-
-// ── Color ─────────────────────────────────────────────────
-function hexToRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
-function lerpColor(ramp,t){
-  const n=ramp.length-1;
-  const i=Math.min(n-1,Math.floor(t*n));
-  const u=t*n-i;
-  const [r1,g1,b1]=hexToRgb(ramp[i]);
-  const [r2,g2,b2]=hexToRgb(ramp[i+1]);
-  return `rgb(${Math.round(r1+(r2-r1)*u)},${Math.round(g1+(g2-g1)*u)},${Math.round(b1+(b2-b1)*u)})`;
-}
-
-function getValue(code) {
-  const r=relData.prefectures[code], p=popData[code];
-  if(!r||!p) return 0;
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
-  return metric==='perCapita' ? raw/p.total*10000 : raw;
-}
-
-function buildState() {
-  const entries = Object.keys(relData.prefectures).map(code => ({
-    code,
-    nameEn: popData[code]?.nameEn.replace(' Prefecture','').replace(' Metropolis','') || code,
-    nameJa: relData.prefectures[code].nameJa,
-    value: getValue(code)
-  })).filter(e=>e.value>0);
-
-  entries.sort((a,b)=>b.value-a.value);
-  entries.forEach((e,i)=>{ e.rank=i+1; });
-  ranked = entries;
-
-  rankMap = {};
-  entries.forEach(e=>{ rankMap[e.code]=e.rank; });
-
-  const vals = entries.map(e=>e.value);
-  _valMin = Math.min(...vals);
-  _valMax = Math.max(...vals);
-}
-
-function getColor(code) {
-  const v=getValue(code);
-  if(!v||_valMax<=_valMin) return '#e8dece';
-  const t=Math.sqrt((v-_valMin)/(_valMax-_valMin));
-  return lerpColor(RAMP, Math.max(0,Math.min(1,t)));
-}
-
-// ── Legend ────────────────────────────────────────────────
-function updateLegend() {
-  document.getElementById('legend-bar').style.background=
-    `linear-gradient(to right, ${RAMP.join(', ')})`;
-  document.getElementById('legend-ticks').innerHTML=
-    `<span>${metric==='perCapita'?fmtDec(_valMin):fmt(Math.round(_valMin))}</span>`+
-    `<span>${metric==='perCapita'?fmtDec(_valMax):fmt(Math.round(_valMax))}</span>`;
-}
-
-// ── Ranking panel ─────────────────────────────────────────
-function renderRanking() {
-  const label = mode==='shinto'   ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Orgs';
-  const suffix = metric==='perCapita' ? '/10k' : '';
-  document.getElementById('rk-title').textContent =
-    `${label} Ranking ${suffix}`;
-
-  const list = document.getElementById('rk-list');
-  list.innerHTML = ranked.map((e,i) => {
-    const pct = (e.value/_valMax*100).toFixed(0);
-    const valStr = metric==='perCapita' ? fmtDec(e.value) : fmt(Math.round(e.value));
-    const nc = i===0?'rk-num gold':i===1?'rk-num silver':i===2?'rk-num bronze':'rk-num';
-    return `<div class="rk-item" data-code="${e.code}">
-      <span class="${nc}">${i+1}</span>
-      <span class="rk-name">${e.nameEn}</span>
-      <span class="rk-val">${valStr}</span>
-      <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%"></span></span>
-    </div>`;
-  }).join('');
-
-  // ランキング ↔ 地図 ↔ ツールチップ 連動
-  list.querySelectorAll('.rk-item').forEach(el => {
-    const code = el.dataset.code;
-    el.addEventListener('mouseenter', (e) => {
-      el.classList.add('active');
-      highlightPref(code);
-      updateInfoCard(code);
-      // ツールチップをランキングパネルの左端に表示
-      showTooltipNearRanking(code);
-    });
-    el.addEventListener('mouseleave', () => {
-      el.classList.remove('active');
-      clearHighlight();
-      updateInfoCard(null);
-      hideTooltip();
-    });
-  });
-}
-
-// ── Highlight ─────────────────────────────────────────────
-function highlightPref(code) {
-  document.querySelectorAll('.pref-path').forEach(p => {
-    if (p.dataset.code === code) {
-      p.classList.add('hovered');
-      p.classList.remove('dimmed');
-      p.parentNode.appendChild(p);
-    } else {
-      p.classList.remove('hovered');
-      p.classList.add('dimmed');
-    }
-  });
-}
-function clearHighlight() {
-  document.querySelectorAll('.pref-path').forEach(p => {
-    p.classList.remove('hovered','dimmed');
-  });
-}
-
-// ── Info card ─────────────────────────────────────────────
-function updateInfoCard(code) {
-  const card = document.getElementById('info-card');
-  if (!code) {
-    card.innerHTML='<div class="info-placeholder">Hover over a prefecture to see details.</div>';
-    return;
-  }
-  const r=relData.prefectures[code], p=popData[code];
-  if(!r||!p) return;
-  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const shrPC=(r.shinto.shrines/p.total*10000).toFixed(1);
-  const tmpPC=(r.buddhist.temples/p.total*10000).toFixed(1);
-  const shintoB   = fmt(r.shinto.believers);
-  const buddhistB = fmt(r.buddhist.believers);
-  card.innerHTML=`
-    <div class="info-name">${nameEn}</div>
-    <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
-    <div class="info-row"><span class="info-row-label">⛩️ Shrines</span><span class="info-row-val">${fmt(r.shinto.shrines)}</span></div>
-    <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${shrPC}</span></div>
-    <div class="info-row"><span class="info-row-label">卍 Temples</span><span class="info-row-val">${fmt(r.buddhist.temples)}</span></div>
-    <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${tmpPC}</span></div>
-    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${shintoB}</span></div>
-    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${buddhistB}</span></div>`;
-}
-
-function fillNatStats() {
-  const n=relData.national;
-  document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
-  document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
-  document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers / 1e6).toFixed(1) + 'M';
-  document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
-}
-
-// ── Tooltip ───────────────────────────────────────────────
-const tooltip  = document.getElementById('tooltip');
-const ttName   = document.getElementById('tt-name');
-const ttNameJa = document.getElementById('tt-name-ja');
-const ttRank   = document.getElementById('tt-rank');
-const ttLabel  = document.getElementById('tt-label');
-const ttVal    = document.getElementById('tt-val');
-const ttBar    = document.getElementById('tt-bar');
-
-// ランキングパネルホバー時: ツールチップをパネル左側に固定表示
-function showTooltipNearRanking(code) {
-  const r=relData.prefectures[code], p=popData[code];
-  if(!r||!p) return;
-  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
-  const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Total orgs';
-  const valStr = metric==='perCapita'
-    ? `${fmtDec(raw/p.total*10000)} per 10k`
-    : fmt(raw);
-  const currentVal = getValue(code);
-  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
-  const rank = rankMap[code] || '—';
-
-  ttName.textContent   = nameEn;
-  ttNameJa.textContent = r.nameJa;
-  ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
-  ttLabel.textContent  = label;
-  ttVal.textContent    = valStr;
-  ttBar.style.width    = barPct+'%';
-
-  // まず位置を確定してから表示（offsetWidth/Height が正確に取れるよう visibility で制御）
-  tooltip.style.transition = 'none';
-  tooltip.style.opacity    = '0';
-  tooltip.style.left       = '0px';
-  tooltip.style.top        = '0px';
-
-  // 次のフレームでサイズを測ってから配置
-  requestAnimationFrame(() => {
-    const rkPanel = document.getElementById('ranking');
-    const rkRect  = rkPanel.getBoundingClientRect();
-    const mapRect = document.getElementById('map-area').getBoundingClientRect();
-
-    const tw = tooltip.offsetWidth  || 220;
-    const th = tooltip.offsetHeight || 110;
-
-    const x = rkRect.left - mapRect.left - tw - 14;
-    const y = Math.max(8, Math.min(
-      rkRect.top - mapRect.top + 20,
-      mapRect.height - th - 8
-    ));
-
-    tooltip.style.left       = x + 'px';
-    tooltip.style.top        = y + 'px';
-    tooltip.style.transition = 'opacity 0.12s';
-    tooltip.style.opacity    = '1';
-  });
-}
-
-function showTooltip(event, code) {
-  const r=relData.prefectures[code], p=popData[code];
-  if(!r||!p) return;
-  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
-  const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Total orgs';
-  const valStr = metric==='perCapita'
-    ? `${fmtDec(raw/p.total*10000)} per 10k`
-    : fmt(raw);
-
-  // バー: 最大値（_valMax）を100%として表示
-  const currentVal = getValue(code);
-  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
-
-  const rank = rankMap[code] || '—';
-
-  ttName.textContent   = nameEn;
-  ttNameJa.textContent = r.nameJa;
-  ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
-  ttLabel.textContent  = label;
-  ttVal.textContent    = valStr;
-  ttBar.style.width    = barPct+'%';
-
-  tooltip.style.opacity='1';
-  moveTooltip(event);
-}
-function moveTooltip(event) {
-  const rect=document.getElementById('map-area').getBoundingClientRect();
-  const tw=tooltip.offsetWidth||220, th=tooltip.offsetHeight||110;
-  let x=event.clientX-rect.left+16, y=event.clientY-rect.top-th-10;
-  if(x+tw>rect.width-10) x=event.clientX-rect.left-tw-16;
-  if(y<8) y=event.clientY-rect.top+16;
-  tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
-}
-function hideTooltip(){tooltip.style.opacity='0';}
-
-// ── Pan & Zoom ────────────────────────────────────────────
-let panX=0,panY=0,scale=1;
-let isDragging=false,didDrag=false;
-let dragSX,dragSY,dragPX,dragPY;
-
-function applyTransform(){
-  document.getElementById('map-g').setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`);
-}
-function zoomAt(cx,cy,factor){
-  const ns=Math.max(0.8,Math.min(12,scale*factor));
-  const k=ns/scale;
-  panX=cx-k*(cx-panX); panY=cy-k*(cy-panY); scale=ns;
-  applyTransform();
-}
-function resetView(){panX=0;panY=0;scale=1;applyTransform();}
-
-const mapArea=document.getElementById('map-area');
-mapArea.addEventListener('wheel',e=>{
-  e.preventDefault();
-  const rect=mapArea.getBoundingClientRect();
-  zoomAt(e.clientX-rect.left,e.clientY-rect.top,e.deltaY>0?0.85:1.18);
-},{passive:false});
-mapArea.addEventListener('mousedown',e=>{
-  isDragging=true;didDrag=false;
-  dragSX=e.clientX;dragSY=e.clientY;dragPX=panX;dragPY=panY;
-});
-window.addEventListener('mousemove',e=>{
-  if(!isDragging)return;
-  const dx=e.clientX-dragSX,dy=e.clientY-dragSY;
-  if(Math.abs(dx)>3||Math.abs(dy)>3)didDrag=true;
-  panX=dragPX+dx;panY=dragPY+dy;applyTransform();
-});
-window.addEventListener('mouseup',()=>{isDragging=false;});
-document.getElementById('btn-zoom-in').addEventListener('click',()=>{
-  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.35);});
-document.getElementById('btn-zoom-out').addEventListener('click',()=>{
-  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.35);});
-document.getElementById('btn-zoom-reset').addEventListener('click',resetView);
-
-// ── Draw map ──────────────────────────────────────────────
-function drawMap() {
-  const W=mapArea.clientWidth, H=mapArea.clientHeight;
-  document.getElementById('map-svg').setAttribute('viewBox',`0 0 ${W} ${H}`);
-  fitProjection(geoData.features,W,H,6,6,6,6);
-  const mapG=document.getElementById('map-g');
-  mapG.innerHTML='';
-  const frag=document.createDocumentFragment();
-
-  geoData.features.forEach(feat=>{
-    const code=feat.properties.code;
-    const el=document.createElementNS('http://www.w3.org/2000/svg','path');
-    el.setAttribute('d',featureToPath(feat));
-    el.setAttribute('fill',getColor(code));
-    el.setAttribute('fill-rule','evenodd');
-    el.setAttribute('class','pref-path');
-    el.dataset.code=code;
-
-    el.addEventListener('mouseenter',function(e){
-      if(didDrag)return;
-      hoveredCode=code;
-      document.querySelectorAll('.pref-path').forEach(p=>{
-        if(p.dataset.code===code){p.classList.add('hovered');p.classList.remove('dimmed');}
-        else{p.classList.remove('hovered');p.classList.add('dimmed');}
-      });
-      this.parentNode.appendChild(this);
-      // ランキングのアイテムをハイライト
-      document.querySelectorAll('.rk-item').forEach(el=>{
-        el.classList.toggle('active',el.dataset.code===code);
-      });
-      // ハイライトしたアイテムをスクロールして見せる
-      const activeItem=document.querySelector(`.rk-item[data-code="${code}"]`);
-      if(activeItem) activeItem.scrollIntoView({behavior:'smooth',block:'nearest'});
-      updateInfoCard(code);
-      showTooltip(e,code);
-    });
-    el.addEventListener('mousemove',e=>{if(hoveredCode===code)moveTooltip(e);});
-    el.addEventListener('mouseleave',function(){
-      hoveredCode=null;
-      this.classList.remove('hovered');
-      document.querySelectorAll('.pref-path').forEach(p=>p.classList.remove('dimmed','hovered'));
-      document.querySelectorAll('.rk-item').forEach(el=>el.classList.remove('active'));
-      updateInfoCard(null);
-      hideTooltip();
-    });
-    frag.appendChild(el);
-  });
-
-  mapG.appendChild(frag);
-  resetView();
-}
-
-function updateAll() {
-  buildState();
-  document.querySelectorAll('.pref-path').forEach(el=>{
-    el.style.transition='fill 0.28s';
-    el.setAttribute('fill',getColor(el.dataset.code));
-  });
-  updateLegend();
-  renderRanking();
-  if(hoveredCode) { updateInfoCard(hoveredCode); showTooltip({clientX:0,clientY:0},hoveredCode); }
-}
-
-// ── Controls ──────────────────────────────────────────────
-document.querySelectorAll('.mode-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); mode=btn.dataset.mode; updateAll();
-  });
-});
-document.querySelectorAll('.metric-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.metric-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); metric=btn.dataset.metric; updateAll();
-  });
-});
-
-let resizeTimer;
-window.addEventListener('resize',()=>{
-  clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{buildState();drawMap();updateLegend();renderRanking();},150);
-});
-
-// ── Init ──────────────────────────────────────────────────
-Promise.all([
-  fetch('geo-json/japan-simple.geojson').then(r=>r.json()),
-  fetch('population-json/pref-pop.json').then(r=>r.json()),
-  fetch('data/religion-stats.json').then(r=>r.json())
-]).then(([geo,pop,rel])=>{
-  geoData=geo; popData=pop; relData=rel;
-  document.getElementById('loading').style.display='none';
-  fillNatStats();
-  buildState();
-  updateLegend();
-  drawMap();
-  renderRanking();
-}).catch(err=>{
-  console.error(err);
-  document.getElementById('loading').innerHTML=
-    `<div style="text-align:center;color:#c0392b;font-size:11px;line-height:2.4;padding:24px">
-      Failed to load data.<br>
-      <code>geo-json/japan-simple.geojson</code><br>
-      <code>population-json/pref-pop.json</code><br>
-      <code>data/religion-stats.json</code><br><br>
-      Run: <code style="background:#f0ebe3;padding:2px 6px">python3 -m http.server 8080</code>
-    </div>`;
-});
-</script>
 </body>
 </html>
