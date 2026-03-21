@@ -130,8 +130,8 @@ html, body {
 }
 .nat-cell { background: var(--paper); padding: 9px 8px 7px; }
 .nat-val {
-  font-size: 15px; font-family: 'Cormorant Garamond', serif;
-  font-weight: 600; line-height: 1; margin-bottom: 3px; color: var(--ink);
+  font-size: 13px; font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 1.2; margin-bottom: 3px; color: var(--ink);
 }
 .nat-label { font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
 
@@ -503,18 +503,21 @@ function renderRanking() {
     </div>`;
   }).join('');
 
-  // ランキング ↔ 地図 連動
+  // ランキング ↔ 地図 ↔ ツールチップ 連動
   list.querySelectorAll('.rk-item').forEach(el => {
     const code = el.dataset.code;
-    el.addEventListener('mouseenter', () => {
+    el.addEventListener('mouseenter', (e) => {
       el.classList.add('active');
       highlightPref(code);
       updateInfoCard(code);
+      // ツールチップをランキングパネルの左端に表示
+      showTooltipNearRanking(code);
     });
     el.addEventListener('mouseleave', () => {
       el.classList.remove('active');
       clearHighlight();
       updateInfoCard(null);
+      hideTooltip();
     });
   });
 }
@@ -550,6 +553,8 @@ function updateInfoCard(code) {
   const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
   const shrPC=(r.shinto.shrines/p.total*10000).toFixed(1);
   const tmpPC=(r.buddhist.temples/p.total*10000).toFixed(1);
+  const shintoB   = fmt(r.shinto.believers);
+  const buddhistB = fmt(r.buddhist.believers);
   card.innerHTML=`
     <div class="info-name">${nameEn}</div>
     <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
@@ -557,16 +562,16 @@ function updateInfoCard(code) {
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${shrPC}</span></div>
     <div class="info-row"><span class="info-row-label">🪷 Temples</span><span class="info-row-val">${fmt(r.buddhist.temples)}</span></div>
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${tmpPC}</span></div>
-    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${fmt(r.shinto.believers)}</span></div>
-    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${fmt(r.buddhist.believers)}</span></div>`;
+    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${shintoB}</span></div>
+    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${buddhistB}</span></div>`;
 }
 
 function fillNatStats() {
   const n=relData.national;
   document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
   document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
-  document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers/1e6).toFixed(1)+'M';
-  document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers/1e6).toFixed(1)+'M';
+  document.getElementById('nat-shinto-b').textContent   = fmt(n.shinto.believers);
+  document.getElementById('nat-buddhist-b').textContent = fmt(n.buddhist.believers);
 }
 
 // ── Tooltip ───────────────────────────────────────────────
@@ -577,6 +582,59 @@ const ttRank   = document.getElementById('tt-rank');
 const ttLabel  = document.getElementById('tt-label');
 const ttVal    = document.getElementById('tt-val');
 const ttBar    = document.getElementById('tt-bar');
+
+// ランキングパネルホバー時: ツールチップをパネル左側に固定表示
+function showTooltipNearRanking(code) {
+  const r=relData.prefectures[code], p=popData[code];
+  if(!r||!p) return;
+  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
+  const raw = mode==='shinto' ? r.shinto.shrines
+            : mode==='buddhist' ? r.buddhist.temples
+            : r.total.orgs;
+  const label = mode==='shinto' ? '⛩️ Shrines'
+              : mode==='buddhist' ? '🪷 Temples'
+              : '🏛 Total orgs';
+  const valStr = metric==='perCapita'
+    ? `${fmtDec(raw/p.total*10000)} per 10k`
+    : fmt(raw);
+  const currentVal = getValue(code);
+  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
+  const rank = rankMap[code] || '—';
+
+  ttName.textContent   = nameEn;
+  ttNameJa.textContent = r.nameJa;
+  ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
+  ttLabel.textContent  = label;
+  ttVal.textContent    = valStr;
+  ttBar.style.width    = barPct+'%';
+
+  // まず位置を確定してから表示（offsetWidth/Height が正確に取れるよう visibility で制御）
+  tooltip.style.transition = 'none';
+  tooltip.style.opacity    = '0';
+  tooltip.style.left       = '0px';
+  tooltip.style.top        = '0px';
+
+  // 次のフレームでサイズを測ってから配置
+  requestAnimationFrame(() => {
+    const rkPanel = document.getElementById('ranking');
+    const rkRect  = rkPanel.getBoundingClientRect();
+    const mapRect = document.getElementById('map-area').getBoundingClientRect();
+
+    const tw = tooltip.offsetWidth  || 220;
+    const th = tooltip.offsetHeight || 110;
+
+    const x = rkRect.left - mapRect.left - tw - 14;
+    const y = Math.max(8, Math.min(
+      rkRect.top - mapRect.top + 20,
+      mapRect.height - th - 8
+    ));
+
+    tooltip.style.left       = x + 'px';
+    tooltip.style.top        = y + 'px';
+    tooltip.style.transition = 'opacity 0.12s';
+    tooltip.style.opacity    = '1';
+  });
+}
 
 function showTooltip(event, code) {
   const r=relData.prefectures[code], p=popData[code];
