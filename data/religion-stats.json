@@ -1,0 +1,1298 @@
+{
+  "national": {
+    "total": {
+      "orgs": 210007,
+      "shrines": 80570,
+      "temples": 76390,
+      "clergy": 80486,
+      "believers": 178150000
+    },
+    "shinto": {
+      "shrines": 80484,
+      "orgs": 86506,
+      "clergy": 80411,
+      "believers": 84014000
+    },
+    "buddhist": {
+      "temples": 76332,
+      "orgs": 84217,
+      "clergy": 17,
+      "believers": 76493000
+    },
+    "christian": {
+      "orgs": 8468,
+      "believers": 4791000
+    }
+  },
+  "prefectures": {
+    "01": {
+      "code": "01",
+      "nameJa": "北海道",
+      "total": {
+        "orgs": 5537,
+        "shrines": 793,
+        "temples": 2308,
+        "clergy": 786,
+        "believers": 4335000
+      },
+      "shinto": {
+        "shrines": 790,
+        "orgs": 990,
+        "clergy": 783,
+        "believers": 907000
+      },
+      "buddhist": {
+        "temples": 2303,
+        "orgs": 2532,
+        "clergy": 0,
+        "believers": 2327000
+      },
+      "christian": {
+        "orgs": 512,
+        "believers": 320000
+      }
+    },
+    "02": {
+      "code": "02",
+      "nameJa": "青森",
+      "total": {
+        "orgs": 1913,
+        "shrines": 885,
+        "temples": 467,
+        "clergy": 884,
+        "believers": 1549000
+      },
+      "shinto": {
+        "shrines": 885,
+        "orgs": 980,
+        "clergy": 884,
+        "believers": 897000
+      },
+      "buddhist": {
+        "temples": 467,
+        "orgs": 610,
+        "clergy": 0,
+        "believers": 458000
+      },
+      "christian": {
+        "orgs": 82,
+        "believers": 43000
+      }
+    },
+    "03": {
+      "code": "03",
+      "nameJa": "岩手",
+      "total": {
+        "orgs": 1833,
+        "shrines": 863,
+        "temples": 629,
+        "clergy": 860,
+        "believers": 1638000
+      },
+      "shinto": {
+        "shrines": 863,
+        "orgs": 899,
+        "clergy": 860,
+        "believers": 876000
+      },
+      "buddhist": {
+        "temples": 629,
+        "orgs": 719,
+        "clergy": 0,
+        "believers": 631000
+      },
+      "christian": {
+        "orgs": 80,
+        "believers": 48000
+      }
+    },
+    "04": {
+      "code": "04",
+      "nameJa": "宮城",
+      "total": {
+        "orgs": 2456,
+        "shrines": 944,
+        "temples": 953,
+        "clergy": 942,
+        "believers": 2119000
+      },
+      "shinto": {
+        "shrines": 944,
+        "orgs": 1060,
+        "clergy": 942,
+        "believers": 962000
+      },
+      "buddhist": {
+        "temples": 953,
+        "orgs": 1060,
+        "clergy": 0,
+        "believers": 949000
+      },
+      "christian": {
+        "orgs": 169,
+        "believers": 104000
+      }
+    },
+    "05": {
+      "code": "05",
+      "nameJa": "秋田",
+      "total": {
+        "orgs": 2169,
+        "shrines": 1144,
+        "temples": 676,
+        "clergy": 1143,
+        "believers": 1994000
+      },
+      "shinto": {
+        "shrines": 1144,
+        "orgs": 1167,
+        "clergy": 1143,
+        "believers": 1156000
+      },
+      "buddhist": {
+        "temples": 676,
+        "orgs": 736,
+        "clergy": 0,
+        "believers": 676000
+      },
+      "christian": {
+        "orgs": 67,
+        "believers": 48000
+      }
+    },
+    "06": {
+      "code": "06",
+      "nameJa": "山形",
+      "total": {
+        "orgs": 3540,
+        "shrines": 1744,
+        "temples": 1474,
+        "clergy": 1743,
+        "believers": 3357000
+      },
+      "shinto": {
+        "shrines": 1742,
+        "orgs": 1789,
+        "clergy": 1741,
+        "believers": 1765000
+      },
+      "buddhist": {
+        "temples": 1474,
+        "orgs": 1547,
+        "clergy": 2,
+        "believers": 1485000
+      },
+      "christian": {
+        "orgs": 75,
+        "believers": 45000
+      }
+    },
+    "07": {
+      "code": "07",
+      "nameJa": "福島",
+      "total": {
+        "orgs": 5199,
+        "shrines": 3003,
+        "temples": 1530,
+        "clergy": 3001,
+        "believers": 4754000
+      },
+      "shinto": {
+        "shrines": 3003,
+        "orgs": 3086,
+        "clergy": 3001,
+        "believers": 3038000
+      },
+      "buddhist": {
+        "temples": 1530,
+        "orgs": 1750,
+        "clergy": 0,
+        "believers": 1531000
+      },
+      "christian": {
+        "orgs": 141,
+        "believers": 86000
+      }
+    },
+    "08": {
+      "code": "08",
+      "nameJa": "茨城",
+      "total": {
+        "orgs": 4533,
+        "shrines": 2486,
+        "temples": 1297,
+        "clergy": 2486,
+        "believers": 4052000
+      },
+      "shinto": {
+        "shrines": 2486,
+        "orgs": 2541,
+        "clergy": 2486,
+        "believers": 2510000
+      },
+      "buddhist": {
+        "temples": 1296,
+        "orgs": 1515,
+        "clergy": 0,
+        "believers": 1288000
+      },
+      "christian": {
+        "orgs": 176,
+        "believers": 113000
+      }
+    },
+    "09": {
+      "code": "09",
+      "nameJa": "栃木",
+      "total": {
+        "orgs": 3366,
+        "shrines": 1909,
+        "temples": 992,
+        "clergy": 1904,
+        "believers": 3084000
+      },
+      "shinto": {
+        "shrines": 1909,
+        "orgs": 1970,
+        "clergy": 1904,
+        "believers": 1934000
+      },
+      "buddhist": {
+        "temples": 992,
+        "orgs": 1091,
+        "clergy": 0,
+        "believers": 987000
+      },
+      "christian": {
+        "orgs": 109,
+        "believers": 58000
+      }
+    },
+    "10": {
+      "code": "10",
+      "nameJa": "群馬",
+      "total": {
+        "orgs": 2955,
+        "shrines": 1214,
+        "temples": 1207,
+        "clergy": 1214,
+        "believers": 2651000
+      },
+      "shinto": {
+        "shrines": 1213,
+        "orgs": 1283,
+        "clergy": 1213,
+        "believers": 1244000
+      },
+      "buddhist": {
+        "temples": 1207,
+        "orgs": 1277,
+        "clergy": 1,
+        "believers": 1206000
+      },
+      "christian": {
+        "orgs": 125,
+        "believers": 58000
+      }
+    },
+    "11": {
+      "code": "11",
+      "nameJa": "埼玉",
+      "total": {
+        "orgs": 5941,
+        "shrines": 2017,
+        "temples": 2268,
+        "clergy": 2012,
+        "believers": 4867000
+      },
+      "shinto": {
+        "shrines": 2016,
+        "orgs": 2138,
+        "clergy": 2011,
+        "believers": 2064000
+      },
+      "buddhist": {
+        "temples": 2267,
+        "orgs": 2539,
+        "clergy": 0,
+        "believers": 2245000
+      },
+      "christian": {
+        "orgs": 334,
+        "believers": 180000
+      }
+    },
+    "12": {
+      "code": "12",
+      "nameJa": "千葉",
+      "total": {
+        "orgs": 7525,
+        "shrines": 3173,
+        "temples": 3005,
+        "clergy": 3170,
+        "believers": 6625000
+      },
+      "shinto": {
+        "shrines": 3173,
+        "orgs": 3301,
+        "clergy": 3170,
+        "believers": 3222000
+      },
+      "buddhist": {
+        "temples": 3002,
+        "orgs": 3218,
+        "clergy": 0,
+        "believers": 3001000
+      },
+      "christian": {
+        "orgs": 343,
+        "believers": 160000
+      }
+    },
+    "13": {
+      "code": "13",
+      "nameJa": "東京",
+      "total": {
+        "orgs": 7982,
+        "shrines": 1457,
+        "temples": 2878,
+        "clergy": 1451,
+        "believers": 5902000
+      },
+      "shinto": {
+        "shrines": 1453,
+        "orgs": 1764,
+        "clergy": 1448,
+        "believers": 1584000
+      },
+      "buddhist": {
+        "temples": 2875,
+        "orgs": 3365,
+        "clergy": 2,
+        "believers": 2930000
+      },
+      "christian": {
+        "orgs": 991,
+        "believers": 581000
+      }
+    },
+    "14": {
+      "code": "14",
+      "nameJa": "神奈川",
+      "total": {
+        "orgs": 4839,
+        "shrines": 1149,
+        "temples": 1896,
+        "clergy": 1138,
+        "believers": 3774000
+      },
+      "shinto": {
+        "shrines": 1148,
+        "orgs": 1361,
+        "clergy": 1137,
+        "believers": 1239000
+      },
+      "buddhist": {
+        "temples": 1895,
+        "orgs": 2157,
+        "clergy": 0,
+        "believers": 1934000
+      },
+      "christian": {
+        "orgs": 517,
+        "believers": 297000
+      }
+    },
+    "15": {
+      "code": "15",
+      "nameJa": "新潟",
+      "total": {
+        "orgs": 8159,
+        "shrines": 4657,
+        "temples": 2730,
+        "clergy": 4656,
+        "believers": 7782000
+      },
+      "shinto": {
+        "shrines": 4654,
+        "orgs": 4804,
+        "clergy": 4654,
+        "believers": 4750000
+      },
+      "buddhist": {
+        "temples": 2730,
+        "orgs": 2842,
+        "clergy": 2,
+        "believers": 2745000
+      },
+      "christian": {
+        "orgs": 124,
+        "believers": 58000
+      }
+    },
+    "16": {
+      "code": "16",
+      "nameJa": "富山",
+      "total": {
+        "orgs": 4032,
+        "shrines": 2264,
+        "temples": 1505,
+        "clergy": 2264,
+        "believers": 3870000
+      },
+      "shinto": {
+        "shrines": 2264,
+        "orgs": 2293,
+        "clergy": 2264,
+        "believers": 2277000
+      },
+      "buddhist": {
+        "temples": 1505,
+        "orgs": 1561,
+        "clergy": 0,
+        "believers": 1518000
+      },
+      "christian": {
+        "orgs": 58,
+        "believers": 31000
+      }
+    },
+    "17": {
+      "code": "17",
+      "nameJa": "石川",
+      "total": {
+        "orgs": 3625,
+        "shrines": 1872,
+        "temples": 1349,
+        "clergy": 1869,
+        "believers": 3373000
+      },
+      "shinto": {
+        "shrines": 1872,
+        "orgs": 1921,
+        "clergy": 1869,
+        "believers": 1887000
+      },
+      "buddhist": {
+        "temples": 1348,
+        "orgs": 1399,
+        "clergy": 0,
+        "believers": 1364000
+      },
+      "christian": {
+        "orgs": 63,
+        "believers": 39000
+      }
+    },
+    "18": {
+      "code": "18",
+      "nameJa": "福井",
+      "total": {
+        "orgs": 3757,
+        "shrines": 1706,
+        "temples": 1665,
+        "clergy": 1706,
+        "believers": 3525000
+      },
+      "shinto": {
+        "shrines": 1706,
+        "orgs": 1728,
+        "clergy": 1706,
+        "believers": 1722000
+      },
+      "buddhist": {
+        "temples": 1665,
+        "orgs": 1772,
+        "clergy": 0,
+        "believers": 1680000
+      },
+      "christian": {
+        "orgs": 53,
+        "believers": 36000
+      }
+    },
+    "19": {
+      "code": "19",
+      "nameJa": "山梨",
+      "total": {
+        "orgs": 3023,
+        "shrines": 1281,
+        "temples": 1483,
+        "clergy": 1275,
+        "believers": 2872000
+      },
+      "shinto": {
+        "shrines": 1280,
+        "orgs": 1318,
+        "clergy": 1274,
+        "believers": 1302000
+      },
+      "buddhist": {
+        "temples": 1483,
+        "orgs": 1531,
+        "clergy": 0,
+        "believers": 1482000
+      },
+      "christian": {
+        "orgs": 58,
+        "believers": 31000
+      }
+    },
+    "20": {
+      "code": "20",
+      "nameJa": "長野",
+      "total": {
+        "orgs": 4946,
+        "shrines": 2455,
+        "temples": 1526,
+        "clergy": 2455,
+        "believers": 4367000
+      },
+      "shinto": {
+        "shrines": 2454,
+        "orgs": 2538,
+        "clergy": 2454,
+        "believers": 2506000
+      },
+      "buddhist": {
+        "temples": 1526,
+        "orgs": 1799,
+        "clergy": 0,
+        "believers": 1551000
+      },
+      "christian": {
+        "orgs": 188,
+        "believers": 108000
+      }
+    },
+    "21": {
+      "code": "21",
+      "nameJa": "岐阜",
+      "total": {
+        "orgs": 6646,
+        "shrines": 3259,
+        "temples": 2233,
+        "clergy": 3259,
+        "believers": 5949000
+      },
+      "shinto": {
+        "shrines": 3255,
+        "orgs": 3392,
+        "clergy": 3255,
+        "believers": 3339000
+      },
+      "buddhist": {
+        "temples": 2232,
+        "orgs": 2399,
+        "clergy": 0,
+        "believers": 2273000
+      },
+      "christian": {
+        "orgs": 79,
+        "believers": 43000
+      }
+    },
+    "22": {
+      "code": "22",
+      "nameJa": "静岡",
+      "total": {
+        "orgs": 6909,
+        "shrines": 2842,
+        "temples": 2602,
+        "clergy": 2840,
+        "believers": 6012000
+      },
+      "shinto": {
+        "shrines": 2838,
+        "orgs": 3035,
+        "clergy": 2838,
+        "believers": 2930000
+      },
+      "buddhist": {
+        "temples": 2601,
+        "orgs": 2788,
+        "clergy": 1,
+        "believers": 2596000
+      },
+      "christian": {
+        "orgs": 219,
+        "believers": 114000
+      }
+    },
+    "23": {
+      "code": "23",
+      "nameJa": "愛知",
+      "total": {
+        "orgs": 10716,
+        "shrines": 3351,
+        "temples": 4506,
+        "clergy": 3350,
+        "believers": 8927000
+      },
+      "shinto": {
+        "shrines": 3351,
+        "orgs": 3713,
+        "clergy": 3350,
+        "believers": 3560000
+      },
+      "buddhist": {
+        "temples": 4506,
+        "orgs": 4897,
+        "clergy": 0,
+        "believers": 4604000
+      },
+      "christian": {
+        "orgs": 313,
+        "believers": 171000
+      }
+    },
+    "24": {
+      "code": "24",
+      "nameJa": "三重",
+      "total": {
+        "orgs": 4455,
+        "shrines": 851,
+        "temples": 2343,
+        "clergy": 850,
+        "believers": 3673000
+      },
+      "shinto": {
+        "shrines": 844,
+        "orgs": 938,
+        "clergy": 843,
+        "believers": 901000
+      },
+      "buddhist": {
+        "temples": 2338,
+        "orgs": 2486,
+        "clergy": 1,
+        "believers": 2336000
+      },
+      "christian": {
+        "orgs": 88,
+        "believers": 59000
+      }
+    },
+    "25": {
+      "code": "25",
+      "nameJa": "滋賀",
+      "total": {
+        "orgs": 5475,
+        "shrines": 1441,
+        "temples": 3192,
+        "clergy": 1440,
+        "believers": 4811000
+      },
+      "shinto": {
+        "shrines": 1441,
+        "orgs": 1505,
+        "clergy": 1440,
+        "believers": 1486000
+      },
+      "buddhist": {
+        "temples": 3192,
+        "orgs": 3310,
+        "clergy": 0,
+        "believers": 3080000
+      },
+      "christian": {
+        "orgs": 83,
+        "believers": 52000
+      }
+    },
+    "26": {
+      "code": "26",
+      "nameJa": "京都",
+      "total": {
+        "orgs": 6563,
+        "shrines": 1760,
+        "temples": 3043,
+        "clergy": 1757,
+        "believers": 5518000
+      },
+      "shinto": {
+        "shrines": 1757,
+        "orgs": 1989,
+        "clergy": 1755,
+        "believers": 1880000
+      },
+      "buddhist": {
+        "temples": 3039,
+        "orgs": 3256,
+        "clergy": 0,
+        "believers": 3039000
+      },
+      "christian": {
+        "orgs": 229,
+        "believers": 150000
+      }
+    },
+    "27": {
+      "code": "27",
+      "nameJa": "大阪",
+      "total": {
+        "orgs": 9178,
+        "shrines": 738,
+        "temples": 3350,
+        "clergy": 735,
+        "believers": 5835000
+      },
+      "shinto": {
+        "shrines": 730,
+        "orgs": 1075,
+        "clergy": 728,
+        "believers": 965000
+      },
+      "buddhist": {
+        "temples": 3346,
+        "orgs": 4215,
+        "clergy": 0,
+        "believers": 3355000
+      },
+      "christian": {
+        "orgs": 531,
+        "believers": 340000
+      }
+    },
+    "28": {
+      "code": "28",
+      "nameJa": "兵庫",
+      "total": {
+        "orgs": 10425,
+        "shrines": 3858,
+        "temples": 3283,
+        "clergy": 3853,
+        "believers": 8636000
+      },
+      "shinto": {
+        "shrines": 3854,
+        "orgs": 4151,
+        "clergy": 3849,
+        "believers": 4051000
+      },
+      "buddhist": {
+        "temples": 3280,
+        "orgs": 3689,
+        "clergy": 2,
+        "believers": 3253000
+      },
+      "christian": {
+        "orgs": 433,
+        "believers": 287000
+      }
+    },
+    "29": {
+      "code": "29",
+      "nameJa": "奈良",
+      "total": {
+        "orgs": 5070,
+        "shrines": 1381,
+        "temples": 1799,
+        "clergy": 1381,
+        "believers": 3805000
+      },
+      "shinto": {
+        "shrines": 1376,
+        "orgs": 1474,
+        "clergy": 1376,
+        "believers": 1437000
+      },
+      "buddhist": {
+        "temples": 1799,
+        "orgs": 1965,
+        "clergy": 0,
+        "believers": 1789000
+      },
+      "christian": {
+        "orgs": 78,
+        "believers": 36000
+      }
+    },
+    "30": {
+      "code": "30",
+      "nameJa": "和歌山",
+      "total": {
+        "orgs": 3021,
+        "shrines": 442,
+        "temples": 1568,
+        "clergy": 440,
+        "believers": 2411000
+      },
+      "shinto": {
+        "shrines": 440,
+        "orgs": 499,
+        "clergy": 438,
+        "believers": 469000
+      },
+      "buddhist": {
+        "temples": 1563,
+        "orgs": 1703,
+        "clergy": 0,
+        "believers": 1573000
+      },
+      "christian": {
+        "orgs": 84,
+        "believers": 40000
+      }
+    },
+    "31": {
+      "code": "31",
+      "nameJa": "鳥取",
+      "total": {
+        "orgs": 1650,
+        "shrines": 818,
+        "temples": 465,
+        "clergy": 818,
+        "believers": 1471000
+      },
+      "shinto": {
+        "shrines": 818,
+        "orgs": 905,
+        "clergy": 818,
+        "believers": 871000
+      },
+      "buddhist": {
+        "temples": 465,
+        "orgs": 503,
+        "clergy": 0,
+        "believers": 464000
+      },
+      "christian": {
+        "orgs": 51,
+        "believers": 35000
+      }
+    },
+    "32": {
+      "code": "32",
+      "nameJa": "島根",
+      "total": {
+        "orgs": 2897,
+        "shrines": 1170,
+        "temples": 1282,
+        "clergy": 1170,
+        "believers": 2681000
+      },
+      "shinto": {
+        "shrines": 1170,
+        "orgs": 1267,
+        "clergy": 1170,
+        "believers": 1233000
+      },
+      "buddhist": {
+        "temples": 1282,
+        "orgs": 1332,
+        "clergy": 0,
+        "believers": 1284000
+      },
+      "christian": {
+        "orgs": 63,
+        "believers": 43000
+      }
+    },
+    "33": {
+      "code": "33",
+      "nameJa": "岡山",
+      "total": {
+        "orgs": 4401,
+        "shrines": 1651,
+        "temples": 1394,
+        "clergy": 1650,
+        "believers": 3638000
+      },
+      "shinto": {
+        "shrines": 1645,
+        "orgs": 1913,
+        "clergy": 1645,
+        "believers": 1848000
+      },
+      "buddhist": {
+        "temples": 1393,
+        "orgs": 1598,
+        "clergy": 0,
+        "believers": 1400000
+      },
+      "christian": {
+        "orgs": 116,
+        "believers": 70000
+      }
+    },
+    "34": {
+      "code": "34",
+      "nameJa": "広島",
+      "total": {
+        "orgs": 5717,
+        "shrines": 2653,
+        "temples": 1700,
+        "clergy": 2653,
+        "believers": 4976000
+      },
+      "shinto": {
+        "shrines": 2652,
+        "orgs": 2885,
+        "clergy": 2652,
+        "believers": 2835000
+      },
+      "buddhist": {
+        "temples": 1698,
+        "orgs": 1879,
+        "clergy": 1,
+        "believers": 1734000
+      },
+      "christian": {
+        "orgs": 179,
+        "believers": 115000
+      }
+    },
+    "35": {
+      "code": "35",
+      "nameJa": "山口",
+      "total": {
+        "orgs": 3220,
+        "shrines": 751,
+        "temples": 1408,
+        "clergy": 751,
+        "believers": 2640000
+      },
+      "shinto": {
+        "shrines": 750,
+        "orgs": 885,
+        "clergy": 750,
+        "believers": 854000
+      },
+      "buddhist": {
+        "temples": 1408,
+        "orgs": 1525,
+        "clergy": 0,
+        "believers": 1409000
+      },
+      "christian": {
+        "orgs": 109,
+        "believers": 74000
+      }
+    },
+    "36": {
+      "code": "36",
+      "nameJa": "徳島",
+      "total": {
+        "orgs": 2552,
+        "shrines": 1286,
+        "temples": 629,
+        "clergy": 1286,
+        "believers": 2247000
+      },
+      "shinto": {
+        "shrines": 1286,
+        "orgs": 1385,
+        "clergy": 1286,
+        "believers": 1331000
+      },
+      "buddhist": {
+        "temples": 627,
+        "orgs": 678,
+        "clergy": 0,
+        "believers": 632000
+      },
+      "christian": {
+        "orgs": 50,
+        "believers": 35000
+      }
+    },
+    "37": {
+      "code": "37",
+      "nameJa": "香川",
+      "total": {
+        "orgs": 2292,
+        "shrines": 776,
+        "temples": 860,
+        "clergy": 775,
+        "believers": 1927000
+      },
+      "shinto": {
+        "shrines": 773,
+        "orgs": 866,
+        "clergy": 772,
+        "believers": 843000
+      },
+      "buddhist": {
+        "temples": 859,
+        "orgs": 965,
+        "clergy": 2,
+        "believers": 871000
+      },
+      "christian": {
+        "orgs": 74,
+        "believers": 49000
+      }
+    },
+    "38": {
+      "code": "38",
+      "nameJa": "愛媛",
+      "total": {
+        "orgs": 3178,
+        "shrines": 1245,
+        "temples": 1059,
+        "clergy": 1244,
+        "believers": 2822000
+      },
+      "shinto": {
+        "shrines": 1241,
+        "orgs": 1463,
+        "clergy": 1240,
+        "believers": 1416000
+      },
+      "buddhist": {
+        "temples": 1059,
+        "orgs": 1156,
+        "clergy": 0,
+        "believers": 1066000
+      },
+      "christian": {
+        "orgs": 125,
+        "believers": 83000
+      }
+    },
+    "39": {
+      "code": "39",
+      "nameJa": "高知",
+      "total": {
+        "orgs": 3020,
+        "shrines": 2146,
+        "temples": 367,
+        "clergy": 2146,
+        "believers": 2775000
+      },
+      "shinto": {
+        "shrines": 2145,
+        "orgs": 2262,
+        "clergy": 2145,
+        "believers": 2223000
+      },
+      "buddhist": {
+        "temples": 363,
+        "orgs": 463,
+        "clergy": 1,
+        "believers": 381000
+      },
+      "christian": {
+        "orgs": 60,
+        "believers": 34000
+      }
+    },
+    "40": {
+      "code": "40",
+      "nameJa": "福岡",
+      "total": {
+        "orgs": 8255,
+        "shrines": 3403,
+        "temples": 2343,
+        "clergy": 3402,
+        "believers": 6629000
+      },
+      "shinto": {
+        "shrines": 3399,
+        "orgs": 3742,
+        "clergy": 3399,
+        "believers": 3634000
+      },
+      "buddhist": {
+        "temples": 2341,
+        "orgs": 2659,
+        "clergy": 1,
+        "believers": 2319000
+      },
+      "christian": {
+        "orgs": 293,
+        "believers": 151000
+      }
+    },
+    "41": {
+      "code": "41",
+      "nameJa": "佐賀",
+      "total": {
+        "orgs": 2685,
+        "shrines": 1105,
+        "temples": 1078,
+        "clergy": 1105,
+        "believers": 2332000
+      },
+      "shinto": {
+        "shrines": 1104,
+        "orgs": 1157,
+        "clergy": 1104,
+        "believers": 1148000
+      },
+      "buddhist": {
+        "temples": 1077,
+        "orgs": 1188,
+        "clergy": 1,
+        "believers": 1058000
+      },
+      "christian": {
+        "orgs": 43,
+        "believers": 20000
+      }
+    },
+    "42": {
+      "code": "42",
+      "nameJa": "長崎",
+      "total": {
+        "orgs": 2975,
+        "shrines": 1324,
+        "temples": 726,
+        "clergy": 1323,
+        "believers": 2309000
+      },
+      "shinto": {
+        "shrines": 1323,
+        "orgs": 1440,
+        "clergy": 1323,
+        "believers": 1405000
+      },
+      "buddhist": {
+        "temples": 726,
+        "orgs": 868,
+        "clergy": 0,
+        "believers": 727000
+      },
+      "christian": {
+        "orgs": 197,
+        "believers": 39000
+      }
+    },
+    "43": {
+      "code": "43",
+      "nameJa": "熊本",
+      "total": {
+        "orgs": 3263,
+        "shrines": 1389,
+        "temples": 1178,
+        "clergy": 1388,
+        "believers": 2818000
+      },
+      "shinto": {
+        "shrines": 1387,
+        "orgs": 1484,
+        "clergy": 1386,
+        "believers": 1450000
+      },
+      "buddhist": {
+        "temples": 1177,
+        "orgs": 1322,
+        "clergy": 0,
+        "believers": 1176000
+      },
+      "christian": {
+        "orgs": 113,
+        "believers": 58000
+      }
+    },
+    "44": {
+      "code": "44",
+      "nameJa": "大分",
+      "total": {
+        "orgs": 4008,
+        "shrines": 2109,
+        "temples": 1228,
+        "clergy": 2108,
+        "believers": 3614000
+      },
+      "shinto": {
+        "shrines": 2103,
+        "orgs": 2204,
+        "clergy": 2103,
+        "believers": 2180000
+      },
+      "buddhist": {
+        "temples": 1225,
+        "orgs": 1305,
+        "clergy": 0,
+        "believers": 1214000
+      },
+      "christian": {
+        "orgs": 89,
+        "believers": 49000
+      }
+    },
+    "45": {
+      "code": "45",
+      "nameJa": "宮崎",
+      "total": {
+        "orgs": 1463,
+        "shrines": 673,
+        "temples": 348,
+        "clergy": 673,
+        "believers": 1205000
+      },
+      "shinto": {
+        "shrines": 672,
+        "orgs": 722,
+        "clergy": 672,
+        "believers": 702000
+      },
+      "buddhist": {
+        "temples": 347,
+        "orgs": 399,
+        "clergy": 0,
+        "believers": 339000
+      },
+      "christian": {
+        "orgs": 78,
+        "believers": 34000
+      }
+    },
+    "46": {
+      "code": "46",
+      "nameJa": "鹿児島",
+      "total": {
+        "orgs": 2161,
+        "shrines": 1118,
+        "temples": 479,
+        "clergy": 1116,
+        "believers": 1781000
+      },
+      "shinto": {
+        "shrines": 1117,
+        "orgs": 1200,
+        "clergy": 1116,
+        "believers": 1164000
+      },
+      "buddhist": {
+        "temples": 478,
+        "orgs": 540,
+        "clergy": 0,
+        "believers": 464000
+      },
+      "christian": {
+        "orgs": 168,
+        "believers": 53000
+      }
+    },
+    "47": {
+      "code": "47",
+      "nameJa": "沖縄",
+      "total": {
+        "orgs": 482,
+        "shrines": 14,
+        "temples": 89,
+        "clergy": 14,
+        "believers": 218000
+      },
+      "shinto": {
+        "shrines": 14,
+        "orgs": 24,
+        "clergy": 14,
+        "believers": 17000
+      },
+      "buddhist": {
+        "temples": 88,
+        "orgs": 109,
+        "clergy": 0,
+        "believers": 69000
+      },
+      "christian": {
+        "orgs": 258,
+        "believers": 113000
+      }
+    }
+  }
+}
