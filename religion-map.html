@@ -4,177 +4,183 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shrines & Temples — Japan Religion Map</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #1a1612;
+  --ink-mid: #4a3f35;
+  --ink-soft: #8a7a6e;
+  --paper: #f5f0e8;
+  --paper-warm: #ede6d8;
+  --paper-deep: #d9cfc0;
+  --red: #c0392b;
+  --teal: #1a5c52;
+  --gold: #886800;
+}
 
-  :root {
-    --ink: #1a1612;
-    --ink-mid: #4a3f35;
-    --ink-soft: #8a7a6e;
-    --paper: #f5f0e8;
-    --paper-warm: #ede6d8;
-    --paper-deep: #d9cfc0;
-    --red: #c0392b;
-    --teal: #1a5c52;
-    --gold: #886800;
-  }
+html, body {
+  width: 100%; height: 100vh; overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+}
 
-  html, body {
-    width: 100%; min-height: 100vh;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'DM Mono', monospace;
-    font-weight: 300;
-  }
+.shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
 
-  .shell {
-    display: grid;
-    grid-template-columns: 290px 1fr;
-    grid-template-rows: auto 1fr;
-    min-height: 100vh;
-  }
+/* ── Header ── */
+.header {
+  grid-column: 1 / -1;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--paper-deep);
+  display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap;
+  background: var(--paper);
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 300; font-style: italic;
+  color: var(--ink); line-height: 1;
+}
+.header-title em { font-style: normal; font-weight: 600; }
+.header-sub {
+  font-size: 10px; letter-spacing: 0.12em;
+  color: var(--ink-soft); text-transform: uppercase;
+}
+.header-source {
+  margin-left: auto; font-size: 9px; color: var(--ink-soft);
+  letter-spacing: 0.05em; line-height: 1.6; text-align: right;
+}
 
-  /* ── Header ── */
-  .header {
-    grid-column: 1 / -1;
-    padding: 22px 32px 16px;
-    border-bottom: 1px solid var(--paper-deep);
-    display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap;
-  }
-  .header-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 26px; font-weight: 300; font-style: italic;
-    color: var(--ink); line-height: 1;
-  }
-  .header-title em { font-style: normal; font-weight: 600; }
-  .header-sub {
-    font-size: 10px; letter-spacing: 0.12em;
-    color: var(--ink-soft); text-transform: uppercase;
-  }
-  .header-source {
-    margin-left: auto; font-size: 9px; color: var(--ink-soft);
-    letter-spacing: 0.05em; line-height: 1.6; text-align: right;
-  }
+/* ── Sidebar ── */
+.sidebar {
+  border-right: 1px solid var(--paper-deep);
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 22px;
+  overflow-y: auto; background: var(--paper);
+}
+.control-label {
+  font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
+}
 
-  /* ── Sidebar ── */
-  .sidebar {
-    border-right: 1px solid var(--paper-deep);
-    padding: 24px 20px;
-    display: flex; flex-direction: column; gap: 24px;
-    overflow-y: auto;
-  }
-  .control-label {
-    font-size: 9px; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
-  }
+.mode-group { display: flex; flex-direction: column; gap: 5px; }
+.mode-btn {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; background: transparent;
+  border: 1px solid var(--paper-deep); cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  font-weight: 300; color: var(--ink-mid);
+  letter-spacing: 0.04em; transition: all 0.15s; text-align: left;
+}
+.mode-btn .dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--paper-deep); transition: all 0.15s;
+}
+.mode-btn.active { border-color: var(--ink-mid); color: var(--ink); }
+.mode-btn.active .dot { border-color: transparent; }
+.mode-btn.shinto.active   .dot { background: var(--red); }
+.mode-btn.buddhist.active .dot { background: var(--teal); }
+.mode-btn.both.active     .dot { background: var(--gold); }
 
-  .mode-group { display: flex; flex-direction: column; gap: 5px; }
-  .mode-btn {
-    display: flex; align-items: center; gap: 9px;
-    padding: 9px 11px; background: transparent;
-    border: 1px solid var(--paper-deep); cursor: pointer;
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    font-weight: 300; color: var(--ink-mid);
-    letter-spacing: 0.04em; transition: all 0.15s; text-align: left;
-  }
-  .mode-btn .dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    border: 1.5px solid var(--paper-deep); transition: all 0.15s;
-  }
-  .mode-btn.active { border-color: var(--ink-mid); color: var(--ink); }
-  .mode-btn.active .dot { border-color: transparent; }
-  .mode-btn.shinto.active   .dot { background: var(--red); }
-  .mode-btn.buddhist.active .dot { background: var(--teal); }
-  .mode-btn.both.active     .dot { background: var(--gold); }
+.metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
+.metric-btn {
+  flex: 1; padding: 8px 4px; background: transparent; border: none;
+  border-right: 1px solid var(--paper-deep);
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.08em; color: var(--ink-soft);
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+}
+.metric-btn:last-child { border-right: none; }
+.metric-btn.active { background: var(--ink); color: var(--paper); }
 
-  .metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
-  .metric-btn {
-    flex: 1; padding: 8px 4px; background: transparent; border: none;
-    border-right: 1px solid var(--paper-deep);
-    font-family: 'DM Mono', monospace; font-size: 9px;
-    letter-spacing: 0.08em; color: var(--ink-soft);
-    cursor: pointer; transition: all 0.15s; text-transform: uppercase;
-  }
-  .metric-btn:last-child { border-right: none; }
-  .metric-btn.active { background: var(--ink); color: var(--paper); }
+.legend-bar { height: 8px; border-radius: 1px; margin-bottom: 6px; }
+.legend-ticks {
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: var(--ink-soft);
+}
 
-  .legend-bar { height: 8px; border-radius: 1px; margin-bottom: 6px; }
-  .legend-ticks {
-    display: flex; justify-content: space-between;
-    font-size: 9px; color: var(--ink-soft);
-  }
+.info-card {
+  background: var(--paper-warm); border: 1px solid var(--paper-deep);
+  padding: 14px; min-height: 130px;
+}
+.info-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-weight: 400; margin-bottom: 2px; color: var(--ink);
+}
+.info-name-ja { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 10px; }
+.info-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 10px;
+}
+.info-row-label { color: var(--ink-soft); letter-spacing: 0.05em; }
+.info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
+.info-row-val.red  { color: var(--red); }
+.info-row-val.teal { color: var(--teal); }
+.info-placeholder {
+  color: var(--ink-soft); font-size: 10px; font-style: italic;
+  padding-top: 10px; font-family: 'Cormorant Garamond', serif;
+}
 
-  .info-card {
-    background: var(--paper-warm); border: 1px solid var(--paper-deep);
-    padding: 14px; min-height: 136px;
-  }
-  .info-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 19px; font-weight: 400; margin-bottom: 2px; color: var(--ink);
-  }
-  .info-name-ja { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 10px; }
-  .info-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 10px;
-  }
-  .info-row-label { color: var(--ink-soft); letter-spacing: 0.05em; }
-  .info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
-  .info-row-val.red  { color: var(--red); }
-  .info-row-val.teal { color: var(--teal); }
-  .info-placeholder {
-    color: var(--ink-soft); font-size: 10px; font-style: italic;
-    padding-top: 10px; font-family: 'Cormorant Garamond', serif;
-  }
+.nat-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
+}
+.nat-cell { background: var(--paper); padding: 9px 9px 7px; }
+.nat-val {
+  font-size: 15px; font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 1; margin-bottom: 3px;
+}
+.nat-val.red  { color: var(--red); }
+.nat-val.teal { color: var(--teal); }
+.nat-label { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.05em; line-height: 1.4; }
 
-  .nat-stats {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
-  }
-  .nat-cell { background: var(--paper); padding: 9px 9px 7px; }
-  .nat-val {
-    font-size: 15px; font-family: 'Cormorant Garamond', serif;
-    font-weight: 600; line-height: 1; margin-bottom: 3px;
-  }
-  .nat-val.red  { color: var(--red); }
-  .nat-val.teal { color: var(--teal); }
-  .nat-label { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.05em; line-height: 1.4; }
+/* ── Map ── */
+.map-area {
+  position: relative; overflow: hidden; background: var(--paper);
+}
+#map-svg { width: 100%; height: 100%; display: block; }
 
-  /* ── Map ── */
-  .map-area {
-    position: relative; display: flex;
-    align-items: center; justify-content: center;
-    overflow: hidden; background: var(--paper);
-  }
-  #map-svg { width: 100%; height: 100%; display: block; }
+.pref-path {
+  stroke: var(--paper); stroke-width: 0.4; cursor: pointer;
+  transition: filter 0.12s;
+}
+.pref-path:hover { stroke: var(--ink); stroke-width: 1.0; filter: brightness(1.1); }
+.pref-path.hovered { stroke: var(--ink); stroke-width: 1.0; }
 
-  .pref-path {
-    stroke: var(--paper); stroke-width: 0.5; cursor: pointer;
-  }
-  .pref-path.hovered { stroke: var(--ink); stroke-width: 1.4; }
+.map-tooltip {
+  position: absolute; pointer-events: none;
+  background: var(--ink); color: var(--paper);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 5px 10px; letter-spacing: 0.04em;
+  white-space: nowrap; opacity: 0; transition: opacity 0.1s;
+}
 
-  .map-tooltip {
-    position: absolute; pointer-events: none;
-    background: var(--ink); color: var(--paper);
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    padding: 5px 10px; letter-spacing: 0.04em;
-    white-space: nowrap; opacity: 0; transition: opacity 0.1s;
-  }
+.divider { height: 1px; background: var(--paper-deep); }
 
-  .divider { height: 1px; background: var(--paper-deep); }
+.paradox {
+  background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
+  padding: 11px 11px 11px 13px;
+}
+.paradox-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px; font-style: italic; margin-bottom: 5px; color: var(--ink);
+}
+.paradox-body { font-size: 9px; color: var(--ink-soft); line-height: 1.7; letter-spacing: 0.04em; }
+.paradox-body strong { color: var(--ink-mid); font-weight: 400; }
 
-  .paradox {
-    background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
-    padding: 11px 11px 11px 13px;
-  }
-  .paradox-headline {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 13px; font-style: italic; margin-bottom: 5px; color: var(--ink);
-  }
-  .paradox-body { font-size: 9px; color: var(--ink-soft); line-height: 1.7; letter-spacing: 0.04em; }
-  .paradox-body strong { color: var(--ink-mid); font-weight: 400; }
+/* Loading */
+#loading {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; color: var(--ink-soft); letter-spacing: 0.08em;
+}
 </style>
 </head>
 <body>
@@ -229,7 +235,7 @@
     <div>
       <div class="control-label">National total</div>
       <div class="nat-stats">
-        <div class="nat-cell"><div class="nat-val red" id="nat-shrines">—</div><div class="nat-label">⛩️ Shinto<br>shrines</div></div>
+        <div class="nat-cell"><div class="nat-val red"  id="nat-shrines">—</div><div class="nat-label">⛩️ Shinto<br>shrines</div></div>
         <div class="nat-cell"><div class="nat-val teal" id="nat-temples">—</div><div class="nat-label">🪷 Buddhist<br>temples</div></div>
         <div class="nat-cell"><div class="nat-val" id="nat-shinto-b">—</div><div class="nat-label">Shinto<br>believers</div></div>
         <div class="nat-cell"><div class="nat-val" id="nat-buddhist-b">—</div><div class="nat-label">Buddhist<br>believers</div></div>
@@ -251,58 +257,155 @@
   <main class="map-area" id="map-area">
     <svg id="map-svg"></svg>
     <div class="map-tooltip" id="tooltip"></div>
+    <div id="loading">Loading…</div>
   </main>
 
 </div>
 
 <script>
+'use strict';
+
+// ── Color ramps ───────────────────────────────────────────
 const RAMPS = {
   shinto:   ['#f5ebe8','#e8c5c0','#d49090','#bb5555','#952222','#6a0808'],
   buddhist: ['#e8f0ef','#b0d5d0','#6ab5ae','#2a8880','#0f5c52','#063830'],
   both:     ['#f5f0e0','#e0d498','#c0b048','#9a8a10','#706200','#4a4000']
 };
 
-const fmt    = d3.format(',');
-const fmtDec = d3.format('.1f');
+const fmt    = v => v.toLocaleString();
+const fmtDec = v => v.toFixed(1);
 
 let mode   = 'shinto';
 let metric = 'perCapita';
 let geoData, popData, relData, colorScale;
 let hoveredCode = null;
 
+// ── Custom Mercator projection (same as population map) ───
+// Projects lon/lat → Mercator x/y, then scales to fit SVG
+let projScale, projTx, projTy;
+
+function toMerc(lon, lat) {
+  return [
+    lon * Math.PI / 180,
+    Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))
+  ];
+}
+
+function project(lon, lat) {
+  const [mx, my] = toMerc(lon, lat);
+  return [projScale * mx + projTx, projScale * -my + projTy];
+}
+
+// Fit projection so all mainland features fill the SVG area with padding
+function fitProjection(features, W, H, padL, padT, padR, padB) {
+  let minX = Infinity, maxX = -Infinity;
+  let minY = Infinity, maxY = -Infinity;
+
+  features.forEach(feat => {
+    const g = feat.geometry;
+    const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+    polys.forEach(poly => {
+      // Skip remote islands that skew the projection:
+      //  Tokyo (13): exclude polygons centred east of 141°
+      //  Kagoshima (46): exclude polygons centred below 30°N
+      const code = feat.properties.code;
+      if (code === '13' || code === '46') {
+        const ring = poly[0];
+        const cx = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+        const cy = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+        if (code === '13' && cx > 141.0) return;
+        if (code === '46' && cy < 30.0)  return;
+      }
+      poly.forEach(ring => ring.forEach(([lon, lat]) => {
+        const [mx, my] = toMerc(lon, lat);
+        const ny = -my;
+        if (mx < minX) minX = mx; if (mx > maxX) maxX = mx;
+        if (ny < minY) minY = ny; if (ny > maxY) maxY = ny;
+      }));
+    });
+  });
+
+  projScale = 0.95 * Math.min(
+    (W - padL - padR) / (maxX - minX),
+    (H - padT - padB) / (maxY - minY)
+  );
+  projTx = (W + padL - padR) / 2 - projScale * (minX + maxX) / 2;
+  projTy = (H + padT - padB) / 2 - projScale * (minY + maxY) / 2;
+}
+
+// Convert a GeoJSON feature to an SVG path string
+function featureToPath(feat) {
+  const g = feat.geometry;
+  const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+  let d = '';
+  polys.forEach(poly => {
+    poly.forEach(ring => {
+      const pts = ring.map(([lon, lat]) => project(lon, lat));
+      d += `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+      for (let i = 1; i < pts.length; i++) {
+        d += `L${pts[i][0].toFixed(1)},${pts[i][1].toFixed(1)}`;
+      }
+      d += 'Z';
+    });
+  });
+  return d;
+}
+
+// ── Color scale (quantile) ────────────────────────────────
+function buildScale() {
+  const vals = Object.keys(relData.prefectures)
+    .map(c => getValue(c))
+    .filter(v => v > 0)
+    .sort((a, b) => a - b);
+  const ramp = RAMPS[mode];
+  const n = ramp.length;
+  // quantile breakpoints
+  colorScale = v => {
+    if (!v) return '#e8e4dc';
+    const idx = vals.indexOf(v) >= 0
+      ? Math.floor(vals.indexOf(v) / vals.length * n)
+      : 0;
+    // use d3-style quantile: bucket by sorted position
+    return ramp[Math.min(n - 1, Math.floor(
+      vals.filter(x => x <= v).length / vals.length * n
+    ))];
+  };
+}
+
 function getValue(code) {
   const r = relData.prefectures[code];
   const p = popData[code];
   if (!r || !p) return 0;
-  let raw = mode === 'shinto' ? r.shinto.shrines
-          : mode === 'buddhist' ? r.buddhist.temples
-          : r.total.orgs;
+  const raw = mode === 'shinto'   ? r.shinto.shrines
+            : mode === 'buddhist' ? r.buddhist.temples
+            : r.total.orgs;
   return metric === 'perCapita' ? raw / p.total * 10000 : raw;
-}
-
-function buildScale() {
-  const vals = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
-  colorScale = d3.scaleQuantile().domain(vals).range(RAMPS[mode]);
 }
 
 function getColor(code) {
   const v = getValue(code);
-  return v ? colorScale(v) : '#e0dbd0';
+  return v ? colorScale(v) : '#e8e4dc';
 }
 
+// ── Legend ────────────────────────────────────────────────
 function updateLegend() {
   document.getElementById('legend-bar').style.background =
     `linear-gradient(to right, ${RAMPS[mode].join(', ')})`;
-  const vals = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
-  const [lo, hi] = d3.extent(vals);
+  const vals = Object.keys(relData.prefectures)
+    .map(c => getValue(c)).filter(v => v > 0);
+  const lo = Math.min(...vals), hi = Math.max(...vals);
   document.getElementById('legend-ticks').innerHTML =
-    `<span>${metric==='perCapita' ? fmtDec(lo) : fmt(Math.round(lo))}</span>` +
-    `<span>${metric==='perCapita' ? fmtDec(hi) : fmt(Math.round(hi))}</span>`;
+    `<span>${metric === 'perCapita' ? fmtDec(lo) : fmt(Math.round(lo))}</span>` +
+    `<span>${metric === 'perCapita' ? fmtDec(hi) : fmt(Math.round(hi))}</span>`;
 }
 
+// ── Info card ─────────────────────────────────────────────
 function updateInfoCard(code) {
   const card = document.getElementById('info-card');
-  if (!code) { card.innerHTML = '<div class="info-placeholder">Hover over a prefecture to see details.</div>'; return; }
+  if (!code) {
+    card.innerHTML = '<div class="info-placeholder">Hover over a prefecture to see details.</div>';
+    return;
+  }
   const r = relData.prefectures[code];
   const p = popData[code];
   if (!r || !p) return;
@@ -328,96 +431,96 @@ function fillNatStats() {
   document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
 }
 
-// ── Tooltip ───────────────────────────────────────
+// ── Tooltip ───────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
+
 function showTooltip(event, code) {
   const r = relData.prefectures[code];
   const p = popData[code];
   if (!r || !p) return;
-  let v = mode === 'shinto'
-    ? (metric==='perCapita' ? fmtDec(r.shinto.shrines/p.total*10000)+' / 10k' : fmt(r.shinto.shrines)+' shrines')
+  const v = mode === 'shinto'
+    ? (metric === 'perCapita' ? fmtDec(r.shinto.shrines/p.total*10000)+' /10k' : fmt(r.shinto.shrines)+' shrines')
     : mode === 'buddhist'
-    ? (metric==='perCapita' ? fmtDec(r.buddhist.temples/p.total*10000)+' / 10k' : fmt(r.buddhist.temples)+' temples')
-    : (metric==='perCapita' ? fmtDec(r.total.orgs/p.total*10000)+' / 10k' : fmt(r.total.orgs)+' orgs');
+    ? (metric === 'perCapita' ? fmtDec(r.buddhist.temples/p.total*10000)+' /10k' : fmt(r.buddhist.temples)+' temples')
+    : (metric === 'perCapita' ? fmtDec(r.total.orgs/p.total*10000)+' /10k' : fmt(r.total.orgs)+' orgs');
   tooltip.textContent = `${r.nameJa}  ${v}`;
   tooltip.style.opacity = '1';
   moveTooltip(event);
 }
+
 function moveTooltip(event) {
   const rect = document.getElementById('map-area').getBoundingClientRect();
   let x = event.clientX - rect.left + 14;
   let y = event.clientY - rect.top  - 34;
-  if (x + 220 > rect.width) x -= 240;
+  if (x + 220 > rect.width)  x -= 240;
   if (y < 0) y += 50;
   tooltip.style.left = x + 'px';
   tooltip.style.top  = y + 'px';
 }
 function hideTooltip() { tooltip.style.opacity = '0'; }
 
-// ── Map ───────────────────────────────────────────
+// ── Draw / update map ─────────────────────────────────────
+let svgG = null;
+
 function drawMap() {
   const area = document.getElementById('map-area');
   const W = area.clientWidth;
   const H = area.clientHeight;
+  const svg = document.getElementById('map-svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  const svg = d3.select('#map-svg').attr('width', W).attr('height', H);
-  svg.selectAll('*').remove();
+  // Fit projection using all 47 prefectures (island-filtered internally)
+  fitProjection(geoData.features, W, H, 10, 10, 10, 10);
 
-  // 東京（小笠原）・鹿児島（南西諸島）の離島が投影を歪めるため、
-  // 本土の bbox を手動で指定して fitExtent する
-  const bboxFeature = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [128.5, 30.5],
-        [146.0, 30.5],
-        [146.0, 45.6],
-        [128.5, 45.6],
-        [128.5, 30.5]
-      ]]
-    }
-  };
+  if (svgG) svgG.remove();
+  svgG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(svgG);
 
-  const projection = d3.geoMercator()
-    .fitExtent([[24, 16], [W - 24, H - 16]], bboxFeature);
+  const frag = document.createDocumentFragment();
 
-  const pathGen = d3.geoPath().projection(projection);
+  geoData.features.forEach(feat => {
+    const code = feat.properties.code;
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    el.setAttribute('d', featureToPath(feat));
+    el.setAttribute('fill', getColor(code));
+    el.setAttribute('fill-rule', 'evenodd');
+    el.setAttribute('class', 'pref-path');
+    el.dataset.code = code;
 
-  const g = svg.append('g');
-
-  g.selectAll('.pref-path')
-    .data(geoData.features)
-    .join('path')
-    .attr('class', 'pref-path')
-    .attr('d', pathGen)
-    .attr('fill', d => getColor(d.properties.code))
-    .on('mouseenter', function(event, d) {
-      hoveredCode = d.properties.code;
-      // hovered クラスを付け替え（raise で最前面に）
-      g.selectAll('.pref-path').classed('hovered', false);
-      d3.select(this).classed('hovered', true).raise();
-      updateInfoCard(hoveredCode);
-      showTooltip(event, hoveredCode);
-    })
-    .on('mousemove', moveTooltip)
-    .on('mouseleave', function() {
+    el.addEventListener('mouseenter', function(e) {
+      hoveredCode = code;
+      document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('hovered'));
+      this.classList.add('hovered');
+      this.parentNode.appendChild(this); // raise to top
+      updateInfoCard(code);
+      showTooltip(e, code);
+    });
+    el.addEventListener('mousemove', moveTooltip);
+    el.addEventListener('mouseleave', function() {
       hoveredCode = null;
-      d3.select(this).classed('hovered', false);
+      this.classList.remove('hovered');
       updateInfoCard(null);
       hideTooltip();
     });
+
+    frag.appendChild(el);
+  });
+
+  svgG.appendChild(frag);
 }
 
 function updateColors() {
   buildScale();
-  d3.selectAll('.pref-path')
-    .transition().duration(280)
-    .attr('fill', d => getColor(d.properties.code));
+  document.querySelectorAll('.pref-path').forEach(el => {
+    const code = el.dataset.code;
+    el.style.transition = 'fill 0.3s';
+    el.setAttribute('fill', getColor(code));
+  });
   updateLegend();
   if (hoveredCode) updateInfoCard(hoveredCode);
 }
 
+// ── Controls ──────────────────────────────────────────────
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -438,28 +541,30 @@ document.querySelectorAll('.metric-btn').forEach(btn => {
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { drawMap(); updateColors(); }, 120);
+  resizeTimer = setTimeout(() => { drawMap(); buildScale(); updateLegend(); }, 150);
 });
 
-// ── Init ──────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────
 Promise.all([
-  d3.json('geo-json/japan.geojson'),
-  d3.json('population-json/pref-pop.json'),
-  d3.json('data/religion-stats.json')
+  fetch('geo-json/japan.geojson').then(r => r.json()),
+  fetch('population-json/pref-pop.json').then(r => r.json()),
+  fetch('data/religion-stats.json').then(r => r.json())
 ]).then(([geo, pop, rel]) => {
   geoData = geo;
   popData = pop;
   relData = rel;
+
+  document.getElementById('loading').style.display = 'none';
+
   fillNatStats();
   buildScale();
   updateLegend();
   drawMap();
 }).catch(err => {
   console.error(err);
-  document.getElementById('map-area').innerHTML =
-    `<div style="padding:40px;font-family:monospace;font-size:12px;color:#c0392b">
-      Failed to load data.<br><br>
-      Required paths:<br>
+  document.getElementById('loading').innerHTML =
+    `<div style="text-align:center;color:#c0392b;font-size:11px;padding:20px;line-height:2">
+      Failed to load data.<br>
       <code>geo-json/japan.geojson</code><br>
       <code>population-json/pref-pop.json</code><br>
       <code>data/religion-stats.json</code><br><br>
