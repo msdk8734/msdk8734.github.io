@@ -570,8 +570,8 @@ function fillNatStats() {
   const n=relData.national;
   document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
   document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
-  document.getElementById('nat-shinto-b').textContent   = fmt(n.shinto.believers);
-  document.getElementById('nat-buddhist-b').textContent = fmt(n.buddhist.believers);
+  document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers / 1e6).toFixed(1) + 'M';
+  document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
 }
 
 // ── Tooltip ───────────────────────────────────────────────
