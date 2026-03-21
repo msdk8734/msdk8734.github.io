@@ -15,7 +15,6 @@
   --paper: #f5f0e8;
   --paper-warm: #ede6d8;
   --paper-deep: #d9cfc0;
-  --map-lo: #e8dece;
   --map-hi: #5c3d1e;
   --accent: #7a5830;
 }
@@ -28,7 +27,9 @@ html, body {
   font-weight: 300;
 }
 
-/* ── Layout: left sidebar | map | right ranking ── */
+/* ════════════════════════════════════
+   DESKTOP layout
+   ════════════════════════════════════ */
 .shell {
   display: grid;
   grid-template-columns: 274px 1fr 220px;
@@ -70,7 +71,6 @@ html, body {
   font-size: 10px; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
 }
-
 .mode-group { display: flex; flex-direction: column; gap: 5px; }
 .mode-btn {
   display: flex; align-items: center; gap: 9px;
@@ -99,52 +99,28 @@ html, body {
 .metric-btn.active { background: var(--ink); color: var(--paper); }
 
 .legend-bar { height: 9px; border-radius: 2px; margin-bottom: 6px; }
-.legend-ticks {
-  display: flex; justify-content: space-between;
-  font-size: 10px; color: var(--ink-soft);
-}
+.legend-ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-soft); }
 
 .info-card {
   background: var(--paper-warm); border: 1px solid var(--paper-deep);
   padding: 13px; min-height: 130px;
 }
-.info-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 20px; font-weight: 400; margin-bottom: 1px; color: var(--ink);
-}
+.info-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 1px; color: var(--ink); }
 .info-name-ja { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 9px; }
-.info-row {
-  display: flex; justify-content: space-between; align-items: baseline;
-  border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 11px;
-}
+.info-row { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 11px; }
 .info-row-label { color: var(--ink-soft); }
 .info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
-.info-placeholder {
-  color: var(--ink-soft); font-size: 11px; font-style: italic;
-  padding-top: 10px; font-family: 'Cormorant Garamond', serif;
-}
+.info-placeholder { color: var(--ink-soft); font-size: 11px; font-style: italic; padding-top: 10px; font-family: 'Cormorant Garamond', serif; }
 
-.nat-stats {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
-}
+.nat-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep); }
 .nat-cell { background: var(--paper); padding: 9px 8px 7px; }
-.nat-val {
-  font-size: 13px; font-family: 'Cormorant Garamond', serif;
-  font-weight: 600; line-height: 1.2; margin-bottom: 3px; color: var(--ink);
-}
+.nat-val { font-size: 15px; font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1; margin-bottom: 3px; color: var(--ink); }
 .nat-label { font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
 
 .divider { height: 1px; background: var(--paper-deep); }
 
-.paradox {
-  background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
-  padding: 11px 11px 11px 13px;
-}
-.paradox-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink);
-}
+.paradox { background: var(--paper-warm); border-left: 2px solid var(--ink-mid); padding: 11px 11px 11px 13px; }
+.paradox-headline { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink); }
 .paradox-body { font-size: 10px; color: var(--ink-soft); line-height: 1.75; letter-spacing: 0.03em; }
 .paradox-body strong { color: var(--ink-mid); font-weight: 400; }
 
@@ -157,35 +133,24 @@ html, body {
 #map-svg { width: 100%; height: 100%; display: block; }
 
 .pref-path {
-  stroke: rgba(255,255,255,0.55);
-  stroke-width: 0.25px;
-  stroke-linejoin: round;
-  cursor: pointer;
-  transition: filter 0.15s;
+  stroke: rgba(255,255,255,0.55); stroke-width: 0.25px; stroke-linejoin: round;
+  cursor: pointer; transition: filter 0.15s;
 }
-.pref-path:hover,
-.pref-path.hovered {
-  stroke: rgba(255,255,255,0.92);
-  stroke-width: 0.6px;
+.pref-path:hover, .pref-path.hovered {
+  stroke: rgba(255,255,255,0.92); stroke-width: 0.6px;
   filter: brightness(1.14) drop-shadow(0 2px 8px rgba(0,0,0,0.28));
 }
-.pref-path.dimmed {
-  opacity: 0.22;
-  filter: none;
-}
+.pref-path.dimmed { opacity: 0.22; filter: none; }
 
-/* ── Tooltip (人口マップ準拠) ── */
+/* ── Tooltip ── */
 .map-tooltip {
   position: absolute; pointer-events: none;
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(12px);
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 14px 18px;
+  background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+  border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px 18px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
   opacity: 0; transition: opacity 0.12s;
-  min-width: 210px; max-width: 270px;
-  color: var(--ink);
+  min-width: 210px; max-width: 270px; color: var(--ink);
+  z-index: 50;
 }
 .tt-name    { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; font-family: 'Cormorant Garamond', serif; }
 .tt-name-ja { font-size: 11px; color: #999; margin-bottom: 3px; font-family: 'DM Mono', monospace; font-weight: 300; }
@@ -212,7 +177,7 @@ html, body {
 }
 .zoom-btn:hover { background: var(--paper-warm); }
 
-/* ── Right ranking panel (人口マップ準拠) ── */
+/* ── Desktop ranking panel ── */
 .ranking {
   border-left: 1px solid var(--paper-deep);
   padding: 14px 10px 12px;
@@ -220,45 +185,177 @@ html, body {
   scrollbar-width: thin; scrollbar-color: var(--paper-deep) transparent;
   background: rgba(245,240,232,0.96);
 }
-.rk-title {
-  font-size: 10px; font-weight: 400; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--ink-soft);
-  margin-bottom: 10px; padding-bottom: 8px;
-  border-bottom: 1px solid var(--paper-deep);
-}
-.rk-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 6px; border-radius: 4px;
-  cursor: pointer; transition: background 0.12s;
-}
-.rk-item:hover, .rk-item.active {
-  background: rgba(92, 61, 30, 0.10);
-}
-.rk-num {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  font-weight: 400; color: var(--ink-soft);
-  width: 18px; text-align: right; flex-shrink: 0;
-}
+.rk-title { font-size: 10px; font-weight: 400; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--paper-deep); }
+.rk-item { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 4px; cursor: pointer; transition: background 0.12s; }
+.rk-item:hover, .rk-item.active { background: rgba(92,61,30,0.10); }
+.rk-num { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 400; color: var(--ink-soft); width: 18px; text-align: right; flex-shrink: 0; }
 .rk-num.gold   { color: #b8860b; }
 .rk-num.silver { color: #888; }
 .rk-num.bronze { color: #8b5c2a; }
-.rk-name {
-  font-size: 11px; color: var(--ink-mid); flex: 1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rk-val {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  color: var(--ink-soft); flex-shrink: 0;
-}
-.rk-bar { width: 32px; height: 3px; background: var(--paper-deep); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.rk-name { font-size: 11px; color: var(--ink-mid); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rk-val  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-soft); flex-shrink: 0; }
+.rk-bar  { width: 32px; height: 3px; background: var(--paper-deep); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
 .rk-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); opacity: 0.6; }
 
-#loading {
-  position: absolute; inset: 0; display: flex;
-  align-items: center; justify-content: center;
-  font-size: 12px; color: var(--ink-soft); letter-spacing: 0.1em;
-  pointer-events: none;
+#loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.1em; pointer-events: none; }
+
+/* ════════════════════════════════════
+   MOBILE styles  (max-width: 720px)
+   ════════════════════════════════════ */
+@media (max-width: 720px) {
+
+  /* 2行グリッド: header + 全画面map */
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+  }
+
+  /* ── Header: タイトルのみコンパクトに ── */
+  .header {
+    padding: 10px 14px 8px;
+    gap: 8px;
+  }
+  .header-title { font-size: 18px; }
+  .header-sub   { font-size: 9px; }
+  .header-source { display: none; }
+
+  /* ── サイドバー: 非表示 ── */
+  .sidebar { display: none; }
+
+  /* ── Desktop ranking: 非表示 ── */
+  .ranking { display: none; }
+
+  /* ── 地図: 全画面 ── */
+  .map-area { grid-column: 1; grid-row: 2; }
+
+  /* ── スマホ用トップバー（Display + Metric）── */
+  #mobile-topbar {
+    position: absolute;
+    top: 8px; left: 8px; right: 52px;  /* zoom-ctrlと被らないよう右に余白 */
+    z-index: 20;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    pointer-events: auto;
+  }
+
+  .mb-mode-group {
+    display: flex; gap: 4px;
+  }
+  .mb-mode-btn {
+    padding: 5px 9px;
+    background: rgba(245,240,232,0.95);
+    border: 1px solid var(--paper-deep);
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--ink-mid); cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .mb-mode-btn.active {
+    background: var(--ink); color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .mb-metric-group {
+    display: flex;
+    background: rgba(245,240,232,0.95);
+    border: 1px solid var(--paper-deep);
+    border-radius: 4px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .mb-metric-btn {
+    padding: 5px 8px;
+    background: transparent; border: none;
+    border-right: 1px solid var(--paper-deep);
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    color: var(--ink-soft); cursor: pointer;
+    transition: all 0.15s; text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mb-metric-btn:last-child { border-right: none; }
+  .mb-metric-btn.active { background: var(--ink); color: var(--paper); }
+
+  /* ── スマホ用ツールチップ: 上部中央固定 ── */
+  .map-tooltip {
+    left: 50% !important;
+    transform: translateX(-50%);
+    top: auto !important;
+    bottom: 80px;   /* ボトムシートの peek 分より上 */
+    min-width: 220px;
+    max-width: 88vw;
+  }
+
+  /* ── ズームボタン: 右下 ── */
+  .zoom-ctrl {
+    bottom: 80px;  /* ボトムシートの peek より上 */
+    right: 12px;
+  }
 }
+
+/* ════════════════════════════════════
+   MOBILE Bottom Sheet
+   ════════════════════════════════════ */
+#bottom-sheet {
+  display: none;  /* JS で flex に切り替え */
+  flex-direction: column;
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: 100dvh;
+  z-index: 200;
+  background: rgba(245,240,232,0.97);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.10), 0 -1px 4px rgba(0,0,0,0.06);
+  will-change: transform;
+  touch-action: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+#bs-handle-area {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 0 6px;
+  user-select: none;
+}
+#bs-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--paper-deep);
+  transition: background 0.15s, width 0.15s;
+}
+#bottom-sheet.bs-dragging #bs-handle { background: var(--ink-soft); width: 48px; }
+
+#bs-header {
+  flex-shrink: 0;
+  padding: 2px 16px 10px;
+  border-bottom: 1px solid var(--paper-deep);
+}
+#bs-rk-title {
+  font-size: 10px; font-weight: 400; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+
+/* National stats in bottom sheet */
+#bs-nat {
+  flex-shrink: 0;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1px; background: var(--paper-deep);
+  border-bottom: 1px solid var(--paper-deep);
+  margin: 0;
+}
+.bs-nat-cell { background: var(--paper); padding: 8px 6px 6px; text-align: center; }
+.bs-nat-val  { font-size: 13px; font-family: 'Cormorant Garamond', serif; font-weight: 600; color: var(--ink); line-height: 1; margin-bottom: 2px; }
+.bs-nat-label { font-size: 8px; color: var(--ink-soft); line-height: 1.4; }
+
+#bs-list-wrap {
+  flex: 1;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 8px 10px 16px;
+  scrollbar-width: thin; scrollbar-color: var(--paper-deep) transparent;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+#bottom-sheet.bs-state-peek #bs-list-wrap { pointer-events: none; }
 </style>
 </head>
 <body>
@@ -275,7 +372,7 @@ html, body {
     </div>
   </header>
 
-  <!-- Left sidebar -->
+  <!-- Left sidebar (desktop only) -->
   <aside class="sidebar">
     <div>
       <div class="control-label">Display</div>
@@ -285,7 +382,6 @@ html, body {
         <button class="mode-btn" data-mode="both"><span class="dot"></span>Total religious orgs</button>
       </div>
     </div>
-
     <div>
       <div class="control-label">Metric</div>
       <div class="metric-group">
@@ -293,24 +389,19 @@ html, body {
         <button class="metric-btn" data-metric="absolute">Absolute #</button>
       </div>
     </div>
-
     <div>
       <div class="control-label">Scale</div>
       <div class="legend-bar" id="legend-bar"></div>
       <div class="legend-ticks" id="legend-ticks"><span>Low</span><span>High</span></div>
     </div>
-
     <div class="divider"></div>
-
     <div>
       <div class="control-label">Prefecture</div>
       <div class="info-card" id="info-card">
         <div class="info-placeholder">Hover over a prefecture to see details.</div>
       </div>
     </div>
-
     <div class="divider"></div>
-
     <div>
       <div class="control-label">National total</div>
       <div class="nat-stats">
@@ -320,9 +411,7 @@ html, body {
         <div class="nat-cell"><div class="nat-val" id="nat-buddhist-b">—</div><div class="nat-label">Buddhist<br>believers</div></div>
       </div>
     </div>
-
     <div class="divider"></div>
-
     <div class="paradox">
       <div class="paradox-headline">The paradox</div>
       <div class="paradox-body">
@@ -335,6 +424,19 @@ html, body {
 
   <!-- Map -->
   <main class="map-area" id="map-area">
+    <!-- Mobile topbar (Display + Metric buttons) -->
+    <div id="mobile-topbar" style="display:none">
+      <div class="mb-mode-group">
+        <button class="mb-mode-btn active" data-mode="shinto">⛩️</button>
+        <button class="mb-mode-btn" data-mode="buddhist">卍</button>
+        <button class="mb-mode-btn" data-mode="both">🏛</button>
+      </div>
+      <div class="mb-metric-group">
+        <button class="mb-metric-btn active" data-metric="perCapita">/10k</button>
+        <button class="mb-metric-btn" data-metric="absolute">#</button>
+      </div>
+    </div>
+
     <svg id="map-svg"><g id="map-g"></g></svg>
     <div class="map-tooltip" id="tooltip">
       <div class="tt-name"    id="tt-name"></div>
@@ -354,7 +456,7 @@ html, body {
     <div id="loading">Loading…</div>
   </main>
 
-  <!-- Right ranking panel -->
+  <!-- Desktop ranking panel -->
   <aside class="ranking" id="ranking">
     <div class="rk-title" id="rk-title">Ranking</div>
     <div id="rk-list"></div>
@@ -362,8 +464,24 @@ html, body {
 
 </div>
 
+<!-- Mobile bottom sheet -->
+<div id="bottom-sheet">
+  <div id="bs-handle-area"><div id="bs-handle"></div></div>
+  <div id="bs-header"><span id="bs-rk-title">Ranking</span></div>
+  <!-- National stats strip -->
+  <div id="bs-nat">
+    <div class="bs-nat-cell"><div class="bs-nat-val" id="bs-nat-shrines">—</div><div class="bs-nat-label">⛩️ Shrines</div></div>
+    <div class="bs-nat-cell"><div class="bs-nat-val" id="bs-nat-temples">—</div><div class="bs-nat-label">卍 Temples</div></div>
+    <div class="bs-nat-cell"><div class="bs-nat-val" id="bs-nat-shinto-b">—</div><div class="bs-nat-label">Shinto believers</div></div>
+    <div class="bs-nat-cell"><div class="bs-nat-val" id="bs-nat-buddhist-b">—</div><div class="bs-nat-label">Buddhist believers</div></div>
+  </div>
+  <div id="bs-list-wrap"><div id="bs-list"></div></div>
+</div>
+
 <script>
 'use strict';
+
+const IS_MOBILE = window.innerWidth <= 720 || ('ontouchstart' in window);
 
 const RAMP = ['#e8dece','#d4c4a8','#b89e7a','#9a7a52','#7a5830','#5c3d1e','#3e2410'];
 const fmt    = v => v.toLocaleString();
@@ -373,13 +491,12 @@ let mode   = 'shinto';
 let metric = 'perCapita';
 let geoData, popData, relData;
 let hoveredCode = null;
-let ranked = [];      // 現在のランキング配列 [{code, nameEn, nameJa, value, rank}]
-let rankMap = {};     // code → rank (1-indexed)
+let ranked = [];
+let rankMap = {};
 let _valMin, _valMax;
 
 // ── Custom Mercator projection ────────────────────────────
 let projScale, projTx, projTy;
-
 function toMerc(lon, lat) {
   return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))];
 }
@@ -428,23 +545,16 @@ function featureToPath(feat) {
 // ── Color ─────────────────────────────────────────────────
 function hexToRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
 function lerpColor(ramp,t){
-  const n=ramp.length-1;
-  const i=Math.min(n-1,Math.floor(t*n));
-  const u=t*n-i;
-  const [r1,g1,b1]=hexToRgb(ramp[i]);
-  const [r2,g2,b2]=hexToRgb(ramp[i+1]);
+  const n=ramp.length-1; const i=Math.min(n-1,Math.floor(t*n)); const u=t*n-i;
+  const [r1,g1,b1]=hexToRgb(ramp[i]); const [r2,g2,b2]=hexToRgb(ramp[i+1]);
   return `rgb(${Math.round(r1+(r2-r1)*u)},${Math.round(g1+(g2-g1)*u)},${Math.round(b1+(b2-b1)*u)})`;
 }
-
 function getValue(code) {
   const r=relData.prefectures[code], p=popData[code];
   if(!r||!p) return 0;
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
+  const raw = mode==='shinto' ? r.shinto.shrines : mode==='buddhist' ? r.buddhist.temples : r.total.orgs;
   return metric==='perCapita' ? raw/p.total*10000 : raw;
 }
-
 function buildState() {
   const entries = Object.keys(relData.prefectures).map(code => ({
     code,
@@ -452,46 +562,33 @@ function buildState() {
     nameJa: relData.prefectures[code].nameJa,
     value: getValue(code)
   })).filter(e=>e.value>0);
-
   entries.sort((a,b)=>b.value-a.value);
   entries.forEach((e,i)=>{ e.rank=i+1; });
   ranked = entries;
-
   rankMap = {};
   entries.forEach(e=>{ rankMap[e.code]=e.rank; });
-
   const vals = entries.map(e=>e.value);
-  _valMin = Math.min(...vals);
-  _valMax = Math.max(...vals);
+  _valMin = Math.min(...vals); _valMax = Math.max(...vals);
 }
-
 function getColor(code) {
   const v=getValue(code);
   if(!v||_valMax<=_valMin) return '#e8dece';
-  const t=Math.sqrt((v-_valMin)/(_valMax-_valMin));
-  return lerpColor(RAMP, Math.max(0,Math.min(1,t)));
+  return lerpColor(RAMP, Math.max(0,Math.min(1,Math.sqrt((v-_valMin)/(_valMax-_valMin)))));
 }
 
 // ── Legend ────────────────────────────────────────────────
 function updateLegend() {
-  document.getElementById('legend-bar').style.background=
-    `linear-gradient(to right, ${RAMP.join(', ')})`;
-  document.getElementById('legend-ticks').innerHTML=
+  const lb = document.getElementById('legend-bar');
+  if (lb) lb.style.background = `linear-gradient(to right, ${RAMP.join(', ')})`;
+  const lt = document.getElementById('legend-ticks');
+  if (lt) lt.innerHTML =
     `<span>${metric==='perCapita'?fmtDec(_valMin):fmt(Math.round(_valMin))}</span>`+
     `<span>${metric==='perCapita'?fmtDec(_valMax):fmt(Math.round(_valMax))}</span>`;
 }
 
-// ── Ranking panel ─────────────────────────────────────────
-function renderRanking() {
-  const label = mode==='shinto'   ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Orgs';
-  const suffix = metric==='perCapita' ? '/10k' : '';
-  document.getElementById('rk-title').textContent =
-    `${label} Ranking ${suffix}`;
-
-  const list = document.getElementById('rk-list');
-  list.innerHTML = ranked.map((e,i) => {
+// ── Ranking (desktop + mobile共通HTML生成) ────────────────
+function rankingHTML() {
+  return ranked.map((e,i) => {
     const pct = (e.value/_valMax*100).toFixed(0);
     const valStr = metric==='perCapita' ? fmtDec(e.value) : fmt(Math.round(e.value));
     const nc = i===0?'rk-num gold':i===1?'rk-num silver':i===2?'rk-num bronze':'rk-num';
@@ -502,59 +599,88 @@ function renderRanking() {
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%"></span></span>
     </div>`;
   }).join('');
+}
 
-  // ランキング ↔ 地図 ↔ ツールチップ 連動
-  list.querySelectorAll('.rk-item').forEach(el => {
-    const code = el.dataset.code;
-    el.addEventListener('mouseenter', (e) => {
-      el.classList.add('active');
-      highlightPref(code);
-      updateInfoCard(code);
-      // ツールチップをランキングパネルの左端に表示
-      showTooltipNearRanking(code);
+function rankingTitle() {
+  const label = mode==='shinto' ? '⛩️ Shrines' : mode==='buddhist' ? '卍 Temples' : '🏛 Orgs';
+  const suffix = metric==='perCapita' ? '/10k' : '';
+  return `${label} Ranking ${suffix}`;
+}
+
+function renderRanking() {
+  const title = rankingTitle();
+  const html  = rankingHTML();
+
+  // Desktop
+  const rkTitle = document.getElementById('rk-title');
+  const rkList  = document.getElementById('rk-list');
+  if (rkTitle) rkTitle.textContent = title;
+  if (rkList)  {
+    rkList.innerHTML = html;
+    rkList.querySelectorAll('.rk-item').forEach(el => {
+      const code = el.dataset.code;
+      el.addEventListener('mouseenter', (e) => {
+        el.classList.add('active');
+        highlightPref(code);
+        updateInfoCard(code);
+        showTooltipNearRanking(code);
+      });
+      el.addEventListener('mouseleave', () => {
+        el.classList.remove('active');
+        clearHighlight();
+        updateInfoCard(null);
+        hideTooltip();
+      });
     });
-    el.addEventListener('mouseleave', () => {
-      el.classList.remove('active');
-      clearHighlight();
-      updateInfoCard(null);
-      hideTooltip();
+  }
+
+  // Mobile bottom sheet
+  const bsTitle = document.getElementById('bs-rk-title');
+  const bsList  = document.getElementById('bs-list');
+  if (bsTitle) bsTitle.textContent = title;
+  if (bsList)  bsList.innerHTML = html;
+  // Mobile ranking items: タップで都道府県をハイライト
+  if (bsList) {
+    bsList.querySelectorAll('.rk-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const code = el.dataset.code;
+        if (hoveredCode === code) {
+          clearHighlight();
+          hoveredCode = null;
+          hideTooltip();
+          bsList.querySelectorAll('.rk-item').forEach(e=>e.classList.remove('active'));
+        } else {
+          hoveredCode = code;
+          highlightPref(code);
+          showTooltipMobile(code);
+          bsList.querySelectorAll('.rk-item').forEach(e=>e.classList.toggle('active', e.dataset.code===code));
+        }
+      });
     });
-  });
+  }
 }
 
 // ── Highlight ─────────────────────────────────────────────
 function highlightPref(code) {
   document.querySelectorAll('.pref-path').forEach(p => {
-    if (p.dataset.code === code) {
-      p.classList.add('hovered');
-      p.classList.remove('dimmed');
-      p.parentNode.appendChild(p);
-    } else {
-      p.classList.remove('hovered');
-      p.classList.add('dimmed');
-    }
+    if (p.dataset.code === code) { p.classList.add('hovered'); p.classList.remove('dimmed'); p.parentNode.appendChild(p); }
+    else { p.classList.remove('hovered'); p.classList.add('dimmed'); }
   });
 }
 function clearHighlight() {
-  document.querySelectorAll('.pref-path').forEach(p => {
-    p.classList.remove('hovered','dimmed');
-  });
+  document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('hovered','dimmed'));
 }
 
-// ── Info card ─────────────────────────────────────────────
+// ── Info card (desktop) ───────────────────────────────────
 function updateInfoCard(code) {
   const card = document.getElementById('info-card');
-  if (!code) {
-    card.innerHTML='<div class="info-placeholder">Hover over a prefecture to see details.</div>';
-    return;
-  }
+  if (!card) return;
+  if (!code) { card.innerHTML='<div class="info-placeholder">Hover over a prefecture to see details.</div>'; return; }
   const r=relData.prefectures[code], p=popData[code];
   if(!r||!p) return;
   const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
   const shrPC=(r.shinto.shrines/p.total*10000).toFixed(1);
   const tmpPC=(r.buddhist.temples/p.total*10000).toFixed(1);
-  const shintoB   = fmt(r.shinto.believers);
-  const buddhistB = fmt(r.buddhist.believers);
   card.innerHTML=`
     <div class="info-name">${nameEn}</div>
     <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
@@ -562,19 +688,26 @@ function updateInfoCard(code) {
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${shrPC}</span></div>
     <div class="info-row"><span class="info-row-label">卍 Temples</span><span class="info-row-val">${fmt(r.buddhist.temples)}</span></div>
     <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${tmpPC}</span></div>
-    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${shintoB}</span></div>
-    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${buddhistB}</span></div>`;
+    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${fmt(r.shinto.believers)}</span></div>
+    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${fmt(r.buddhist.believers)}</span></div>`;
 }
 
+// ── National stats ────────────────────────────────────────
 function fillNatStats() {
-  const n=relData.national;
+  const n = relData.national;
+  // Desktop
   document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
   document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
   document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers / 1e6).toFixed(1) + 'M';
   document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
+  // Mobile bottom sheet
+  document.getElementById('bs-nat-shrines').textContent    = fmt(n.shinto.shrines);
+  document.getElementById('bs-nat-temples').textContent    = fmt(n.buddhist.temples);
+  document.getElementById('bs-nat-shinto-b').textContent   = (n.shinto.believers / 1e6).toFixed(1) + 'M';
+  document.getElementById('bs-nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
 }
 
-// ── Tooltip ───────────────────────────────────────────────
+// ── Tooltip helpers ───────────────────────────────────────
 const tooltip  = document.getElementById('tooltip');
 const ttName   = document.getElementById('tt-name');
 const ttNameJa = document.getElementById('tt-name-ja');
@@ -583,86 +716,26 @@ const ttLabel  = document.getElementById('tt-label');
 const ttVal    = document.getElementById('tt-val');
 const ttBar    = document.getElementById('tt-bar');
 
-// ランキングパネルホバー時: ツールチップをパネル左側に固定表示
-function showTooltipNearRanking(code) {
+function fillTooltip(code) {
   const r=relData.prefectures[code], p=popData[code];
   if(!r||!p) return;
   const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
-  const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Total orgs';
-  const valStr = metric==='perCapita'
-    ? `${fmtDec(raw/p.total*10000)} per 10k`
-    : fmt(raw);
-  const currentVal = getValue(code);
-  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
+  const raw = mode==='shinto' ? r.shinto.shrines : mode==='buddhist' ? r.buddhist.temples : r.total.orgs;
+  const label = mode==='shinto' ? '⛩️ Shrines' : mode==='buddhist' ? '卍 Temples' : '🏛 Total orgs';
+  const valStr = metric==='perCapita' ? `${fmtDec(raw/p.total*10000)} per 10k` : fmt(raw);
+  const barPct = Math.min(100, getValue(code)/_valMax*100).toFixed(1);
   const rank = rankMap[code] || '—';
-
   ttName.textContent   = nameEn;
   ttNameJa.textContent = r.nameJa;
   ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
   ttLabel.textContent  = label;
   ttVal.textContent    = valStr;
   ttBar.style.width    = barPct+'%';
-
-  // まず位置を確定してから表示（offsetWidth/Height が正確に取れるよう visibility で制御）
-  tooltip.style.transition = 'none';
-  tooltip.style.opacity    = '0';
-  tooltip.style.left       = '0px';
-  tooltip.style.top        = '0px';
-
-  // 次のフレームでサイズを測ってから配置
-  requestAnimationFrame(() => {
-    const rkPanel = document.getElementById('ranking');
-    const rkRect  = rkPanel.getBoundingClientRect();
-    const mapRect = document.getElementById('map-area').getBoundingClientRect();
-
-    const tw = tooltip.offsetWidth  || 220;
-    const th = tooltip.offsetHeight || 110;
-
-    const x = rkRect.left - mapRect.left - tw - 14;
-    const y = Math.max(8, Math.min(
-      rkRect.top - mapRect.top + 20,
-      mapRect.height - th - 8
-    ));
-
-    tooltip.style.left       = x + 'px';
-    tooltip.style.top        = y + 'px';
-    tooltip.style.transition = 'opacity 0.12s';
-    tooltip.style.opacity    = '1';
-  });
 }
 
+// Desktop: マウス位置に追従
 function showTooltip(event, code) {
-  const r=relData.prefectures[code], p=popData[code];
-  if(!r||!p) return;
-  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const raw = mode==='shinto' ? r.shinto.shrines
-            : mode==='buddhist' ? r.buddhist.temples
-            : r.total.orgs;
-  const label = mode==='shinto' ? '⛩️ Shrines'
-              : mode==='buddhist' ? '卍 Temples'
-              : '🏛 Total orgs';
-  const valStr = metric==='perCapita'
-    ? `${fmtDec(raw/p.total*10000)} per 10k`
-    : fmt(raw);
-
-  // バー: 最大値（_valMax）を100%として表示
-  const currentVal = getValue(code);
-  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
-
-  const rank = rankMap[code] || '—';
-
-  ttName.textContent   = nameEn;
-  ttNameJa.textContent = r.nameJa;
-  ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
-  ttLabel.textContent  = label;
-  ttVal.textContent    = valStr;
-  ttBar.style.width    = barPct+'%';
-
+  fillTooltip(code);
   tooltip.style.opacity='1';
   moveTooltip(event);
 }
@@ -674,12 +747,40 @@ function moveTooltip(event) {
   if(y<8) y=event.clientY-rect.top+16;
   tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
 }
+
+// Desktop: ランキングホバー時はパネル左に固定
+function showTooltipNearRanking(code) {
+  fillTooltip(code);
+  tooltip.style.transition='none';
+  tooltip.style.opacity='0';
+  tooltip.style.left='0px'; tooltip.style.top='0px';
+  requestAnimationFrame(() => {
+    const rkRect  = document.getElementById('ranking').getBoundingClientRect();
+    const mapRect = document.getElementById('map-area').getBoundingClientRect();
+    const tw = tooltip.offsetWidth||220, th = tooltip.offsetHeight||110;
+    const x = rkRect.left - mapRect.left - tw - 14;
+    const y = Math.max(8, Math.min(rkRect.top - mapRect.top + 20, mapRect.height - th - 8));
+    tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
+    tooltip.style.transition='opacity 0.12s'; tooltip.style.opacity='1';
+  });
+}
+
+// Mobile: 地図の下部中央（ボトムシートの上）に固定
+function showTooltipMobile(code) {
+  fillTooltip(code);
+  tooltip.style.opacity='1';
+  // CSS の bottom: 80px + transform: translateX(-50%) で自動配置
+}
+
 function hideTooltip(){tooltip.style.opacity='0';}
 
 // ── Pan & Zoom ────────────────────────────────────────────
 let panX=0,panY=0,scale=1;
 let isDragging=false,didDrag=false;
 let dragSX,dragSY,dragPX,dragPY;
+// Touch pinch
+let lastTouchDist=null;
+let touchStartX,touchStartY,touchStartVX,touchStartVY,touchMoved=false;
 
 function applyTransform(){
   document.getElementById('map-g').setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`);
@@ -687,17 +788,20 @@ function applyTransform(){
 function zoomAt(cx,cy,factor){
   const ns=Math.max(0.8,Math.min(12,scale*factor));
   const k=ns/scale;
-  panX=cx-k*(cx-panX); panY=cy-k*(cy-panY); scale=ns;
-  applyTransform();
+  panX=cx-k*(cx-panX); panY=cy-k*(cy-panY); scale=ns; applyTransform();
 }
 function resetView(){panX=0;panY=0;scale=1;applyTransform();}
 
 const mapArea=document.getElementById('map-area');
+
+// Mouse wheel
 mapArea.addEventListener('wheel',e=>{
   e.preventDefault();
   const rect=mapArea.getBoundingClientRect();
   zoomAt(e.clientX-rect.left,e.clientY-rect.top,e.deltaY>0?0.85:1.18);
 },{passive:false});
+
+// Mouse drag
 mapArea.addEventListener('mousedown',e=>{
   isDragging=true;didDrag=false;
   dragSX=e.clientX;dragSY=e.clientY;dragPX=panX;dragPY=panY;
@@ -709,10 +813,69 @@ window.addEventListener('mousemove',e=>{
   panX=dragPX+dx;panY=dragPY+dy;applyTransform();
 });
 window.addEventListener('mouseup',()=>{isDragging=false;});
-document.getElementById('btn-zoom-in').addEventListener('click',()=>{
-  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.35);});
-document.getElementById('btn-zoom-out').addEventListener('click',()=>{
-  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.35);});
+
+// Touch pan & pinch
+mapArea.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(e.touches.length===1){
+    isDragging=true;touchMoved=false;
+    touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;
+    touchStartVX=panX;touchStartVY=panY;lastTouchDist=null;
+  } else if(e.touches.length===2){
+    isDragging=false;
+    const dx=e.touches[1].clientX-e.touches[0].clientX;
+    const dy=e.touches[1].clientY-e.touches[0].clientY;
+    lastTouchDist=Math.hypot(dx,dy);
+  }
+},{passive:false});
+
+mapArea.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===1&&isDragging){
+    const dx=e.touches[0].clientX-touchStartX,dy=e.touches[0].clientY-touchStartY;
+    if(Math.abs(dx)>4||Math.abs(dy)>4)touchMoved=true;
+    panX=touchStartVX+dx;panY=touchStartVY+dy;applyTransform();
+  } else if(e.touches.length===2&&lastTouchDist!==null){
+    const dx=e.touches[1].clientX-e.touches[0].clientX;
+    const dy=e.touches[1].clientY-e.touches[0].clientY;
+    const dist=Math.hypot(dx,dy);
+    const mid={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+    const rect=mapArea.getBoundingClientRect();
+    if(dist>0) zoomAt(mid.x-rect.left,mid.y-rect.top,dist/lastTouchDist);
+    lastTouchDist=dist;
+  }
+},{passive:false});
+
+mapArea.addEventListener('touchend',e=>{
+  isDragging=false;
+  // タップ（移動なし）→ 都道府県をハイライト
+  if(!touchMoved&&e.changedTouches.length===1){
+    const t=e.changedTouches[0];
+    const el=document.elementFromPoint(t.clientX,t.clientY);
+    const path=el?.closest('.pref-path');
+    if(path){
+      const code=path.dataset.code;
+      if(hoveredCode===code){
+        clearHighlight(); hoveredCode=null; hideTooltip();
+      } else {
+        hoveredCode=code;
+        clearHighlight(); highlightPref(code);
+        showTooltipMobile(code);
+        // ボトムシートのアイテムをハイライト
+        document.querySelectorAll('#bs-list .rk-item').forEach(el=>el.classList.toggle('active',el.dataset.code===code));
+        const activeItem=document.querySelector(`#bs-list .rk-item[data-code="${code}"]`);
+        if(activeItem) activeItem.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }
+    } else {
+      clearHighlight(); hoveredCode=null; hideTooltip();
+      document.querySelectorAll('#bs-list .rk-item').forEach(el=>el.classList.remove('active'));
+    }
+  }
+},{passive:false});
+
+// Zoom buttons
+document.getElementById('btn-zoom-in').addEventListener('click',()=>{const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.35);});
+document.getElementById('btn-zoom-out').addEventListener('click',()=>{const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.35);});
 document.getElementById('btn-zoom-reset').addEventListener('click',resetView);
 
 // ── Draw map ──────────────────────────────────────────────
@@ -723,7 +886,6 @@ function drawMap() {
   const mapG=document.getElementById('map-g');
   mapG.innerHTML='';
   const frag=document.createDocumentFragment();
-
   geoData.features.forEach(feat=>{
     const code=feat.properties.code;
     const el=document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -732,37 +894,33 @@ function drawMap() {
     el.setAttribute('fill-rule','evenodd');
     el.setAttribute('class','pref-path');
     el.dataset.code=code;
-
-    el.addEventListener('mouseenter',function(e){
-      if(didDrag)return;
-      hoveredCode=code;
-      document.querySelectorAll('.pref-path').forEach(p=>{
-        if(p.dataset.code===code){p.classList.add('hovered');p.classList.remove('dimmed');}
-        else{p.classList.remove('hovered');p.classList.add('dimmed');}
+    // Desktop mouse events
+    if(!IS_MOBILE){
+      el.addEventListener('mouseenter',function(e){
+        if(didDrag)return;
+        hoveredCode=code;
+        document.querySelectorAll('.pref-path').forEach(p=>{
+          if(p.dataset.code===code){p.classList.add('hovered');p.classList.remove('dimmed');}
+          else{p.classList.remove('hovered');p.classList.add('dimmed');}
+        });
+        this.parentNode.appendChild(this);
+        document.querySelectorAll('.rk-item').forEach(el=>el.classList.toggle('active',el.dataset.code===code));
+        const activeItem=document.querySelector(`.rk-item[data-code="${code}"]`);
+        if(activeItem) activeItem.scrollIntoView({behavior:'smooth',block:'nearest'});
+        updateInfoCard(code);
+        showTooltip(e,code);
       });
-      this.parentNode.appendChild(this);
-      // ランキングのアイテムをハイライト
-      document.querySelectorAll('.rk-item').forEach(el=>{
-        el.classList.toggle('active',el.dataset.code===code);
+      el.addEventListener('mousemove',e=>{if(hoveredCode===code)moveTooltip(e);});
+      el.addEventListener('mouseleave',function(){
+        hoveredCode=null;
+        this.classList.remove('hovered');
+        document.querySelectorAll('.pref-path').forEach(p=>p.classList.remove('dimmed','hovered'));
+        document.querySelectorAll('.rk-item').forEach(el=>el.classList.remove('active'));
+        updateInfoCard(null); hideTooltip();
       });
-      // ハイライトしたアイテムをスクロールして見せる
-      const activeItem=document.querySelector(`.rk-item[data-code="${code}"]`);
-      if(activeItem) activeItem.scrollIntoView({behavior:'smooth',block:'nearest'});
-      updateInfoCard(code);
-      showTooltip(e,code);
-    });
-    el.addEventListener('mousemove',e=>{if(hoveredCode===code)moveTooltip(e);});
-    el.addEventListener('mouseleave',function(){
-      hoveredCode=null;
-      this.classList.remove('hovered');
-      document.querySelectorAll('.pref-path').forEach(p=>p.classList.remove('dimmed','hovered'));
-      document.querySelectorAll('.rk-item').forEach(el=>el.classList.remove('active'));
-      updateInfoCard(null);
-      hideTooltip();
-    });
+    }
     frag.appendChild(el);
   });
-
   mapG.appendChild(frag);
   resetView();
 }
@@ -775,28 +933,147 @@ function updateAll() {
   });
   updateLegend();
   renderRanking();
-  if(hoveredCode) { updateInfoCard(hoveredCode); showTooltip({clientX:0,clientY:0},hoveredCode); }
 }
 
-// ── Controls ──────────────────────────────────────────────
+// ── Desktop controls ──────────────────────────────────────
 document.querySelectorAll('.mode-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); mode=btn.dataset.mode; updateAll();
+    btn.classList.add('active'); mode=btn.dataset.mode;
+    // モバイルボタンも同期
+    document.querySelectorAll('.mb-mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+    updateAll();
   });
 });
 document.querySelectorAll('.metric-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.metric-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); metric=btn.dataset.metric; updateAll();
+    btn.classList.add('active'); metric=btn.dataset.metric;
+    document.querySelectorAll('.mb-metric-btn').forEach(b=>b.classList.toggle('active',b.dataset.metric===metric));
+    updateAll();
   });
 });
 
+// ── Mobile topbar controls ────────────────────────────────
+document.querySelectorAll('.mb-mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mb-mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); mode=btn.dataset.mode;
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+    updateAll();
+  });
+});
+document.querySelectorAll('.mb-metric-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mb-metric-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); metric=btn.dataset.metric;
+    document.querySelectorAll('.metric-btn').forEach(b=>b.classList.toggle('active',b.dataset.metric===metric));
+    updateAll();
+  });
+});
+
+// ── Resize ────────────────────────────────────────────────
 let resizeTimer;
 window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
   resizeTimer=setTimeout(()=>{buildState();drawMap();updateLegend();renderRanking();},150);
 });
+
+// ════════════════════════════════════
+//  Mobile Bottom Sheet
+// ════════════════════════════════════
+const BS_PEEK_H = 72;   // handle + title が見える高さ
+const BS_ANIM   = 300;
+
+const bsEl       = document.getElementById('bottom-sheet');
+const bsListWrap = document.getElementById('bs-list-wrap');
+
+let bsState = 'peek';
+
+function bsTY(state) {
+  const vh = window.innerHeight;
+  if (state==='full') return vh * 0.10;
+  if (state==='half') return vh * 0.52;
+  return vh - BS_PEEK_H;
+}
+function bsListH(ty) {
+  const vh = window.innerHeight;
+  const fixedH = 22 + 38 + 44; // handle + header + nat-stats
+  return Math.max(40, vh - ty - fixedH - 20);
+}
+function bsApply(ty, animate) {
+  bsEl.style.transition = animate ? `transform ${BS_ANIM}ms cubic-bezier(.25,1,.5,1)` : 'none';
+  bsEl.style.transform  = `translateY(${ty}px)`;
+  bsEl.classList.toggle('bs-state-peek', bsState==='peek');
+  bsListWrap.style.height = bsListH(ty) + 'px';
+}
+function bsSetState(state, animate=true) {
+  bsState = state;
+  bsApply(bsTY(state), animate);
+  if(animate) setTimeout(()=>{ bsListWrap.style.height=bsListH(bsTY(state))+'px'; }, BS_ANIM+20);
+}
+
+function bsInit() {
+  if(window.innerWidth > 720 && !('ontouchstart' in window)) return;
+  bsEl.style.height  = '100dvh';
+  bsEl.style.display = 'flex';
+  document.getElementById('mobile-topbar').style.display = 'flex';
+  requestAnimationFrame(()=>bsSetState('peek',false));
+
+  // Drag
+  let dragActive=false, dragStartY=0, dragStartTY=0, dragDeltaY=0;
+
+  bsEl.addEventListener('touchstart',e=>{
+    e.stopPropagation();
+    const t=e.changedTouches[0];
+    const sheetTop=bsTY(bsState);
+    const dragZoneH = bsState==='peek' ? BS_PEEK_H : 38;
+    if(t.clientY<sheetTop||t.clientY>sheetTop+dragZoneH) return;
+    dragActive=true; dragDeltaY=0;
+    dragStartY=t.clientY; dragStartTY=bsTY(bsState);
+    bsEl.style.transition='none';
+    bsEl.classList.add('bs-dragging');
+  },{passive:true});
+
+  bsEl.addEventListener('touchmove',e=>{
+    e.stopPropagation();
+    if(!dragActive)return;
+    const t=e.changedTouches[0];
+    dragDeltaY=t.clientY-dragStartY;
+    const minTY=bsTY('full'),maxTY=bsTY('peek');
+    const raw=Math.max(minTY,Math.min(maxTY,dragStartTY+dragDeltaY));
+    bsEl.style.transform=`translateY(${raw}px)`;
+    bsListWrap.style.height=bsListH(raw)+'px';
+  },{passive:true});
+
+  bsEl.addEventListener('touchend',e=>{
+    e.stopPropagation();
+    if(!dragActive)return;
+    dragActive=false;
+    bsEl.classList.remove('bs-dragging');
+    const abs=Math.abs(dragDeltaY);
+    if(abs<8){
+      bsSetState(bsState==='peek'?'half':bsState==='half'?'full':'peek'); return;
+    }
+    if(abs>60){
+      bsSetState(dragDeltaY>0?(bsState==='full'?'half':'peek'):(bsState==='peek'?'half':'full')); return;
+    }
+    const cur=parseFloat(bsEl.style.transform.replace(/[^0-9.\-]/g,''))||bsTY(bsState);
+    let best='peek',bestD=Infinity;
+    ['peek','half','full'].forEach(s=>{ const d=Math.abs(cur-bsTY(s)); if(d<bestD){bestD=d;best=s;} });
+    bsSetState(best);
+  },{passive:true});
+
+  bsEl.addEventListener('touchcancel',e=>{
+    e.stopPropagation();
+    if(!dragActive)return;
+    dragActive=false;
+    bsEl.classList.remove('bs-dragging');
+    bsSetState(bsState);
+  },{passive:true});
+
+  window.addEventListener('resize',()=>bsSetState(bsState,false));
+}
 
 // ── Init ──────────────────────────────────────────────────
 Promise.all([
@@ -811,6 +1088,7 @@ Promise.all([
   updateLegend();
   drawMap();
   renderRanking();
+  bsInit();
 }).catch(err=>{
   console.error(err);
   document.getElementById('loading').innerHTML=
