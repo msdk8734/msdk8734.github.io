@@ -15,9 +15,9 @@
   --paper: #f5f0e8;
   --paper-warm: #ede6d8;
   --paper-deep: #d9cfc0;
-  /* 単色カラーランプ — 背景色 #f5f0e8 に合わせた温かみのあるセピア〜深茶 */
   --map-lo: #e8dece;
   --map-hi: #5c3d1e;
+  --accent: #7a5830;
 }
 
 html, body {
@@ -28,9 +28,10 @@ html, body {
   font-weight: 300;
 }
 
+/* ── Layout: left sidebar | map | right ranking ── */
 .shell {
   display: grid;
-  grid-template-columns: 290px 1fr;
+  grid-template-columns: 274px 1fr 220px;
   grid-template-rows: auto 1fr;
   height: 100vh;
 }
@@ -38,7 +39,7 @@ html, body {
 /* ── Header ── */
 .header {
   grid-column: 1 / -1;
-  padding: 15px 26px 13px;
+  padding: 14px 24px 12px;
   border-bottom: 1px solid var(--paper-deep);
   display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
   background: var(--paper);
@@ -58,11 +59,11 @@ html, body {
   letter-spacing: 0.04em; line-height: 1.7; text-align: right;
 }
 
-/* ── Sidebar ── */
+/* ── Left sidebar ── */
 .sidebar {
   border-right: 1px solid var(--paper-deep);
-  padding: 20px 18px;
-  display: flex; flex-direction: column; gap: 20px;
+  padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 18px;
   overflow-y: auto; background: var(--paper);
 }
 .control-label {
@@ -70,7 +71,6 @@ html, body {
   text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
 }
 
-/* Mode buttons */
 .mode-group { display: flex; flex-direction: column; gap: 5px; }
 .mode-btn {
   display: flex; align-items: center; gap: 9px;
@@ -87,7 +87,6 @@ html, body {
 .mode-btn.active { border-color: var(--ink-mid); color: var(--ink); }
 .mode-btn.active .dot { border-color: transparent; background: var(--map-hi); }
 
-/* Metric buttons */
 .metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
 .metric-btn {
   flex: 1; padding: 8px 4px; background: transparent; border: none;
@@ -99,23 +98,21 @@ html, body {
 .metric-btn:last-child { border-right: none; }
 .metric-btn.active { background: var(--ink); color: var(--paper); }
 
-/* Legend */
 .legend-bar { height: 9px; border-radius: 2px; margin-bottom: 6px; }
 .legend-ticks {
   display: flex; justify-content: space-between;
   font-size: 10px; color: var(--ink-soft);
 }
 
-/* Info card */
 .info-card {
   background: var(--paper-warm); border: 1px solid var(--paper-deep);
-  padding: 14px; min-height: 136px;
+  padding: 13px; min-height: 130px;
 }
 .info-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 21px; font-weight: 400; margin-bottom: 2px; color: var(--ink);
+  font-size: 20px; font-weight: 400; margin-bottom: 1px; color: var(--ink);
 }
-.info-name-ja { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 10px; }
+.info-name-ja { font-size: 11px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 9px; }
 .info-row {
   display: flex; justify-content: space-between; align-items: baseline;
   border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 11px;
@@ -127,17 +124,29 @@ html, body {
   padding-top: 10px; font-family: 'Cormorant Garamond', serif;
 }
 
-/* National stats */
 .nat-stats {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
 }
-.nat-cell { background: var(--paper); padding: 10px 9px 8px; }
+.nat-cell { background: var(--paper); padding: 9px 8px 7px; }
 .nat-val {
-  font-size: 16px; font-family: 'Cormorant Garamond', serif;
-  font-weight: 600; line-height: 1; margin-bottom: 4px; color: var(--ink);
+  font-size: 15px; font-family: 'Cormorant Garamond', serif;
+  font-weight: 600; line-height: 1; margin-bottom: 3px; color: var(--ink);
 }
 .nat-label { font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
+
+.divider { height: 1px; background: var(--paper-deep); }
+
+.paradox {
+  background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
+  padding: 11px 11px 11px 13px;
+}
+.paradox-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink);
+}
+.paradox-body { font-size: 10px; color: var(--ink-soft); line-height: 1.75; letter-spacing: 0.03em; }
+.paradox-body strong { color: var(--ink-mid); font-weight: 400; }
 
 /* ── Map ── */
 .map-area {
@@ -147,7 +156,6 @@ html, body {
 .map-area:active { cursor: grabbing; }
 #map-svg { width: 100%; height: 100%; display: block; }
 
-/* Prefecture paths — 人口地図と同じ hover スタイル */
 .pref-path {
   stroke: rgba(255,255,255,0.55);
   stroke-width: 0.25px;
@@ -157,35 +165,41 @@ html, body {
 }
 .pref-path:hover,
 .pref-path.hovered {
-  stroke: rgba(255,255,255,0.90);
+  stroke: rgba(255,255,255,0.92);
   stroke-width: 0.6px;
   filter: brightness(1.14) drop-shadow(0 2px 8px rgba(0,0,0,0.28));
 }
+.pref-path.dimmed {
+  opacity: 0.22;
+  filter: none;
+}
 
-/* Tooltip */
+/* ── Tooltip (人口マップ準拠) ── */
 .map-tooltip {
   position: absolute; pointer-events: none;
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(12px);
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
   border-radius: 10px;
-  padding: 13px 16px;
+  padding: 14px 18px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
   opacity: 0; transition: opacity 0.12s;
-  min-width: 200px;
+  min-width: 210px; max-width: 270px;
   color: var(--ink);
 }
-.tt-name { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; font-family: 'Cormorant Garamond', serif; }
-.tt-name-ja { font-size: 11px; color: #999; margin-bottom: 10px; font-family: 'DM Mono', monospace; font-weight: 300; }
-.tt-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; gap: 12px; }
-.tt-label { font-size: 11px; color: #888; font-family: 'DM Mono', monospace; font-weight: 300; }
-.tt-val-num { font-size: 15px; font-weight: 600; color: #1a1a1a; font-family: 'DM Mono', monospace; }
-.tt-bar-bg { height: 4px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 6px; }
-.tt-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); }
+.tt-name    { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; font-family: 'Cormorant Garamond', serif; }
+.tt-name-ja { font-size: 11px; color: #999; margin-bottom: 3px; font-family: 'DM Mono', monospace; font-weight: 300; }
+.tt-rank    { font-size: 11px; color: #888; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+.tt-rank .tt-rank-num { color: var(--accent); font-size: 18px; font-family: 'DM Mono', monospace; font-weight: 400; }
+.tt-row     { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; gap: 10px; }
+.tt-label   { font-size: 11px; color: #888; flex-shrink: 0; }
+.tt-val-num { font-size: 16px; font-weight: 600; color: #1a1a1a; font-family: 'DM Mono', monospace; }
+.tt-bar-bg  { height: 4px; background: #f0ebe3; border-radius: 2px; overflow: hidden; margin-top: 8px; }
+.tt-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); transition: width 0.2s; }
 
-/* Zoom controls */
+/* ── Zoom controls ── */
 .zoom-ctrl {
-  position: absolute; bottom: 18px; right: 18px;
+  position: absolute; bottom: 16px; right: 16px;
   display: flex; flex-direction: column; gap: 1px; z-index: 10;
 }
 .zoom-btn {
@@ -198,18 +212,46 @@ html, body {
 }
 .zoom-btn:hover { background: var(--paper-warm); }
 
-.divider { height: 1px; background: var(--paper-deep); }
-
-.paradox {
-  background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
-  padding: 12px 12px 12px 14px;
+/* ── Right ranking panel (人口マップ準拠) ── */
+.ranking {
+  border-left: 1px solid var(--paper-deep);
+  padding: 14px 10px 12px;
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--paper-deep) transparent;
+  background: rgba(245,240,232,0.96);
 }
-.paradox-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink);
+.rk-title {
+  font-size: 10px; font-weight: 400; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--paper-deep);
 }
-.paradox-body { font-size: 10px; color: var(--ink-soft); line-height: 1.75; letter-spacing: 0.03em; }
-.paradox-body strong { color: var(--ink-mid); font-weight: 400; }
+.rk-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 6px; border-radius: 4px;
+  cursor: pointer; transition: background 0.12s;
+}
+.rk-item:hover, .rk-item.active {
+  background: rgba(92, 61, 30, 0.10);
+}
+.rk-num {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  font-weight: 400; color: var(--ink-soft);
+  width: 18px; text-align: right; flex-shrink: 0;
+}
+.rk-num.gold   { color: #b8860b; }
+.rk-num.silver { color: #888; }
+.rk-num.bronze { color: #8b5c2a; }
+.rk-name {
+  font-size: 11px; color: var(--ink-mid); flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rk-val {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--ink-soft); flex-shrink: 0;
+}
+.rk-bar { width: 32px; height: 3px; background: var(--paper-deep); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.rk-bar-fill { height: 100%; border-radius: 2px; background: var(--map-hi); opacity: 0.6; }
 
 #loading {
   position: absolute; inset: 0; display: flex;
@@ -233,6 +275,7 @@ html, body {
     </div>
   </header>
 
+  <!-- Left sidebar -->
   <aside class="sidebar">
     <div>
       <div class="control-label">Display</div>
@@ -284,19 +327,21 @@ html, body {
       <div class="paradox-headline">The paradox</div>
       <div class="paradox-body">
         Japan has more shrines than convenience stores.
-        Yet <strong>~60% say they have no religion</strong> —
+        Yet <strong>69.6% follow no religion</strong> (JGSS 2015) —
         because seasonal shrine visits are considered <em>culture</em>, not faith.
       </div>
     </div>
   </aside>
 
+  <!-- Map -->
   <main class="map-area" id="map-area">
     <svg id="map-svg"><g id="map-g"></g></svg>
     <div class="map-tooltip" id="tooltip">
       <div class="tt-name"    id="tt-name"></div>
       <div class="tt-name-ja" id="tt-name-ja"></div>
+      <div class="tt-rank"    id="tt-rank"></div>
       <div class="tt-row">
-        <span class="tt-label" id="tt-label"></span>
+        <span class="tt-label"   id="tt-label"></span>
         <span class="tt-val-num" id="tt-val"></span>
       </div>
       <div class="tt-bar-bg"><div class="tt-bar-fill" id="tt-bar"></div></div>
@@ -309,14 +354,18 @@ html, body {
     <div id="loading">Loading…</div>
   </main>
 
+  <!-- Right ranking panel -->
+  <aside class="ranking" id="ranking">
+    <div class="rk-title" id="rk-title">Ranking</div>
+    <div id="rk-list"></div>
+  </aside>
+
 </div>
 
 <script>
 'use strict';
 
-// ── 単色カラーランプ (セピア〜深茶、背景 #f5f0e8 に調和) ──
 const RAMP = ['#e8dece','#d4c4a8','#b89e7a','#9a7a52','#7a5830','#5c3d1e','#3e2410'];
-
 const fmt    = v => v.toLocaleString();
 const fmtDec = v => v.toFixed(1);
 
@@ -324,123 +373,184 @@ let mode   = 'shinto';
 let metric = 'perCapita';
 let geoData, popData, relData;
 let hoveredCode = null;
+let ranked = [];      // 現在のランキング配列 [{code, nameEn, nameJa, value, rank}]
+let rankMap = {};     // code → rank (1-indexed)
 let _valMin, _valMax;
 
 // ── Custom Mercator projection ────────────────────────────
 let projScale, projTx, projTy;
 
 function toMerc(lon, lat) {
-  return [
-    lon * Math.PI / 180,
-    Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))
-  ];
+  return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))];
 }
 function project(lon, lat) {
   const [mx, my] = toMerc(lon, lat);
   return [projScale * mx + projTx, projScale * -my + projTy];
 }
-function fitProjection(features, W, H, padL, padT, padR, padB) {
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+function fitProjection(features, W, H, pL, pT, pR, pB) {
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
   features.forEach(feat => {
     const code = feat.properties.code;
     const g = feat.geometry;
-    const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+    const polys = g.type==='Polygon' ? [g.coordinates] : g.coordinates;
     polys.forEach(poly => {
-      if (code === '13' || code === '46') {
-        const ring = poly[0];
-        const cx = ring.reduce((s,p)=>s+p[0],0)/ring.length;
-        const cy = ring.reduce((s,p)=>s+p[1],0)/ring.length;
-        if (code==='13' && cx>141.0) return;
-        if (code==='46' && cy<30.0)  return;
+      if (code==='13'||code==='46') {
+        const ring=poly[0];
+        const cx=ring.reduce((s,p)=>s+p[0],0)/ring.length;
+        const cy=ring.reduce((s,p)=>s+p[1],0)/ring.length;
+        if (code==='13'&&cx>141.0) return;
+        if (code==='46'&&cy<30.0)  return;
       }
-      poly.forEach(ring => ring.forEach(([lon,lat]) => {
-        const [mx,my] = toMerc(lon,lat); const ny=-my;
+      poly.forEach(ring=>ring.forEach(([lon,lat])=>{
+        const [mx,my]=toMerc(lon,lat); const ny=-my;
         if(mx<minX)minX=mx; if(mx>maxX)maxX=mx;
         if(ny<minY)minY=ny; if(ny>maxY)maxY=ny;
       }));
     });
   });
-  projScale = 0.98 * Math.min(
-    (W-padL-padR)/(maxX-minX),
-    (H-padT-padB)/(maxY-minY)
-  );
-  projTx = (W+padL-padR)/2 - projScale*(minX+maxX)/2;
-  projTy = (H+padT-padB)/2 - projScale*(minY+maxY)/2;
+  projScale = 0.98 * Math.min((W-pL-pR)/(maxX-minX),(H-pT-pB)/(maxY-minY));
+  projTx = (W+pL-pR)/2 - projScale*(minX+maxX)/2;
+  projTy = (H+pT-pB)/2 - projScale*(minY+maxY)/2;
 }
 function featureToPath(feat) {
   const g = feat.geometry;
-  const polys = g.type==='Polygon' ? [g.coordinates] : g.coordinates;
+  const polys = g.type==='Polygon'?[g.coordinates]:g.coordinates;
   let d='';
-  polys.forEach(poly => poly.forEach(ring => {
-    const pts = ring.map(([lon,lat])=>project(lon,lat));
-    d += `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  polys.forEach(poly=>poly.forEach(ring=>{
+    const pts=ring.map(([lon,lat])=>project(lon,lat));
+    d+=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
     for(let i=1;i<pts.length;i++) d+=`L${pts[i][0].toFixed(1)},${pts[i][1].toFixed(1)}`;
     d+='Z';
   }));
   return d;
 }
 
-// ── Color helpers ─────────────────────────────────────────
-function hexToRgb(hex) {
-  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-}
-function lerpColor(ramp, t) {
-  const n = ramp.length - 1;
-  const i = Math.min(n-1, Math.floor(t*n));
-  const u = t*n - i;
-  const [r1,g1,b1] = hexToRgb(ramp[i]);
-  const [r2,g2,b2] = hexToRgb(ramp[i+1]);
+// ── Color ─────────────────────────────────────────────────
+function hexToRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function lerpColor(ramp,t){
+  const n=ramp.length-1;
+  const i=Math.min(n-1,Math.floor(t*n));
+  const u=t*n-i;
+  const [r1,g1,b1]=hexToRgb(ramp[i]);
+  const [r2,g2,b2]=hexToRgb(ramp[i+1]);
   return `rgb(${Math.round(r1+(r2-r1)*u)},${Math.round(g1+(g2-g1)*u)},${Math.round(b1+(b2-b1)*u)})`;
 }
 
 function getValue(code) {
-  const r = relData.prefectures[code];
-  const p = popData[code];
-  if (!r||!p) return 0;
-  const raw = mode==='shinto'   ? r.shinto.shrines
+  const r=relData.prefectures[code], p=popData[code];
+  if(!r||!p) return 0;
+  const raw = mode==='shinto' ? r.shinto.shrines
             : mode==='buddhist' ? r.buddhist.temples
             : r.total.orgs;
   return metric==='perCapita' ? raw/p.total*10000 : raw;
 }
 
-function buildColorState() {
-  const vals = Object.keys(relData.prefectures).map(c=>getValue(c)).filter(v=>v>0);
+function buildState() {
+  const entries = Object.keys(relData.prefectures).map(code => ({
+    code,
+    nameEn: popData[code]?.nameEn.replace(' Prefecture','').replace(' Metropolis','') || code,
+    nameJa: relData.prefectures[code].nameJa,
+    value: getValue(code)
+  })).filter(e=>e.value>0);
+
+  entries.sort((a,b)=>b.value-a.value);
+  entries.forEach((e,i)=>{ e.rank=i+1; });
+  ranked = entries;
+
+  rankMap = {};
+  entries.forEach(e=>{ rankMap[e.code]=e.rank; });
+
+  const vals = entries.map(e=>e.value);
   _valMin = Math.min(...vals);
   _valMax = Math.max(...vals);
 }
 
 function getColor(code) {
-  const v = getValue(code);
-  if (!v||_valMax<=_valMin) return '#e8dece';
-  // sqrt transform: 低い値でも視認できる明るさを確保
-  const t = Math.sqrt((v-_valMin)/(_valMax-_valMin));
-  return lerpColor(RAMP, Math.max(0, Math.min(1, t)));
+  const v=getValue(code);
+  if(!v||_valMax<=_valMin) return '#e8dece';
+  const t=Math.sqrt((v-_valMin)/(_valMax-_valMin));
+  return lerpColor(RAMP, Math.max(0,Math.min(1,t)));
 }
 
 // ── Legend ────────────────────────────────────────────────
 function updateLegend() {
-  document.getElementById('legend-bar').style.background =
+  document.getElementById('legend-bar').style.background=
     `linear-gradient(to right, ${RAMP.join(', ')})`;
-  const lo = _valMin, hi = _valMax;
-  document.getElementById('legend-ticks').innerHTML =
-    `<span>${metric==='perCapita' ? fmtDec(lo) : fmt(Math.round(lo))}</span>`+
-    `<span>${metric==='perCapita' ? fmtDec(hi) : fmt(Math.round(hi))}</span>`;
+  document.getElementById('legend-ticks').innerHTML=
+    `<span>${metric==='perCapita'?fmtDec(_valMin):fmt(Math.round(_valMin))}</span>`+
+    `<span>${metric==='perCapita'?fmtDec(_valMax):fmt(Math.round(_valMax))}</span>`;
+}
+
+// ── Ranking panel ─────────────────────────────────────────
+function renderRanking() {
+  const label = mode==='shinto'   ? '⛩️ Shrines'
+              : mode==='buddhist' ? '🪷 Temples'
+              : '🏛 Orgs';
+  const suffix = metric==='perCapita' ? '/10k' : '';
+  document.getElementById('rk-title').textContent =
+    `${label} Ranking ${suffix}`;
+
+  const list = document.getElementById('rk-list');
+  list.innerHTML = ranked.map((e,i) => {
+    const pct = (e.value/_valMax*100).toFixed(0);
+    const valStr = metric==='perCapita' ? fmtDec(e.value) : fmt(Math.round(e.value));
+    const nc = i===0?'rk-num gold':i===1?'rk-num silver':i===2?'rk-num bronze':'rk-num';
+    return `<div class="rk-item" data-code="${e.code}">
+      <span class="${nc}">${i+1}</span>
+      <span class="rk-name">${e.nameEn}</span>
+      <span class="rk-val">${valStr}</span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${pct}%"></span></span>
+    </div>`;
+  }).join('');
+
+  // ランキング ↔ 地図 連動
+  list.querySelectorAll('.rk-item').forEach(el => {
+    const code = el.dataset.code;
+    el.addEventListener('mouseenter', () => {
+      el.classList.add('active');
+      highlightPref(code);
+      updateInfoCard(code);
+    });
+    el.addEventListener('mouseleave', () => {
+      el.classList.remove('active');
+      clearHighlight();
+      updateInfoCard(null);
+    });
+  });
+}
+
+// ── Highlight ─────────────────────────────────────────────
+function highlightPref(code) {
+  document.querySelectorAll('.pref-path').forEach(p => {
+    if (p.dataset.code === code) {
+      p.classList.add('hovered');
+      p.classList.remove('dimmed');
+      p.parentNode.appendChild(p);
+    } else {
+      p.classList.remove('hovered');
+      p.classList.add('dimmed');
+    }
+  });
+}
+function clearHighlight() {
+  document.querySelectorAll('.pref-path').forEach(p => {
+    p.classList.remove('hovered','dimmed');
+  });
 }
 
 // ── Info card ─────────────────────────────────────────────
 function updateInfoCard(code) {
   const card = document.getElementById('info-card');
   if (!code) {
-    card.innerHTML = '<div class="info-placeholder">Hover over a prefecture to see details.</div>';
+    card.innerHTML='<div class="info-placeholder">Hover over a prefecture to see details.</div>';
     return;
   }
-  const r = relData.prefectures[code];
-  const p = popData[code];
-  if (!r||!p) return;
-  const shrPC = (r.shinto.shrines/p.total*10000).toFixed(1);
-  const tmpPC = (r.buddhist.temples/p.total*10000).toFixed(1);
-  const nameEn = p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  card.innerHTML = `
+  const r=relData.prefectures[code], p=popData[code];
+  if(!r||!p) return;
+  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
+  const shrPC=(r.shinto.shrines/p.total*10000).toFixed(1);
+  const tmpPC=(r.buddhist.temples/p.total*10000).toFixed(1);
+  card.innerHTML=`
     <div class="info-name">${nameEn}</div>
     <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
     <div class="info-row"><span class="info-row-label">⛩️ Shrines</span><span class="info-row-val">${fmt(r.shinto.shrines)}</span></div>
@@ -452,7 +562,7 @@ function updateInfoCard(code) {
 }
 
 function fillNatStats() {
-  const n = relData.national;
+  const n=relData.national;
   document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
   document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
   document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers/1e6).toFixed(1)+'M';
@@ -463,136 +573,132 @@ function fillNatStats() {
 const tooltip  = document.getElementById('tooltip');
 const ttName   = document.getElementById('tt-name');
 const ttNameJa = document.getElementById('tt-name-ja');
+const ttRank   = document.getElementById('tt-rank');
 const ttLabel  = document.getElementById('tt-label');
 const ttVal    = document.getElementById('tt-val');
 const ttBar    = document.getElementById('tt-bar');
 
 function showTooltip(event, code) {
-  const r = relData.prefectures[code];
-  const p = popData[code];
-  if (!r||!p) return;
-
-  const nameEn = p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
-  const raw = mode==='shinto'   ? r.shinto.shrines
+  const r=relData.prefectures[code], p=popData[code];
+  if(!r||!p) return;
+  const nameEn=p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
+  const raw = mode==='shinto' ? r.shinto.shrines
             : mode==='buddhist' ? r.buddhist.temples
             : r.total.orgs;
   const label = mode==='shinto' ? '⛩️ Shrines'
               : mode==='buddhist' ? '🪷 Temples'
               : '🏛 Total orgs';
   const valStr = metric==='perCapita'
-    ? `${fmtDec(raw/p.total*10000)} / 10k pop.`
+    ? `${fmtDec(raw/p.total*10000)} per 10k`
     : fmt(raw);
 
-  // bar width relative to national max
-  const maxRaw = mode==='shinto'   ? relData.national.shinto.shrines
-               : mode==='buddhist' ? relData.national.buddhist.temples
-               : relData.national.total.orgs;
-  const barPct = Math.min(100, raw/maxRaw*100).toFixed(0);
+  // バー: 最大値（_valMax）を100%として表示
+  const currentVal = getValue(code);
+  const barPct = Math.min(100, currentVal/_valMax*100).toFixed(1);
+
+  const rank = rankMap[code] || '—';
 
   ttName.textContent   = nameEn;
   ttNameJa.textContent = r.nameJa;
+  ttRank.innerHTML     = `<span class="tt-rank-num">#${rank}</span> of 47 prefectures`;
   ttLabel.textContent  = label;
   ttVal.textContent    = valStr;
-  ttBar.style.width    = barPct + '%';
+  ttBar.style.width    = barPct+'%';
 
-  tooltip.style.opacity = '1';
+  tooltip.style.opacity='1';
   moveTooltip(event);
 }
 function moveTooltip(event) {
-  const rect = document.getElementById('map-area').getBoundingClientRect();
-  const tw = tooltip.offsetWidth  || 210;
-  const th = tooltip.offsetHeight || 90;
-  let x = event.clientX - rect.left + 16;
-  let y = event.clientY - rect.top  - th - 10;
-  if (x+tw > rect.width -10) x = event.clientX-rect.left-tw-16;
-  if (y < 8) y = event.clientY-rect.top+16;
-  tooltip.style.left = x+'px';
-  tooltip.style.top  = y+'px';
+  const rect=document.getElementById('map-area').getBoundingClientRect();
+  const tw=tooltip.offsetWidth||220, th=tooltip.offsetHeight||110;
+  let x=event.clientX-rect.left+16, y=event.clientY-rect.top-th-10;
+  if(x+tw>rect.width-10) x=event.clientX-rect.left-tw-16;
+  if(y<8) y=event.clientY-rect.top+16;
+  tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
 }
-function hideTooltip() { tooltip.style.opacity='0'; }
+function hideTooltip(){tooltip.style.opacity='0';}
 
 // ── Pan & Zoom ────────────────────────────────────────────
-let panX=0, panY=0, scale=1;
-let isDragging=false, didDrag=false;
-let dragSX, dragSY, dragPX, dragPY;
+let panX=0,panY=0,scale=1;
+let isDragging=false,didDrag=false;
+let dragSX,dragSY,dragPX,dragPY;
 
-function applyTransform() {
-  document.getElementById('map-g').setAttribute(
-    'transform', `translate(${panX},${panY}) scale(${scale})`
-  );
+function applyTransform(){
+  document.getElementById('map-g').setAttribute('transform',`translate(${panX},${panY}) scale(${scale})`);
 }
-function zoomAt(cx, cy, factor) {
-  const ns = Math.max(0.8, Math.min(12, scale*factor));
-  const k  = ns/scale;
-  panX = cx - k*(cx-panX);
-  panY = cy - k*(cy-panY);
-  scale = ns;
+function zoomAt(cx,cy,factor){
+  const ns=Math.max(0.8,Math.min(12,scale*factor));
+  const k=ns/scale;
+  panX=cx-k*(cx-panX); panY=cy-k*(cy-panY); scale=ns;
   applyTransform();
 }
-function resetView() { panX=0; panY=0; scale=1; applyTransform(); }
+function resetView(){panX=0;panY=0;scale=1;applyTransform();}
 
-const mapArea = document.getElementById('map-area');
-
-mapArea.addEventListener('wheel', e => {
+const mapArea=document.getElementById('map-area');
+mapArea.addEventListener('wheel',e=>{
   e.preventDefault();
-  const rect = mapArea.getBoundingClientRect();
-  zoomAt(e.clientX-rect.left, e.clientY-rect.top, e.deltaY>0 ? 0.85 : 1.18);
-}, { passive:false });
-
-mapArea.addEventListener('mousedown', e => {
-  isDragging=true; didDrag=false;
-  dragSX=e.clientX; dragSY=e.clientY; dragPX=panX; dragPY=panY;
+  const rect=mapArea.getBoundingClientRect();
+  zoomAt(e.clientX-rect.left,e.clientY-rect.top,e.deltaY>0?0.85:1.18);
+},{passive:false});
+mapArea.addEventListener('mousedown',e=>{
+  isDragging=true;didDrag=false;
+  dragSX=e.clientX;dragSY=e.clientY;dragPX=panX;dragPY=panY;
 });
-window.addEventListener('mousemove', e => {
-  if (!isDragging) return;
-  const dx=e.clientX-dragSX, dy=e.clientY-dragSY;
-  if (Math.abs(dx)>3||Math.abs(dy)>3) didDrag=true;
-  panX=dragPX+dx; panY=dragPY+dy; applyTransform();
+window.addEventListener('mousemove',e=>{
+  if(!isDragging)return;
+  const dx=e.clientX-dragSX,dy=e.clientY-dragSY;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)didDrag=true;
+  panX=dragPX+dx;panY=dragPY+dy;applyTransform();
 });
-window.addEventListener('mouseup', () => { isDragging=false; });
-
-document.getElementById('btn-zoom-in').addEventListener('click', () => {
-  const r=mapArea.getBoundingClientRect(); zoomAt(r.width/2, r.height/2, 1.35);
-});
-document.getElementById('btn-zoom-out').addEventListener('click', () => {
-  const r=mapArea.getBoundingClientRect(); zoomAt(r.width/2, r.height/2, 1/1.35);
-});
-document.getElementById('btn-zoom-reset').addEventListener('click', resetView);
+window.addEventListener('mouseup',()=>{isDragging=false;});
+document.getElementById('btn-zoom-in').addEventListener('click',()=>{
+  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.35);});
+document.getElementById('btn-zoom-out').addEventListener('click',()=>{
+  const r=mapArea.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.35);});
+document.getElementById('btn-zoom-reset').addEventListener('click',resetView);
 
 // ── Draw map ──────────────────────────────────────────────
 function drawMap() {
-  const area = document.getElementById('map-area');
-  const W = area.clientWidth, H = area.clientHeight;
-  document.getElementById('map-svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const W=mapArea.clientWidth, H=mapArea.clientHeight;
+  document.getElementById('map-svg').setAttribute('viewBox',`0 0 ${W} ${H}`);
+  fitProjection(geoData.features,W,H,6,6,6,6);
+  const mapG=document.getElementById('map-g');
+  mapG.innerHTML='';
+  const frag=document.createDocumentFragment();
 
-  fitProjection(geoData.features, W, H, 6, 6, 6, 6);
-
-  const mapG = document.getElementById('map-g');
-  mapG.innerHTML = '';
-  const frag = document.createDocumentFragment();
-
-  geoData.features.forEach(feat => {
-    const code = feat.properties.code;
-    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
-    el.setAttribute('d', featureToPath(feat));
-    el.setAttribute('fill', getColor(code));
+  geoData.features.forEach(feat=>{
+    const code=feat.properties.code;
+    const el=document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d',featureToPath(feat));
+    el.setAttribute('fill',getColor(code));
     el.setAttribute('fill-rule','evenodd');
     el.setAttribute('class','pref-path');
-    el.dataset.code = code;
+    el.dataset.code=code;
 
-    el.addEventListener('mouseenter', function(e) {
-      if (didDrag) return;
-      hoveredCode = code;
-      document.querySelectorAll('.pref-path').forEach(p=>p.classList.remove('hovered'));
-      this.classList.add('hovered');
-      this.parentNode.appendChild(this); // raise to top
+    el.addEventListener('mouseenter',function(e){
+      if(didDrag)return;
+      hoveredCode=code;
+      document.querySelectorAll('.pref-path').forEach(p=>{
+        if(p.dataset.code===code){p.classList.add('hovered');p.classList.remove('dimmed');}
+        else{p.classList.remove('hovered');p.classList.add('dimmed');}
+      });
+      this.parentNode.appendChild(this);
+      // ランキングのアイテムをハイライト
+      document.querySelectorAll('.rk-item').forEach(el=>{
+        el.classList.toggle('active',el.dataset.code===code);
+      });
+      // ハイライトしたアイテムをスクロールして見せる
+      const activeItem=document.querySelector(`.rk-item[data-code="${code}"]`);
+      if(activeItem) activeItem.scrollIntoView({behavior:'smooth',block:'nearest'});
       updateInfoCard(code);
-      showTooltip(e, code);
+      showTooltip(e,code);
     });
-    el.addEventListener('mousemove', e => { if(hoveredCode===code) moveTooltip(e); });
-    el.addEventListener('mouseleave', function() {
+    el.addEventListener('mousemove',e=>{if(hoveredCode===code)moveTooltip(e);});
+    el.addEventListener('mouseleave',function(){
       hoveredCode=null;
       this.classList.remove('hovered');
+      document.querySelectorAll('.pref-path').forEach(p=>p.classList.remove('dimmed','hovered'));
+      document.querySelectorAll('.rk-item').forEach(el=>el.classList.remove('active'));
       updateInfoCard(null);
       hideTooltip();
     });
@@ -603,38 +709,35 @@ function drawMap() {
   resetView();
 }
 
-function updateColors() {
-  buildColorState();
-  document.querySelectorAll('.pref-path').forEach(el => {
-    el.style.transition = 'fill 0.28s';
-    el.setAttribute('fill', getColor(el.dataset.code));
+function updateAll() {
+  buildState();
+  document.querySelectorAll('.pref-path').forEach(el=>{
+    el.style.transition='fill 0.28s';
+    el.setAttribute('fill',getColor(el.dataset.code));
   });
   updateLegend();
-  if (hoveredCode) updateInfoCard(hoveredCode);
+  renderRanking();
+  if(hoveredCode) { updateInfoCard(hoveredCode); showTooltip({clientX:0,clientY:0},hoveredCode); }
 }
 
 // ── Controls ──────────────────────────────────────────────
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    mode = btn.dataset.mode;
-    updateColors();
+    btn.classList.add('active'); mode=btn.dataset.mode; updateAll();
   });
 });
-document.querySelectorAll('.metric-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('.metric-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('.metric-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    metric = btn.dataset.metric;
-    updateColors();
+    btn.classList.add('active'); metric=btn.dataset.metric; updateAll();
   });
 });
 
 let resizeTimer;
-window.addEventListener('resize', () => {
+window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { buildColorState(); drawMap(); updateLegend(); }, 150);
+  resizeTimer=setTimeout(()=>{buildState();drawMap();updateLegend();renderRanking();},150);
 });
 
 // ── Init ──────────────────────────────────────────────────
@@ -642,16 +745,17 @@ Promise.all([
   fetch('geo-json/japan.geojson').then(r=>r.json()),
   fetch('population-json/pref-pop.json').then(r=>r.json()),
   fetch('data/religion-stats.json').then(r=>r.json())
-]).then(([geo,pop,rel]) => {
+]).then(([geo,pop,rel])=>{
   geoData=geo; popData=pop; relData=rel;
   document.getElementById('loading').style.display='none';
   fillNatStats();
-  buildColorState();
+  buildState();
   updateLegend();
   drawMap();
-}).catch(err => {
+  renderRanking();
+}).catch(err=>{
   console.error(err);
-  document.getElementById('loading').innerHTML =
+  document.getElementById('loading').innerHTML=
     `<div style="text-align:center;color:#c0392b;font-size:11px;line-height:2.4;padding:24px">
       Failed to load data.<br>
       <code>geo-json/japan.geojson</code><br>
