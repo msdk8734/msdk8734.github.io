@@ -135,6 +135,12 @@ html, body {
 .nat-label { font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
 
 .divider { height: 1px; background: var(--paper-deep); }
+.info-note {
+  font-size: 9px; color: var(--ink-soft); line-height: 1.65;
+  letter-spacing: 0.02em; padding: 8px 2px 0;
+  border-top: 1px solid var(--paper-deep);
+  margin-top: 6px;
+}
 
 .paradox { background: var(--paper-warm); border-left: 2px solid var(--ink-mid); padding: 11px 11px 11px 13px; }
 .paradox-headline { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-style: italic; margin-bottom: 5px; color: var(--ink); }
@@ -424,8 +430,9 @@ html, body {
       <div class="info-card" id="info-card">
         <div class="info-placeholder">Hover over a prefecture to see details.</div>
       </div>
-    </div>
-    <div class="divider"></div>
+      <div class="info-note">
+        ※ Believer counts may exceed population. Likely causes: (1) people registered at their hometown temple while living elsewhere, and (2) deceased parishioners remaining on temple rolls.
+      </div>
     <div>
       <div class="control-label">National total</div>
       <div class="nat-stats">
