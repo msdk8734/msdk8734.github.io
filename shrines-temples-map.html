@@ -52,13 +52,30 @@ html, body {
 }
 .header-title em { font-style: normal; font-weight: 600; }
 .header-sub {
-  font-size: 11px; letter-spacing: 0.10em;
-  color: var(--ink-soft); text-transform: uppercase;
+  font-size: 11px; letter-spacing: 0.04em;
+  color: var(--ink-soft); font-style: italic;
+  font-family: 'Cormorant Garamond', serif; font-weight: 300;
+  line-height: 1.5;
 }
 .header-source {
   margin-left: auto; font-size: 10px; color: var(--ink-soft);
   letter-spacing: 0.04em; line-height: 1.7; text-align: right;
 }
+/* ── Home button ── */
+.home-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  background: transparent;
+  border: 1px solid var(--paper-deep);
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.06em; color: var(--ink-soft);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.home-btn:hover { background: var(--paper-warm); color: var(--ink); border-color: var(--ink-soft); }
 
 /* ── Left sidebar ── */
 .sidebar {
@@ -217,8 +234,9 @@ html, body {
     gap: 8px;
   }
   .header-title { font-size: 18px; }
-  .header-sub   { font-size: 9px; }
+  .header-sub   { font-size: 10px; }
   .header-source { display: none; }
+  .home-btn { font-size: 9px; padding: 4px 9px; }
 
   /* ── サイドバー: 非表示 ── */
   .sidebar { display: none; }
@@ -364,11 +382,17 @@ html, body {
   <header class="header">
     <div>
       <div class="header-title">Shrines &amp; <em>Temples</em></div>
-      <div class="header-sub" style="margin-top:4px">Religion in Japan — Prefecture Map</div>
+      <div class="header-sub" style="margin-top:5px">
+        Mapping sacred Japan — shrines &amp; temples per prefecture,<br>
+        ranked by count and density per 100,000 people
+      </div>
     </div>
-    <div class="header-source">
-      Agency for Cultural Affairs<br>
-      Religious Statistics Survey · Dec 31, 2024
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:auto">
+      <a class="home-btn" href="index.html">← All visualizations</a>
+      <div class="header-source">
+        Agency for Cultural Affairs<br>
+        Religious Statistics Survey · Dec 31, 2024
+      </div>
     </div>
   </header>
 
