@@ -18,10 +18,8 @@
     --paper-warm: #ede6d8;
     --paper-deep: #d9cfc0;
     --red: #c0392b;
-    --red-light: #e8c5c0;
     --teal: #1a5c52;
-    --teal-light: #b8d8d4;
-    --gold: #b8860b;
+    --gold: #886800;
   }
 
   html, body {
@@ -32,292 +30,156 @@
     font-weight: 300;
   }
 
-  /* ── Layout ── */
   .shell {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 290px 1fr;
     grid-template-rows: auto 1fr;
     min-height: 100vh;
   }
 
-  /* ── Header strip ── */
+  /* ── Header ── */
   .header {
     grid-column: 1 / -1;
-    padding: 28px 36px 20px;
+    padding: 22px 32px 16px;
     border-bottom: 1px solid var(--paper-deep);
-    display: flex;
-    align-items: baseline;
-    gap: 24px;
-    flex-wrap: wrap;
+    display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap;
   }
   .header-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
-    font-weight: 300;
-    font-style: italic;
-    letter-spacing: 0.02em;
-    color: var(--ink);
-    line-height: 1;
+    font-size: 26px; font-weight: 300; font-style: italic;
+    color: var(--ink); line-height: 1;
   }
-  .header-title em {
-    font-style: normal;
-    font-weight: 600;
-  }
+  .header-title em { font-style: normal; font-weight: 600; }
   .header-sub {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--ink-soft);
-    text-transform: uppercase;
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--ink-soft); text-transform: uppercase;
   }
   .header-source {
-    margin-left: auto;
-    font-size: 9px;
-    color: var(--ink-soft);
-    letter-spacing: 0.06em;
-    line-height: 1.6;
-    text-align: right;
+    margin-left: auto; font-size: 9px; color: var(--ink-soft);
+    letter-spacing: 0.05em; line-height: 1.6; text-align: right;
   }
 
   /* ── Sidebar ── */
   .sidebar {
     border-right: 1px solid var(--paper-deep);
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
+    padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 24px;
     overflow-y: auto;
   }
-
   .control-label {
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 10px;
+    font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
   }
 
-  /* Mode toggle */
-  .mode-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  .mode-group { display: flex; flex-direction: column; gap: 5px; }
   .mode-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: transparent;
-    border: 1px solid var(--paper-deep);
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 300;
-    color: var(--ink-mid);
-    letter-spacing: 0.04em;
-    transition: all 0.18s;
-    text-align: left;
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 11px; background: transparent;
+    border: 1px solid var(--paper-deep); cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    font-weight: 300; color: var(--ink-mid);
+    letter-spacing: 0.04em; transition: all 0.15s; text-align: left;
   }
   .mode-btn .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 1.5px solid var(--paper-deep);
-    transition: all 0.18s;
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--paper-deep); transition: all 0.15s;
   }
-  .mode-btn.active {
-    border-color: var(--ink-mid);
-    color: var(--ink);
-  }
+  .mode-btn.active { border-color: var(--ink-mid); color: var(--ink); }
   .mode-btn.active .dot { border-color: transparent; }
-  .mode-btn.shinto.active .dot { background: var(--red); }
+  .mode-btn.shinto.active   .dot { background: var(--red); }
   .mode-btn.buddhist.active .dot { background: var(--teal); }
-  .mode-btn.both.active .dot { background: var(--gold); }
+  .mode-btn.both.active     .dot { background: var(--gold); }
 
-  /* Metric toggle */
-  .metric-group {
-    display: flex;
-    border: 1px solid var(--paper-deep);
-    overflow: hidden;
-  }
+  .metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
   .metric-btn {
-    flex: 1;
-    padding: 8px 4px;
-    background: transparent;
-    border: none;
+    flex: 1; padding: 8px 4px; background: transparent; border: none;
     border-right: 1px solid var(--paper-deep);
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.08em;
-    color: var(--ink-soft);
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 0.08em; color: var(--ink-soft);
+    cursor: pointer; transition: all 0.15s; text-transform: uppercase;
   }
   .metric-btn:last-child { border-right: none; }
-  .metric-btn.active {
-    background: var(--ink);
-    color: var(--paper);
-  }
+  .metric-btn.active { background: var(--ink); color: var(--paper); }
 
-  /* Legend */
-  .legend-wrap { }
-  .legend-bar {
-    height: 8px;
-    border-radius: 1px;
-    margin-bottom: 6px;
-  }
+  .legend-bar { height: 8px; border-radius: 1px; margin-bottom: 6px; }
   .legend-ticks {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    color: var(--ink-soft);
+    display: flex; justify-content: space-between;
+    font-size: 9px; color: var(--ink-soft);
   }
 
-  /* Tooltip card */
   .info-card {
-    background: var(--paper-warm);
-    border: 1px solid var(--paper-deep);
-    padding: 16px;
-    min-height: 140px;
+    background: var(--paper-warm); border: 1px solid var(--paper-deep);
+    padding: 14px; min-height: 136px;
   }
   .info-name {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 400;
-    margin-bottom: 2px;
-    color: var(--ink);
+    font-size: 19px; font-weight: 400; margin-bottom: 2px; color: var(--ink);
   }
-  .info-name-ja {
-    font-size: 10px;
-    color: var(--ink-soft);
-    letter-spacing: 0.06em;
-    margin-bottom: 12px;
-  }
+  .info-name-ja { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 10px; }
   .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    border-top: 1px solid var(--paper-deep);
-    padding: 5px 0;
-    font-size: 10px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 10px;
   }
-  .info-row-label { color: var(--ink-soft); letter-spacing: 0.06em; }
-  .info-row-val {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--ink);
-  }
-  .info-row-val.accent-red { color: var(--red); }
-  .info-row-val.accent-teal { color: var(--teal); }
+  .info-row-label { color: var(--ink-soft); letter-spacing: 0.05em; }
+  .info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
+  .info-row-val.red  { color: var(--red); }
+  .info-row-val.teal { color: var(--teal); }
   .info-placeholder {
-    color: var(--ink-soft);
-    font-size: 10px;
-    font-style: italic;
-    padding-top: 12px;
-    font-family: 'Cormorant Garamond', serif;
+    color: var(--ink-soft); font-size: 10px; font-style: italic;
+    padding-top: 10px; font-family: 'Cormorant Garamond', serif;
   }
 
-  /* National stats */
   .nat-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--paper-deep);
-    border: 1px solid var(--paper-deep);
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
   }
-  .nat-cell {
-    background: var(--paper);
-    padding: 10px 10px 8px;
-  }
+  .nat-cell { background: var(--paper); padding: 9px 9px 7px; }
   .nat-val {
-    font-size: 16px;
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    line-height: 1;
-    margin-bottom: 3px;
+    font-size: 15px; font-family: 'Cormorant Garamond', serif;
+    font-weight: 600; line-height: 1; margin-bottom: 3px;
   }
-  .nat-val.red { color: var(--red); }
+  .nat-val.red  { color: var(--red); }
   .nat-val.teal { color: var(--teal); }
-  .nat-label {
-    font-size: 9px;
-    color: var(--ink-soft);
-    letter-spacing: 0.06em;
-    line-height: 1.4;
-  }
+  .nat-label { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.05em; line-height: 1.4; }
 
-  /* ── Map area ── */
+  /* ── Map ── */
   .map-area {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    overflow: hidden;
+    position: relative; display: flex;
+    align-items: center; justify-content: center;
+    overflow: hidden; background: var(--paper);
   }
+  #map-svg { width: 100%; height: 100%; display: block; }
 
-  #map-svg {
-    width: 100%;
-    height: 100%;
-    max-height: calc(100vh - 90px);
+  .pref-path {
+    stroke: var(--paper); stroke-width: 0.5; cursor: pointer;
   }
-
-  .prefecture-path {
-    stroke: var(--paper);
-    stroke-width: 0.6;
-    cursor: pointer;
-    transition: opacity 0.12s;
-  }
-  .prefecture-path:hover { opacity: 0.75; }
-  .prefecture-path.hovered { stroke: var(--ink); stroke-width: 1.2; }
+  .pref-path.hovered { stroke: var(--ink); stroke-width: 1.4; }
 
   .map-tooltip {
-    position: absolute;
-    pointer-events: none;
-    background: var(--ink);
-    color: var(--paper);
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    padding: 6px 10px;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.12s;
+    position: absolute; pointer-events: none;
+    background: var(--ink); color: var(--paper);
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    padding: 5px 10px; letter-spacing: 0.04em;
+    white-space: nowrap; opacity: 0; transition: opacity 0.1s;
   }
 
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--paper-deep);
-    margin: 0;
-  }
+  .divider { height: 1px; background: var(--paper-deep); }
 
-  /* Paradox callout */
   .paradox {
-    background: var(--paper-warm);
-    border-left: 2px solid var(--ink-mid);
-    padding: 12px 12px 12px 14px;
+    background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
+    padding: 11px 11px 11px 13px;
   }
   .paradox-headline {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 14px;
-    font-style: italic;
-    margin-bottom: 6px;
-    color: var(--ink);
+    font-size: 13px; font-style: italic; margin-bottom: 5px; color: var(--ink);
   }
-  .paradox-body {
-    font-size: 9px;
-    color: var(--ink-soft);
-    line-height: 1.7;
-    letter-spacing: 0.04em;
-  }
+  .paradox-body { font-size: 9px; color: var(--ink-soft); line-height: 1.7; letter-spacing: 0.04em; }
   .paradox-body strong { color: var(--ink-mid); font-weight: 400; }
 </style>
 </head>
 <body>
 <div class="shell">
 
-  <!-- Header -->
   <header class="header">
     <div>
       <div class="header-title">Shrines &amp; <em>Temples</em></div>
@@ -329,26 +191,16 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
   <aside class="sidebar">
-
-    <!-- Mode -->
     <div>
       <div class="control-label">Display</div>
       <div class="mode-group">
-        <button class="mode-btn shinto active" data-mode="shinto">
-          <span class="dot"></span>Shinto shrines ⛩️
-        </button>
-        <button class="mode-btn buddhist" data-mode="buddhist">
-          <span class="dot"></span>Buddhist temples 🪷
-        </button>
-        <button class="mode-btn both" data-mode="both">
-          <span class="dot"></span>Total religious orgs
-        </button>
+        <button class="mode-btn shinto active" data-mode="shinto"><span class="dot"></span>Shinto shrines ⛩️</button>
+        <button class="mode-btn buddhist" data-mode="buddhist"><span class="dot"></span>Buddhist temples 🪷</button>
+        <button class="mode-btn both" data-mode="both"><span class="dot"></span>Total religious orgs</button>
       </div>
     </div>
 
-    <!-- Metric -->
     <div>
       <div class="control-label">Metric</div>
       <div class="metric-group">
@@ -357,18 +209,14 @@
       </div>
     </div>
 
-    <!-- Legend -->
-    <div class="legend-wrap">
+    <div>
       <div class="control-label">Scale</div>
       <div class="legend-bar" id="legend-bar"></div>
-      <div class="legend-ticks" id="legend-ticks">
-        <span>Low</span><span>High</span>
-      </div>
+      <div class="legend-ticks" id="legend-ticks"><span>Low</span><span>High</span></div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- Hovered prefecture info -->
     <div>
       <div class="control-label">Prefecture</div>
       <div class="info-card" id="info-card">
@@ -378,46 +226,29 @@
 
     <div class="divider"></div>
 
-    <!-- National totals -->
     <div>
       <div class="control-label">National total</div>
-      <div class="nat-stats" id="nat-stats">
-        <div class="nat-cell">
-          <div class="nat-val red" id="nat-shrines">—</div>
-          <div class="nat-label">⛩️ Shinto<br>shrines</div>
-        </div>
-        <div class="nat-cell">
-          <div class="nat-val teal" id="nat-temples">—</div>
-          <div class="nat-label">🪷 Buddhist<br>temples</div>
-        </div>
-        <div class="nat-cell">
-          <div class="nat-val" id="nat-shinto-b">—</div>
-          <div class="nat-label">Shinto<br>believers</div>
-        </div>
-        <div class="nat-cell">
-          <div class="nat-val" id="nat-buddhist-b">—</div>
-          <div class="nat-label">Buddhist<br>believers</div>
-        </div>
+      <div class="nat-stats">
+        <div class="nat-cell"><div class="nat-val red" id="nat-shrines">—</div><div class="nat-label">⛩️ Shinto<br>shrines</div></div>
+        <div class="nat-cell"><div class="nat-val teal" id="nat-temples">—</div><div class="nat-label">🪷 Buddhist<br>temples</div></div>
+        <div class="nat-cell"><div class="nat-val" id="nat-shinto-b">—</div><div class="nat-label">Shinto<br>believers</div></div>
+        <div class="nat-cell"><div class="nat-val" id="nat-buddhist-b">—</div><div class="nat-label">Buddhist<br>believers</div></div>
       </div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- Paradox -->
     <div class="paradox">
       <div class="paradox-headline">The paradox</div>
       <div class="paradox-body">
         Japan has more shrines than convenience stores.
-        Yet <strong>~60% of Japanese say they have no religion</strong> — 
-        because seasonal visits to shrines and temples are 
-        considered <em>culture</em>, not faith.
+        Yet <strong>~60% say they have no religion</strong> —
+        because seasonal shrine visits are considered <em>culture</em>, not faith.
       </div>
     </div>
-
   </aside>
 
-  <!-- Map -->
-  <main class="map-area">
+  <main class="map-area" id="map-area">
     <svg id="map-svg"></svg>
     <div class="map-tooltip" id="tooltip"></div>
   </main>
@@ -425,48 +256,33 @@
 </div>
 
 <script>
-const PATHS = {
-  geo:      'geo-json/japan.geojson',
-  pop:      'population-json/pref-pop.json',
-  religion: 'data/religion-stats.json'
-};
-
-// ── State ──────────────────────────────────────────
-let mode   = 'shinto';   // shinto | buddhist | both
-let metric = 'perCapita'; // perCapita | absolute
-let geoData, popData, relData;
-let colorScale, projection, pathGen;
-let hoveredCode = null;
-
-// ── Colour ramps ───────────────────────────────────
 const RAMPS = {
-  shinto:   ['#f5ebe8', '#e8c5c0', '#d99590', '#c06060', '#a03030', '#7a1010'],
-  buddhist: ['#e8f0ef', '#b8d8d4', '#7ab8b2', '#3a8880', '#1a5c52', '#0a3830'],
-  both:     ['#f5f0e0', '#e8d898', '#c8b850', '#a89020', '#886800', '#604800']
+  shinto:   ['#f5ebe8','#e8c5c0','#d49090','#bb5555','#952222','#6a0808'],
+  buddhist: ['#e8f0ef','#b0d5d0','#6ab5ae','#2a8880','#0f5c52','#063830'],
+  both:     ['#f5f0e0','#e0d498','#c0b048','#9a8a10','#706200','#4a4000']
 };
 
-const fmt = d3.format(',');
+const fmt    = d3.format(',');
 const fmtDec = d3.format('.1f');
 
-// ── Helpers ────────────────────────────────────────
+let mode   = 'shinto';
+let metric = 'perCapita';
+let geoData, popData, relData, colorScale;
+let hoveredCode = null;
+
 function getValue(code) {
   const r = relData.prefectures[code];
   const p = popData[code];
   if (!r || !p) return 0;
-  let raw;
-  if (mode === 'shinto')   raw = r.shinto.shrines;
-  if (mode === 'buddhist') raw = r.buddhist.temples;
-  if (mode === 'both')     raw = r.total.orgs;
-  if (metric === 'perCapita') return raw / p.total * 10000;
-  return raw;
+  let raw = mode === 'shinto' ? r.shinto.shrines
+          : mode === 'buddhist' ? r.buddhist.temples
+          : r.total.orgs;
+  return metric === 'perCapita' ? raw / p.total * 10000 : raw;
 }
 
-function buildColorScale() {
-  const values = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
-  const ext = d3.extent(values);
-  colorScale = d3.scaleQuantile()
-    .domain(values)
-    .range(RAMPS[mode]);
+function buildScale() {
+  const vals = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
+  colorScale = d3.scaleQuantile().domain(vals).range(RAMPS[mode]);
 }
 
 function getColor(code) {
@@ -474,110 +290,118 @@ function getColor(code) {
   return v ? colorScale(v) : '#e0dbd0';
 }
 
-// ── Legend ────────────────────────────────────────
 function updateLegend() {
-  const bar = document.getElementById('legend-bar');
-  const ticks = document.getElementById('legend-ticks');
-  const ramp = RAMPS[mode];
-  bar.style.background = `linear-gradient(to right, ${ramp.join(', ')})`;
-
-  const values = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
-  const [lo, hi] = d3.extent(values);
-  if (metric === 'perCapita') {
-    ticks.innerHTML = `<span>${fmtDec(lo)}</span><span>${fmtDec(hi)}</span>`;
-  } else {
-    ticks.innerHTML = `<span>${fmt(Math.round(lo))}</span><span>${fmt(Math.round(hi))}</span>`;
-  }
+  document.getElementById('legend-bar').style.background =
+    `linear-gradient(to right, ${RAMPS[mode].join(', ')})`;
+  const vals = Object.keys(relData.prefectures).map(c => getValue(c)).filter(v => v > 0);
+  const [lo, hi] = d3.extent(vals);
+  document.getElementById('legend-ticks').innerHTML =
+    `<span>${metric==='perCapita' ? fmtDec(lo) : fmt(Math.round(lo))}</span>` +
+    `<span>${metric==='perCapita' ? fmtDec(hi) : fmt(Math.round(hi))}</span>`;
 }
 
-// ── Info card ─────────────────────────────────────
 function updateInfoCard(code) {
   const card = document.getElementById('info-card');
-  if (!code) {
-    card.innerHTML = '<div class="info-placeholder">Hover over a prefecture to see details.</div>';
-    return;
-  }
-  const r  = relData.prefectures[code];
-  const p  = popData[code];
+  if (!code) { card.innerHTML = '<div class="info-placeholder">Hover over a prefecture to see details.</div>'; return; }
+  const r = relData.prefectures[code];
+  const p = popData[code];
   if (!r || !p) return;
-
-  const shrinesPC = (r.shinto.shrines / p.total * 10000).toFixed(1);
-  const templesPC = (r.buddhist.temples / p.total * 10000).toFixed(1);
-  const shintoB   = (r.shinto.believers / 1000).toFixed(0);
-  const buddhistB = (r.buddhist.believers / 1000).toFixed(0);
-
+  const shrPC = (r.shinto.shrines   / p.total * 10000).toFixed(1);
+  const tmpPC = (r.buddhist.temples / p.total * 10000).toFixed(1);
+  const nameEn = p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
   card.innerHTML = `
-    <div class="info-name">${p.nameEn.replace(' Prefecture','').replace(' Metropolis','')}</div>
+    <div class="info-name">${nameEn}</div>
     <div class="info-name-ja">${r.nameJa} · pop. ${fmt(p.total)}</div>
-    <div class="info-row">
-      <span class="info-row-label">⛩️ Shrines</span>
-      <span class="info-row-val accent-red">${fmt(r.shinto.shrines)}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-row-label">  per 10k pop.</span>
-      <span class="info-row-val">${shrinesPC}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-row-label">🪷 Temples</span>
-      <span class="info-row-val accent-teal">${fmt(r.buddhist.temples)}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-row-label">  per 10k pop.</span>
-      <span class="info-row-val">${templesPC}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-row-label">Shinto believers</span>
-      <span class="info-row-val">${fmt(shintoB * 1000)}</span>
-    </div>
-    <div class="info-row">
-      <span class="info-row-label">Buddhist believers</span>
-      <span class="info-row-val">${fmt(buddhistB * 1000)}</span>
-    </div>
-  `;
+    <div class="info-row"><span class="info-row-label">⛩️ Shrines</span><span class="info-row-val red">${fmt(r.shinto.shrines)}</span></div>
+    <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${shrPC}</span></div>
+    <div class="info-row"><span class="info-row-label">🪷 Temples</span><span class="info-row-val teal">${fmt(r.buddhist.temples)}</span></div>
+    <div class="info-row"><span class="info-row-label">&nbsp;&nbsp;per 10k pop.</span><span class="info-row-val">${tmpPC}</span></div>
+    <div class="info-row"><span class="info-row-label">Shinto believers</span><span class="info-row-val">${fmt(r.shinto.believers)}</span></div>
+    <div class="info-row"><span class="info-row-label">Buddhist believers</span><span class="info-row-val">${fmt(r.buddhist.believers)}</span></div>`;
 }
 
-// ── National stats ────────────────────────────────
 function fillNatStats() {
   const n = relData.national;
-  document.getElementById('nat-shrines').textContent   = fmt(n.shinto.shrines);
-  document.getElementById('nat-temples').textContent   = fmt(n.buddhist.temples);
-  document.getElementById('nat-shinto-b').textContent  = (n.shinto.believers / 1e6).toFixed(1) + 'M';
-  document.getElementById('nat-buddhist-b').textContent= (n.buddhist.believers / 1e6).toFixed(1) + 'M';
+  document.getElementById('nat-shrines').textContent    = fmt(n.shinto.shrines);
+  document.getElementById('nat-temples').textContent    = fmt(n.buddhist.temples);
+  document.getElementById('nat-shinto-b').textContent   = (n.shinto.believers   / 1e6).toFixed(1) + 'M';
+  document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
 }
 
-// ── Map draw / update ─────────────────────────────
+// ── Tooltip ───────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+function showTooltip(event, code) {
+  const r = relData.prefectures[code];
+  const p = popData[code];
+  if (!r || !p) return;
+  let v = mode === 'shinto'
+    ? (metric==='perCapita' ? fmtDec(r.shinto.shrines/p.total*10000)+' / 10k' : fmt(r.shinto.shrines)+' shrines')
+    : mode === 'buddhist'
+    ? (metric==='perCapita' ? fmtDec(r.buddhist.temples/p.total*10000)+' / 10k' : fmt(r.buddhist.temples)+' temples')
+    : (metric==='perCapita' ? fmtDec(r.total.orgs/p.total*10000)+' / 10k' : fmt(r.total.orgs)+' orgs');
+  tooltip.textContent = `${r.nameJa}  ${v}`;
+  tooltip.style.opacity = '1';
+  moveTooltip(event);
+}
+function moveTooltip(event) {
+  const rect = document.getElementById('map-area').getBoundingClientRect();
+  let x = event.clientX - rect.left + 14;
+  let y = event.clientY - rect.top  - 34;
+  if (x + 220 > rect.width) x -= 240;
+  if (y < 0) y += 50;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function hideTooltip() { tooltip.style.opacity = '0'; }
+
+// ── Map ───────────────────────────────────────────
 function drawMap() {
-  const svg = d3.select('#map-svg');
-  const W = svg.node().clientWidth || 700;
-  const H = svg.node().clientHeight || 600;
+  const area = document.getElementById('map-area');
+  const W = area.clientWidth;
+  const H = area.clientHeight;
 
-  projection = d3.geoMercator()
-    .center([137, 37])
-    .scale(W * 1.55)
-    .translate([W / 2, H / 2]);
-
-  pathGen = d3.geoPath().projection(projection);
-
+  const svg = d3.select('#map-svg').attr('width', W).attr('height', H);
   svg.selectAll('*').remove();
+
+  // 東京（小笠原）・鹿児島（南西諸島）の離島が投影を歪めるため、
+  // 本土の bbox を手動で指定して fitExtent する
+  const bboxFeature = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [128.5, 30.5],
+        [146.0, 30.5],
+        [146.0, 45.6],
+        [128.5, 45.6],
+        [128.5, 30.5]
+      ]]
+    }
+  };
+
+  const projection = d3.geoMercator()
+    .fitExtent([[24, 16], [W - 24, H - 16]], bboxFeature);
+
+  const pathGen = d3.geoPath().projection(projection);
 
   const g = svg.append('g');
 
-  g.selectAll('.prefecture-path')
+  g.selectAll('.pref-path')
     .data(geoData.features)
     .join('path')
-    .attr('class', 'prefecture-path')
+    .attr('class', 'pref-path')
     .attr('d', pathGen)
     .attr('fill', d => getColor(d.properties.code))
     .on('mouseenter', function(event, d) {
       hoveredCode = d.properties.code;
+      // hovered クラスを付け替え（raise で最前面に）
+      g.selectAll('.pref-path').classed('hovered', false);
       d3.select(this).classed('hovered', true).raise();
       updateInfoCard(hoveredCode);
-      showTooltip(event, d);
+      showTooltip(event, hoveredCode);
     })
-    .on('mousemove', function(event, d) {
-      moveTooltip(event, d);
-    })
-    .on('mouseleave', function(event, d) {
+    .on('mousemove', moveTooltip)
+    .on('mouseleave', function() {
       hoveredCode = null;
       d3.select(this).classed('hovered', false);
       updateInfoCard(null);
@@ -586,61 +410,14 @@ function drawMap() {
 }
 
 function updateColors() {
-  buildColorScale();
-  d3.select('#map-svg').selectAll('.prefecture-path')
-    .transition().duration(300)
+  buildScale();
+  d3.selectAll('.pref-path')
+    .transition().duration(280)
     .attr('fill', d => getColor(d.properties.code));
   updateLegend();
   if (hoveredCode) updateInfoCard(hoveredCode);
 }
 
-// ── Tooltip ───────────────────────────────────────
-const tooltip = document.getElementById('tooltip');
-
-function showTooltip(event, d) {
-  const code = d.properties.code;
-  const r = relData.prefectures[code];
-  const p = popData[code];
-  if (!r || !p) return;
-
-  let label, val;
-  if (mode === 'shinto') {
-    label = 'Shrines';
-    val = metric === 'perCapita'
-      ? fmtDec(r.shinto.shrines / p.total * 10000) + ' / 10k'
-      : fmt(r.shinto.shrines);
-  } else if (mode === 'buddhist') {
-    label = 'Temples';
-    val = metric === 'perCapita'
-      ? fmtDec(r.buddhist.temples / p.total * 10000) + ' / 10k'
-      : fmt(r.buddhist.temples);
-  } else {
-    label = 'Total orgs';
-    val = metric === 'perCapita'
-      ? fmtDec(r.total.orgs / p.total * 10000) + ' / 10k'
-      : fmt(r.total.orgs);
-  }
-
-  tooltip.textContent = `${r.nameJa}  ${label}: ${val}`;
-  tooltip.style.opacity = '1';
-  moveTooltip(event);
-}
-
-function moveTooltip(event) {
-  const mapRect = document.querySelector('.map-area').getBoundingClientRect();
-  let x = event.clientX - mapRect.left + 12;
-  let y = event.clientY - mapRect.top - 32;
-  if (x + 200 > mapRect.width) x -= 220;
-  if (y < 0) y += 48;
-  tooltip.style.left = x + 'px';
-  tooltip.style.top  = y + 'px';
-}
-
-function hideTooltip() {
-  tooltip.style.opacity = '0';
-}
-
-// ── Controls ──────────────────────────────────────
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -649,7 +426,6 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     updateColors();
   });
 });
-
 document.querySelectorAll('.metric-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.metric-btn').forEach(b => b.classList.remove('active'));
@@ -659,37 +435,35 @@ document.querySelectorAll('.metric-btn').forEach(btn => {
   });
 });
 
-// ── Resize ────────────────────────────────────────
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => drawMap() || updateColors(), 120);
+  resizeTimer = setTimeout(() => { drawMap(); updateColors(); }, 120);
 });
 
 // ── Init ──────────────────────────────────────────
 Promise.all([
-  d3.json(PATHS.geo),
-  d3.json(PATHS.pop),
-  d3.json(PATHS.religion)
+  d3.json('geo-json/japan.geojson'),
+  d3.json('population-json/pref-pop.json'),
+  d3.json('data/religion-stats.json')
 ]).then(([geo, pop, rel]) => {
   geoData = geo;
   popData = pop;
   relData = rel;
-
   fillNatStats();
-  buildColorScale();
+  buildScale();
   updateLegend();
   drawMap();
 }).catch(err => {
-  console.error('Data load error:', err);
-  document.querySelector('.map-area').innerHTML =
-    `<div style="color:#c0392b;font-family:monospace;padding:40px;font-size:13px;">
+  console.error(err);
+  document.getElementById('map-area').innerHTML =
+    `<div style="padding:40px;font-family:monospace;font-size:12px;color:#c0392b">
       Failed to load data.<br><br>
-      Make sure the following files exist relative to index.html:<br>
+      Required paths:<br>
       <code>geo-json/japan.geojson</code><br>
       <code>population-json/pref-pop.json</code><br>
       <code>data/religion-stats.json</code><br><br>
-      Run a local server: <code>python3 -m http.server 8080</code>
+      Run: <code>python3 -m http.server 8080</code>
     </div>`;
 });
 </script>
