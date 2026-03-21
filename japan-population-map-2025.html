@@ -599,7 +599,7 @@ function applyView() {
   if (g) g.setAttribute('transform', `translate(${viewX},${viewY}) scale(${viewScale})`);
 }
 function zoomAt(mx, my, factor) {
-  const newScale = Math.max(0.5, Math.min(40, viewScale * factor));
+  const newScale = Math.max(0.5, Math.min(80, viewScale * factor));
   const k = newScale / viewScale;
   viewX = mx - k * (mx - viewX);
   viewY = my - k * (my - viewY);
@@ -1129,7 +1129,7 @@ async function zoomIn(id) {
   const availW = svgW - PANEL_W - PAD * 2;
   const availH = svgH - PAD * 2;
   const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * 0.88;
-  const targetScale = Math.min(fs, 40);
+  const targetScale = Math.min(fs, 80);
   const targetX = (svgW - PANEL_W) / 2 - targetScale * (x0 + x1) / 2;
   const targetY = svgH / 2 - targetScale * (y0 + y1) / 2;
 
