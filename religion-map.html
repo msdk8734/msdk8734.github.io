@@ -30,7 +30,7 @@ html, body {
 
 .shell {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 268px 1fr;
   grid-template-rows: auto 1fr;
   height: 100vh;
 }
@@ -38,14 +38,14 @@ html, body {
 /* ── Header ── */
 .header {
   grid-column: 1 / -1;
-  padding: 18px 28px 14px;
+  padding: 14px 24px 12px;
   border-bottom: 1px solid var(--paper-deep);
-  display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap;
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
   background: var(--paper);
 }
 .header-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 300; font-style: italic;
+  font-size: 22px; font-weight: 300; font-style: italic;
   color: var(--ink); line-height: 1;
 }
 .header-title em { font-style: normal; font-weight: 600; }
@@ -61,19 +61,19 @@ html, body {
 /* ── Sidebar ── */
 .sidebar {
   border-right: 1px solid var(--paper-deep);
-  padding: 20px 18px;
-  display: flex; flex-direction: column; gap: 22px;
+  padding: 18px 16px;
+  display: flex; flex-direction: column; gap: 18px;
   overflow-y: auto; background: var(--paper);
 }
 .control-label {
   font-size: 9px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
+  text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px;
 }
 
-.mode-group { display: flex; flex-direction: column; gap: 5px; }
+.mode-group { display: flex; flex-direction: column; gap: 4px; }
 .mode-btn {
-  display: flex; align-items: center; gap: 9px;
-  padding: 9px 11px; background: transparent;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: transparent;
   border: 1px solid var(--paper-deep); cursor: pointer;
   font-family: 'DM Mono', monospace; font-size: 11px;
   font-weight: 300; color: var(--ink-mid);
@@ -91,7 +91,7 @@ html, body {
 
 .metric-group { display: flex; border: 1px solid var(--paper-deep); overflow: hidden; }
 .metric-btn {
-  flex: 1; padding: 8px 4px; background: transparent; border: none;
+  flex: 1; padding: 7px 4px; background: transparent; border: none;
   border-right: 1px solid var(--paper-deep);
   font-family: 'DM Mono', monospace; font-size: 9px;
   letter-spacing: 0.08em; color: var(--ink-soft);
@@ -100,7 +100,8 @@ html, body {
 .metric-btn:last-child { border-right: none; }
 .metric-btn.active { background: var(--ink); color: var(--paper); }
 
-.legend-bar { height: 8px; border-radius: 1px; margin-bottom: 6px; }
+.legend-wrap { }
+.legend-bar { height: 8px; border-radius: 1px; margin-bottom: 5px; }
 .legend-ticks {
   display: flex; justify-content: space-between;
   font-size: 9px; color: var(--ink-soft);
@@ -108,78 +109,103 @@ html, body {
 
 .info-card {
   background: var(--paper-warm); border: 1px solid var(--paper-deep);
-  padding: 14px; min-height: 130px;
+  padding: 12px; min-height: 126px;
 }
 .info-name {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 19px; font-weight: 400; margin-bottom: 2px; color: var(--ink);
+  font-size: 18px; font-weight: 400; margin-bottom: 1px; color: var(--ink);
 }
-.info-name-ja { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 10px; }
+.info-name-ja { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.06em; margin-bottom: 9px; }
 .info-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  border-top: 1px solid var(--paper-deep); padding: 4px 0; font-size: 10px;
+  border-top: 1px solid var(--paper-deep); padding: 3px 0; font-size: 10px;
 }
-.info-row-label { color: var(--ink-soft); letter-spacing: 0.05em; }
-.info-row-val { font-size: 12px; font-weight: 400; color: var(--ink); }
+.info-row-label { color: var(--ink-soft); letter-spacing: 0.04em; }
+.info-row-val { font-size: 11px; font-weight: 400; color: var(--ink); }
 .info-row-val.red  { color: var(--red); }
 .info-row-val.teal { color: var(--teal); }
 .info-placeholder {
   color: var(--ink-soft); font-size: 10px; font-style: italic;
-  padding-top: 10px; font-family: 'Cormorant Garamond', serif;
+  padding-top: 8px; font-family: 'Cormorant Garamond', serif;
 }
 
 .nat-stats {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 1px; background: var(--paper-deep); border: 1px solid var(--paper-deep);
 }
-.nat-cell { background: var(--paper); padding: 9px 9px 7px; }
+.nat-cell { background: var(--paper); padding: 8px 8px 6px; }
 .nat-val {
-  font-size: 15px; font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-family: 'Cormorant Garamond', serif;
   font-weight: 600; line-height: 1; margin-bottom: 3px;
 }
 .nat-val.red  { color: var(--red); }
 .nat-val.teal { color: var(--teal); }
-.nat-label { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.05em; line-height: 1.4; }
+.nat-label { font-size: 9px; color: var(--ink-soft); letter-spacing: 0.04em; line-height: 1.4; }
 
 /* ── Map ── */
 .map-area {
   position: relative; overflow: hidden; background: var(--paper);
+  cursor: grab;
 }
+.map-area:active { cursor: grabbing; }
 #map-svg { width: 100%; height: 100%; display: block; }
 
 .pref-path {
-  stroke: var(--paper); stroke-width: 0.4; cursor: pointer;
-  transition: filter 0.12s;
+  stroke: var(--paper); stroke-width: 0.4;
+  cursor: pointer; transition: filter 0.1s;
 }
-.pref-path:hover { stroke: var(--ink); stroke-width: 1.0; filter: brightness(1.1); }
-.pref-path.hovered { stroke: var(--ink); stroke-width: 1.0; }
+.pref-path.hovered {
+  stroke: var(--ink-mid); stroke-width: 0.9;
+  filter: brightness(1.08);
+}
 
+/* ── Tooltip ── */
 .map-tooltip {
   position: absolute; pointer-events: none;
-  background: var(--ink); color: var(--paper);
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  padding: 5px 10px; letter-spacing: 0.04em;
-  white-space: nowrap; opacity: 0; transition: opacity 0.1s;
+  background: rgba(26, 22, 18, 0.92);
+  color: #f5f0e8;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  padding: 7px 12px 8px; letter-spacing: 0.04em;
+  border-radius: 2px;
+  opacity: 0; transition: opacity 0.08s;
+  white-space: nowrap;
+  line-height: 1.7;
 }
+.map-tooltip .tt-name { font-size: 13px; font-family: 'Cormorant Garamond', serif; font-weight: 400; margin-bottom: 1px; }
+.map-tooltip .tt-val  { font-size: 10px; opacity: 0.75; }
+
+/* ── Zoom controls ── */
+.zoom-ctrl {
+  position: absolute; bottom: 16px; right: 16px;
+  display: flex; flex-direction: column; gap: 1px; z-index: 10;
+}
+.zoom-btn {
+  width: 30px; height: 30px;
+  background: var(--paper); border: 1px solid var(--paper-deep);
+  color: var(--ink-mid); font-size: 17px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-family: monospace; transition: background 0.12s;
+}
+.zoom-btn:hover { background: var(--paper-warm); }
 
 .divider { height: 1px; background: var(--paper-deep); }
 
 .paradox {
   background: var(--paper-warm); border-left: 2px solid var(--ink-mid);
-  padding: 11px 11px 11px 13px;
+  padding: 10px 10px 10px 12px;
 }
 .paradox-headline {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 13px; font-style: italic; margin-bottom: 5px; color: var(--ink);
+  font-size: 13px; font-style: italic; margin-bottom: 4px; color: var(--ink);
 }
-.paradox-body { font-size: 9px; color: var(--ink-soft); line-height: 1.7; letter-spacing: 0.04em; }
+.paradox-body { font-size: 9px; color: var(--ink-soft); line-height: 1.7; letter-spacing: 0.03em; }
 .paradox-body strong { color: var(--ink-mid); font-weight: 400; }
 
-/* Loading */
 #loading {
   position: absolute; inset: 0; display: flex;
   align-items: center; justify-content: center;
-  font-size: 12px; color: var(--ink-soft); letter-spacing: 0.08em;
+  font-size: 11px; color: var(--ink-soft); letter-spacing: 0.1em;
+  pointer-events: none;
 }
 </style>
 </head>
@@ -189,7 +215,7 @@ html, body {
   <header class="header">
     <div>
       <div class="header-title">Shrines &amp; <em>Temples</em></div>
-      <div class="header-sub" style="margin-top:4px">Religion in Japan — Prefecture Map</div>
+      <div class="header-sub" style="margin-top:3px">Religion in Japan — Prefecture Map</div>
     </div>
     <div class="header-source">
       Agency for Cultural Affairs<br>
@@ -215,7 +241,7 @@ html, body {
       </div>
     </div>
 
-    <div>
+    <div class="legend-wrap">
       <div class="control-label">Scale</div>
       <div class="legend-bar" id="legend-bar"></div>
       <div class="legend-ticks" id="legend-ticks"><span>Low</span><span>High</span></div>
@@ -255,8 +281,16 @@ html, body {
   </aside>
 
   <main class="map-area" id="map-area">
-    <svg id="map-svg"></svg>
-    <div class="map-tooltip" id="tooltip"></div>
+    <svg id="map-svg"><g id="map-g"></g></svg>
+    <div class="map-tooltip" id="tooltip">
+      <div class="tt-name" id="tt-name"></div>
+      <div class="tt-val"  id="tt-val"></div>
+    </div>
+    <div class="zoom-ctrl">
+      <button class="zoom-btn" id="btn-zoom-in"  title="Zoom in">+</button>
+      <button class="zoom-btn" id="btn-zoom-out" title="Zoom out">−</button>
+      <button class="zoom-btn" id="btn-zoom-reset" title="Reset" style="font-size:13px">⌂</button>
+    </div>
     <div id="loading">Loading…</div>
   </main>
 
@@ -265,11 +299,11 @@ html, body {
 <script>
 'use strict';
 
-// ── Color ramps ───────────────────────────────────────────
+// ── Color ramps (7 stops for finer gradation) ─────────────
 const RAMPS = {
-  shinto:   ['#f5ebe8','#e8c5c0','#d49090','#bb5555','#952222','#6a0808'],
-  buddhist: ['#e8f0ef','#b0d5d0','#6ab5ae','#2a8880','#0f5c52','#063830'],
-  both:     ['#f5f0e0','#e0d498','#c0b048','#9a8a10','#706200','#4a4000']
+  shinto:   ['#f0e4e2','#e0bab6','#cc8f8a','#b55e58','#993028','#7a1510','#560808'],
+  buddhist: ['#e4efee','#b5d5d1','#7db8b2','#449090','#1a6b64','#0a4840','#052e28'],
+  both:     ['#f0edd8','#ddd28a','#c4b448','#a89210','#886a00','#624c00','#403000']
 };
 
 const fmt    = v => v.toLocaleString();
@@ -277,11 +311,10 @@ const fmtDec = v => v.toFixed(1);
 
 let mode   = 'shinto';
 let metric = 'perCapita';
-let geoData, popData, relData, colorScale;
+let geoData, popData, relData;
 let hoveredCode = null;
 
-// ── Custom Mercator projection (same as population map) ───
-// Projects lon/lat → Mercator x/y, then scales to fit SVG
+// ── Custom Mercator projection ────────────────────────────
 let projScale, projTx, projTy;
 
 function toMerc(lon, lat) {
@@ -290,25 +323,22 @@ function toMerc(lon, lat) {
     Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))
   ];
 }
-
 function project(lon, lat) {
   const [mx, my] = toMerc(lon, lat);
   return [projScale * mx + projTx, projScale * -my + projTy];
 }
 
-// Fit projection so all mainland features fill the SVG area with padding
+// Fit projection, filtering out remote-island polygons that skew the view
 function fitProjection(features, W, H, padL, padT, padR, padB) {
   let minX = Infinity, maxX = -Infinity;
   let minY = Infinity, maxY = -Infinity;
 
   features.forEach(feat => {
+    const code = feat.properties.code;
     const g = feat.geometry;
     const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
     polys.forEach(poly => {
-      // Skip remote islands that skew the projection:
-      //  Tokyo (13): exclude polygons centred east of 141°
-      //  Kagoshima (46): exclude polygons centred below 30°N
-      const code = feat.properties.code;
+      // Skip remote-island polygons for Tokyo (east of 141°) and Kagoshima (below 30°N)
       if (code === '13' || code === '46') {
         const ring = poly[0];
         const cx = ring.reduce((s, p) => s + p[0], 0) / ring.length;
@@ -325,7 +355,8 @@ function fitProjection(features, W, H, padL, padT, padR, padB) {
     });
   });
 
-  projScale = 0.95 * Math.min(
+  // Use 98% of available space to make map as large as possible
+  projScale = 0.98 * Math.min(
     (W - padL - padR) / (maxX - minX),
     (H - padT - padB) / (maxY - minY)
   );
@@ -333,7 +364,6 @@ function fitProjection(features, W, H, padL, padT, padR, padB) {
   projTy = (H + padT - padB) / 2 - projScale * (minY + maxY) / 2;
 }
 
-// Convert a GeoJSON feature to an SVG path string
 function featureToPath(feat) {
   const g = feat.geometry;
   const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
@@ -351,25 +381,41 @@ function featureToPath(feat) {
   return d;
 }
 
-// ── Color scale (quantile) ────────────────────────────────
-function buildScale() {
+// ── Color scale — sqrt-transformed linear interpolation ───
+// quantile だと北海道が最薄色グループに押し込まれるため、
+// sqrt スケール（低値側を広げる）で絶対値を連続マッピング
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return [r, g, b];
+}
+function lerpColor(ramp, t) {
+  // t: 0〜1 → ramp の最初〜最後を線形補間
+  const n = ramp.length - 1;
+  const i = Math.min(n - 1, Math.floor(t * n));
+  const u = t * n - i;
+  const [r1,g1,b1] = hexToRgb(ramp[i]);
+  const [r2,g2,b2] = hexToRgb(ramp[i+1]);
+  return `rgb(${Math.round(r1+(r2-r1)*u)},${Math.round(g1+(g2-g1)*u)},${Math.round(b1+(b2-b1)*u)})`;
+}
+
+let _valMin, _valMax;
+
+function buildColorState() {
   const vals = Object.keys(relData.prefectures)
     .map(c => getValue(c))
-    .filter(v => v > 0)
-    .sort((a, b) => a - b);
-  const ramp = RAMPS[mode];
-  const n = ramp.length;
-  // quantile breakpoints
-  colorScale = v => {
-    if (!v) return '#e8e4dc';
-    const idx = vals.indexOf(v) >= 0
-      ? Math.floor(vals.indexOf(v) / vals.length * n)
-      : 0;
-    // use d3-style quantile: bucket by sorted position
-    return ramp[Math.min(n - 1, Math.floor(
-      vals.filter(x => x <= v).length / vals.length * n
-    ))];
-  };
+    .filter(v => v > 0);
+  _valMin = Math.min(...vals);
+  _valMax = Math.max(...vals);
+}
+
+function getColor(code) {
+  const v = getValue(code);
+  if (!v || _valMax <= _valMin) return '#e8e4dc';
+  // sqrt transform: compress high end, expand low end so sparse prefectures are visible
+  const t = Math.sqrt((v - _valMin) / (_valMax - _valMin));
+  return lerpColor(RAMPS[mode], Math.max(0, Math.min(1, t)));
 }
 
 function getValue(code) {
@@ -382,18 +428,11 @@ function getValue(code) {
   return metric === 'perCapita' ? raw / p.total * 10000 : raw;
 }
 
-function getColor(code) {
-  const v = getValue(code);
-  return v ? colorScale(v) : '#e8e4dc';
-}
-
 // ── Legend ────────────────────────────────────────────────
 function updateLegend() {
   document.getElementById('legend-bar').style.background =
     `linear-gradient(to right, ${RAMPS[mode].join(', ')})`;
-  const vals = Object.keys(relData.prefectures)
-    .map(c => getValue(c)).filter(v => v > 0);
-  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const lo = _valMin, hi = _valMax;
   document.getElementById('legend-ticks').innerHTML =
     `<span>${metric === 'perCapita' ? fmtDec(lo) : fmt(Math.round(lo))}</span>` +
     `<span>${metric === 'perCapita' ? fmtDec(hi) : fmt(Math.round(hi))}</span>`;
@@ -431,51 +470,115 @@ function fillNatStats() {
   document.getElementById('nat-buddhist-b').textContent = (n.buddhist.believers / 1e6).toFixed(1) + 'M';
 }
 
-// ── Tooltip ───────────────────────────────────────────────
-const tooltip = document.getElementById('tooltip');
+// ── Tooltip (英語・2行) ───────────────────────────────────
+const tooltip  = document.getElementById('tooltip');
+const ttName   = document.getElementById('tt-name');
+const ttVal    = document.getElementById('tt-val');
 
 function showTooltip(event, code) {
   const r = relData.prefectures[code];
   const p = popData[code];
   if (!r || !p) return;
-  const v = mode === 'shinto'
-    ? (metric === 'perCapita' ? fmtDec(r.shinto.shrines/p.total*10000)+' /10k' : fmt(r.shinto.shrines)+' shrines')
-    : mode === 'buddhist'
-    ? (metric === 'perCapita' ? fmtDec(r.buddhist.temples/p.total*10000)+' /10k' : fmt(r.buddhist.temples)+' temples')
-    : (metric === 'perCapita' ? fmtDec(r.total.orgs/p.total*10000)+' /10k' : fmt(r.total.orgs)+' orgs');
-  tooltip.textContent = `${r.nameJa}  ${v}`;
+  const nameEn = p.nameEn.replace(' Prefecture','').replace(' Metropolis','');
+  const raw = mode === 'shinto'   ? r.shinto.shrines
+            : mode === 'buddhist' ? r.buddhist.temples
+            : r.total.orgs;
+  const label = mode === 'shinto' ? 'shrines' : mode === 'buddhist' ? 'temples' : 'orgs';
+  const valStr = metric === 'perCapita'
+    ? `${fmtDec(raw / p.total * 10000)} per 10k pop.`
+    : `${fmt(raw)} ${label}`;
+  ttName.textContent = nameEn;
+  ttVal.textContent  = valStr;
   tooltip.style.opacity = '1';
   moveTooltip(event);
 }
-
 function moveTooltip(event) {
   const rect = document.getElementById('map-area').getBoundingClientRect();
   let x = event.clientX - rect.left + 14;
-  let y = event.clientY - rect.top  - 34;
-  if (x + 220 > rect.width)  x -= 240;
-  if (y < 0) y += 50;
+  let y = event.clientY - rect.top  - 52;
+  const tw = tooltip.offsetWidth || 180;
+  const th = tooltip.offsetHeight || 52;
+  if (x + tw > rect.width  - 10) x = event.clientX - rect.left - tw - 14;
+  if (y < 10) y = event.clientY - rect.top + 14;
   tooltip.style.left = x + 'px';
   tooltip.style.top  = y + 'px';
 }
 function hideTooltip() { tooltip.style.opacity = '0'; }
 
-// ── Draw / update map ─────────────────────────────────────
-let svgG = null;
+// ── Pan & Zoom ────────────────────────────────────────────
+let panX = 0, panY = 0, scale = 1;
+let baseScale, baseTx, baseTy; // 初期投影パラメータを保存
 
+let isDragging = false, didDrag = false;
+let dragStartX, dragStartY, dragPanX, dragPanY;
+
+function applyTransform() {
+  document.getElementById('map-g').setAttribute(
+    'transform', `translate(${panX},${panY}) scale(${scale})`
+  );
+}
+
+function zoomAt(cx, cy, factor) {
+  const newScale = Math.max(0.8, Math.min(12, scale * factor));
+  const k = newScale / scale;
+  panX = cx - k * (cx - panX);
+  panY = cy - k * (cy - panY);
+  scale = newScale;
+  applyTransform();
+}
+
+function resetView() {
+  panX = 0; panY = 0; scale = 1;
+  applyTransform();
+}
+
+// マウスホイール
+const mapArea = document.getElementById('map-area');
+mapArea.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = mapArea.getBoundingClientRect();
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY > 0 ? 0.85 : 1.18);
+}, { passive: false });
+
+// ドラッグ
+mapArea.addEventListener('mousedown', e => {
+  isDragging = true; didDrag = false;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  dragPanX = panX; dragPanY = panY;
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag = true;
+  panX = dragPanX + dx; panY = dragPanY + dy;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+// ズームボタン
+document.getElementById('btn-zoom-in').addEventListener('click', () => {
+  const rect = mapArea.getBoundingClientRect();
+  zoomAt(rect.width / 2, rect.height / 2, 1.35);
+});
+document.getElementById('btn-zoom-out').addEventListener('click', () => {
+  const rect = mapArea.getBoundingClientRect();
+  zoomAt(rect.width / 2, rect.height / 2, 1 / 1.35);
+});
+document.getElementById('btn-zoom-reset').addEventListener('click', resetView);
+
+// ── Map draw ──────────────────────────────────────────────
 function drawMap() {
   const area = document.getElementById('map-area');
   const W = area.clientWidth;
   const H = area.clientHeight;
-  const svg = document.getElementById('map-svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  document.getElementById('map-svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  // Fit projection using all 47 prefectures (island-filtered internally)
-  fitProjection(geoData.features, W, H, 10, 10, 10, 10);
+  // パディングを小さくして地図を最大化
+  fitProjection(geoData.features, W, H, 6, 6, 6, 6);
 
-  if (svgG) svgG.remove();
-  svgG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  svg.appendChild(svgG);
-
+  const mapG = document.getElementById('map-g');
+  mapG.innerHTML = '';
   const frag = document.createDocumentFragment();
 
   geoData.features.forEach(feat => {
@@ -488,14 +591,17 @@ function drawMap() {
     el.dataset.code = code;
 
     el.addEventListener('mouseenter', function(e) {
+      if (didDrag) return;
       hoveredCode = code;
       document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('hovered'));
       this.classList.add('hovered');
-      this.parentNode.appendChild(this); // raise to top
+      this.parentNode.appendChild(this);
       updateInfoCard(code);
       showTooltip(e, code);
     });
-    el.addEventListener('mousemove', moveTooltip);
+    el.addEventListener('mousemove', e => {
+      if (hoveredCode === code) moveTooltip(e);
+    });
     el.addEventListener('mouseleave', function() {
       hoveredCode = null;
       this.classList.remove('hovered');
@@ -506,15 +612,15 @@ function drawMap() {
     frag.appendChild(el);
   });
 
-  svgG.appendChild(frag);
+  mapG.appendChild(frag);
+  resetView();
 }
 
 function updateColors() {
-  buildScale();
+  buildColorState();
   document.querySelectorAll('.pref-path').forEach(el => {
-    const code = el.dataset.code;
-    el.style.transition = 'fill 0.3s';
-    el.setAttribute('fill', getColor(code));
+    el.style.transition = 'fill 0.28s';
+    el.setAttribute('fill', getColor(el.dataset.code));
   });
   updateLegend();
   if (hoveredCode) updateInfoCard(hoveredCode);
@@ -541,7 +647,11 @@ document.querySelectorAll('.metric-btn').forEach(btn => {
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { drawMap(); buildScale(); updateLegend(); }, 150);
+  resizeTimer = setTimeout(() => {
+    buildColorState();
+    drawMap();
+    updateLegend();
+  }, 150);
 });
 
 // ── Init ──────────────────────────────────────────────────
@@ -553,22 +663,20 @@ Promise.all([
   geoData = geo;
   popData = pop;
   relData = rel;
-
   document.getElementById('loading').style.display = 'none';
-
   fillNatStats();
-  buildScale();
+  buildColorState();
   updateLegend();
   drawMap();
 }).catch(err => {
   console.error(err);
   document.getElementById('loading').innerHTML =
-    `<div style="text-align:center;color:#c0392b;font-size:11px;padding:20px;line-height:2">
+    `<div style="text-align:center;color:#c0392b;font-size:11px;line-height:2.2;padding:20px">
       Failed to load data.<br>
       <code>geo-json/japan.geojson</code><br>
       <code>population-json/pref-pop.json</code><br>
       <code>data/religion-stats.json</code><br><br>
-      Run: <code>python3 -m http.server 8080</code>
+      Run: <code style="background:#f0ebe3;padding:2px 6px">python3 -m http.server 8080</code>
     </div>`;
 });
 </script>
