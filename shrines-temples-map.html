@@ -978,6 +978,10 @@ function updateAll() {
   });
   updateLegend();
   renderRanking();
+  // ツールチップが表示中なら内容を更新
+  if (hoveredCode && tooltip.style.opacity === '1') {
+    fillTooltip(hoveredCode);
+  }
 }
 
 // ── Desktop controls ──────────────────────────────────────
