@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Shrines & Temples — Japan Religion Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -228,16 +228,20 @@ html, body {
    ════════════════════════════════════ */
 @media (max-width: 720px) {
 
-  /* 2行グリッド: header + 全画面map */
+  /* 3行グリッド: header + topbar + 全画面map */
   .shell {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     height: 100vh;
+    height: 100dvh;
   }
 
-  /* ── Header: タイトルのみコンパクトに ── */
+  /* ── Header: safe-area対応（ノッチ・Dynamic Island） ── */
   .header {
-    padding: 10px 14px 8px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+    padding-bottom: 8px;
     gap: 8px;
   }
   .header-title { font-size: 18px; }
@@ -251,17 +255,22 @@ html, body {
   /* ── Desktop ranking: 非表示 ── */
   .ranking { display: none; }
 
-  /* ── 地図: 全画面 ── */
-  .map-area { grid-column: 1; grid-row: 2; }
-
-  /* ── スマホ用トップバー（Display + Metric）── */
+  /* ── モバイルtopbar: グリッドの2行目に配置（map外） ── */
   #mobile-topbar {
-    position: absolute;
-    top: 8px; left: 8px; right: 52px;  /* zoom-ctrlと被らないよう右に余白 */
+    grid-column: 1;
+    grid-row: 2;
+    position: static !important;   /* absoluteを上書き */
+    display: none;                 /* JSで flex に切り替え */
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px 12px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--paper-deep);
     z-index: 20;
-    display: flex; gap: 6px; flex-wrap: wrap;
-    pointer-events: auto;
   }
+
+  /* ── 地図: 3行目（全画面） ── */
+  .map-area { grid-column: 1; grid-row: 3; }
 
   .mb-mode-group {
     display: flex; gap: 4px;
