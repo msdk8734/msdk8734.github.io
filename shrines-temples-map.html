@@ -310,15 +310,18 @@ html, body {
   .mb-metric-btn:last-child { border-right: none; }
   .mb-metric-btn.active { background: var(--ink); color: var(--paper); }
 
-  /* ── スマホ用ツールチップ: 上部中央固定 ── */
+  /* ── スマホ用ツールチップ: 左上固定（日本海の空きスペース） ── */
   .map-tooltip {
-    left: 50% !important;
-    transform: translateX(-50%);
-    top: auto !important;
-    bottom: 80px;   /* ボトムシートの peek 分より上 */
-    min-width: 220px;
-    max-width: 88vw;
+    left: 8px !important;
+    top: 8px !important;
+    transform: none !important;
+    bottom: auto !important;
+    min-width: 180px;
+    max-width: 52vw;
+    font-size: 12px;
   }
+  .tt-name    { font-size: 14px; }
+  .tt-val-num { font-size: 13px; }
 
   /* ── ズームボタン: 右下 ── */
   .zoom-ctrl {
@@ -463,21 +466,21 @@ html, body {
     </div>
   </aside>
 
+  <!-- Mobile topbar (Display + Metric) — グリッド2行目、map-areaの外 -->
+  <div id="mobile-topbar" style="display:none">
+    <div class="mb-mode-group">
+      <button class="mb-mode-btn active" data-mode="shinto">⛩️</button>
+      <button class="mb-mode-btn" data-mode="buddhist">卍</button>
+      <button class="mb-mode-btn" data-mode="both">🏛</button>
+    </div>
+    <div class="mb-metric-group">
+      <button class="mb-metric-btn active" data-metric="perCapita">/10k</button>
+      <button class="mb-metric-btn" data-metric="absolute">#</button>
+    </div>
+  </div>
+
   <!-- Map -->
   <main class="map-area" id="map-area">
-    <!-- Mobile topbar (Display + Metric buttons) -->
-    <div id="mobile-topbar" style="display:none">
-      <div class="mb-mode-group">
-        <button class="mb-mode-btn active" data-mode="shinto">⛩️</button>
-        <button class="mb-mode-btn" data-mode="buddhist">卍</button>
-        <button class="mb-mode-btn" data-mode="both">🏛</button>
-      </div>
-      <div class="mb-metric-group">
-        <button class="mb-metric-btn active" data-metric="perCapita">/10k</button>
-        <button class="mb-metric-btn" data-metric="absolute">#</button>
-      </div>
-    </div>
-
     <svg id="map-svg"><g id="map-g"></g></svg>
     <div class="map-tooltip" id="tooltip">
       <div class="tt-name"    id="tt-name"></div>
@@ -806,11 +809,12 @@ function showTooltipNearRanking(code) {
   });
 }
 
-// Mobile: 地図の下部中央（ボトムシートの上）に固定
+// Mobile: 地図左上（日本海の空きスペース）に固定表示
 function showTooltipMobile(code) {
   fillTooltip(code);
-  tooltip.style.opacity='1';
-  // CSS の bottom: 80px + transform: translateX(-50%) で自動配置
+  tooltip.style.left = '8px';
+  tooltip.style.top  = '8px';
+  tooltip.style.opacity = '1';
 }
 
 function hideTooltip(){tooltip.style.opacity='0';}
