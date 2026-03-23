@@ -353,7 +353,7 @@
       <span class="flabel">List</span>
       <button class="fbtn on" data-f="list" data-v="all">All</button>
       <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
-      <button class="fbtn"    data-f="list" data-v="続100">The Next 100</button>
+      <button class="fbtn"    data-f="list" data-v="continued_100">The Next 100</button>
     </div>
     <div class="hdiv"></div>
     <div class="fgrp">
@@ -416,7 +416,7 @@
     <span class="flabel">List</span>
     <button class="fbtn on" data-f="list" data-v="all">All</button>
     <button class="fbtn"    data-f="list" data-v="100">100</button>
-    <button class="fbtn"    data-f="list" data-v="続100">Next 100</button>
+    <button class="fbtn"    data-f="list" data-v="continued_100">Next 100</button>
     <div class="mob-divider"></div>
     <span class="flabel">Type</span>
     <button class="fbtn on" data-f="type" data-v="all">All</button>
@@ -449,23 +449,23 @@
 <script>
 const TYPE_CFG = {
   'existing':               {color:'#f0c040', glow:true,  size:13, border:null},
-  'reconstructed-wood':     {color:'#4caf7d', glow:false, size:9,  border:null},
-  'reconstructed-concrete': {color:'#4a90c8', glow:false, size:9,  border:null},
+  'reconstructed_wood':     {color:'#4caf7d', glow:false, size:9,  border:null},
+  'reconstructed_concrete': {color:'#4a90c8', glow:false, size:9,  border:null},
   'replica':                {color:'#e07d40', glow:false, size:9,  border:null},
   'ruins':                  {color:'#c8b89a', glow:false, size:8, border:'#7a6a55'},
 };
 const TYPE_EN = {
   'existing':               'Surviving Keep',
-  'reconstructed-wood':     'Reconstructed (Wood)',
-  'reconstructed-concrete': 'Reconstructed (Concrete)',
+  'reconstructed_wood':     'Reconstructed (Wood)',
+  'reconstructed_concrete': 'Reconstructed (Concrete)',
   'replica':                'Replica',
   'ruins':                  'Ruins / Site only',
 };
 
 function makeIcon(c) {
-  const cfg = TYPE_CFG[c.tenshukaku] || TYPE_CFG.ruins;
+  const cfg = TYPE_CFG[c.tower_status] || TYPE_CFG.ruins;
   const s = cfg.size, tot = s + 10, cx = tot / 2, r = s / 2;
-  const isExist = c.tenshukaku === 'existing';
+  const isExist = c.tower_status === 'existing';
   const stroke  = cfg.border || (cfg.color === 'transparent' ? '#8a9aaa' : 'rgba(0,0,0,0.45)');
   const sw      = cfg.color === 'transparent' ? 1.5 : 1;
 
@@ -476,7 +476,7 @@ function makeIcon(c) {
   const ring = isExist
     ? `<circle cx="${cx}" cy="${cx}" r="${r+3}" fill="none" stroke="#f0c040" stroke-width="1.5" opacity="0.4"/>`
     : '';
-  const natRing = c.kokuho
+  const natRing = c.is_national_treasure
     ? `<circle cx="${cx}" cy="${cx}" r="${r-2.5}" fill="none" stroke="#e74c3c" stroke-width="1.5" opacity="0.9"/>`
     : '';
 
@@ -486,27 +486,27 @@ function makeIcon(c) {
 }
 
 function makePopup(c) {
-  const cfg = TYPE_CFG[c.tenshukaku] || TYPE_CFG.ruins;
+  const cfg = TYPE_CFG[c.tower_status] || TYPE_CFG.ruins;
   const dot  = cfg.color === 'transparent'
     ? `background:#c8b89a;border:1.5px solid #7a6a55`
     : `background:${cfg.color}`;
-  const built = c.built == null ? 'Unknown'
-              : c.built < 0    ? `ca. ${Math.abs(c.built)} BC`
-              : `ca. ${c.built}`;
+  const built = c.built_year == null ? 'Unknown'
+              : c.built_year < 0    ? `ca. ${Math.abs(c.built_year)} BC`
+              : `ca. ${c.built_year}`;
 
   return `<div class="pop-head">
     <div class="pop-badges">
-      <span class="pop-badge ${c.list==='100'?'pb-100':'pb-zoku'}">${c.list==='100'?'100 Famous':'The Next 100'} · No.${c.number}</span>
-      ${c.kokuho?'<span class="pop-badge pb-nat">National Treasure</span>':''}
+      <span class="pop-badge ${c.list_type==='100'?'pb-100':'pb-zoku'}">${c.list_type==='100'?'100 Famous':'The Next 100'} · No.${c.number}</span>
+      ${c.is_national_treasure?'<span class="pop-badge pb-nat">National Treasure</span>':''}
     </div>
-    <div class="pop-en">${c.nameEn}</div>
-    <div class="pop-ja">${c.nameJa}</div>
+    <div class="pop-en">${c.name_en}</div>
+    <div class="pop-ja">${c.name_ja}</div>
   </div>
   <div class="pop-body">
-    <div class="pop-row"><span class="pop-lbl">Prefecture</span><span>${c.prefectureEn} (${c.prefecture})</span></div>
-    <div class="pop-row"><span class="pop-lbl">Keep type</span><span class="pop-type"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;${dot};flex-shrink:0"></span>${TYPE_EN[c.tenshukaku]||c.tenshukaku}</span></div>
+    <div class="pop-row"><span class="pop-lbl">Prefecture</span><span>${c.prefecture_en} (${c.prefecture})</span></div>
+    <div class="pop-row"><span class="pop-lbl">Keep type</span><span class="pop-type"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;${dot};flex-shrink:0"></span>${TYPE_EN[c.tower_status]||c.tower_status}</span></div>
     <div class="pop-row"><span class="pop-lbl">Built</span><span>${built}</span></div>
-    ${c.notes?`<div class="pop-note">${c.notes}</div>`:''}
+    ${c.notes_ja?`<div class="pop-note">${c.notes_ja}</div>`:''}
   </div>`;
 }
 
@@ -542,11 +542,11 @@ function applyFilters() {
   const vis = [];
   allCastles.forEach((c,i) => {
     let ok = true;
-    if (fList !== 'all' && c.list !== fList) ok = false;
-    if (fType === 'existing'      && c.tenshukaku !== 'existing')              ok = false;
-    if (fType === 'reconstructed' && !c.tenshukaku.startsWith('reconstructed'))ok = false;
-    if (fType === 'ruins'         && c.tenshukaku !== 'ruins')                 ok = false;
-    if (fNat  && !c.kokuho)                                                    ok = false;
+    if (fList !== 'all' && c.list_type !== fList) ok = false;
+    if (fType === 'existing'      && c.tower_status !== 'existing')              ok = false;
+    if (fType === 'reconstructed' && !c.tower_status.startsWith('reconstructed'))ok = false;
+    if (fType === 'ruins'         && c.tower_status !== 'ruins')                 ok = false;
+    if (fNat  && !c.is_national_treasure)                                                    ok = false;
     if (ok) { layer.addLayer(markers[i]); vis.push(c); }
   });
   updateStats(vis);
@@ -555,8 +555,8 @@ function applyFilters() {
 
 function updateStats(vis) {
   const shown = vis.length;
-  const surv  = vis.filter(c=>c.tenshukaku==='existing').length;
-  const nat   = vis.filter(c=>c.kokuho).length;
+  const surv  = vis.filter(c=>c.tower_status==='existing').length;
+  const nat   = vis.filter(c=>c.is_national_treasure).length;
   const pref  = new Set(vis.map(c=>c.prefecture)).size;
 
   // デスクトップ
@@ -572,10 +572,10 @@ function updateStats(vis) {
   document.getElementById('st-pref-m').textContent  = pref;
 
   const cnt={};
-  vis.forEach(c=>cnt[c.tenshukaku]=(cnt[c.tenshukaku]||0)+1);
+  vis.forEach(c=>cnt[c.tower_status]=(cnt[c.tower_status]||0)+1);
   const ex  = cnt['existing']||0;
-  const rw  = cnt['reconstructed-wood']||0;
-  const rc  = cnt['reconstructed-concrete']||0;
+  const rw  = cnt['reconstructed_wood']||0;
+  const rc  = cnt['reconstructed_concrete']||0;
   const rep = cnt['replica']||0;
   const ru  = cnt['ruins']||0;
 
@@ -597,7 +597,7 @@ function updateStats(vis) {
 function updateRanking(vis) {
   const cm={};
   vis.forEach(c=>{
-    const k=c.prefectureEn+'|'+c.prefecture;
+    const k=c.prefecture_en+'|'+c.prefecture;
     cm[k]=(cm[k]||0)+1;
   });
   const sorted=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
@@ -628,12 +628,12 @@ function updateRanking(vis) {
 }
 
 function buildExList(castles) {
-  const ex=castles.filter(c=>c.tenshukaku==='existing');
+  const ex=castles.filter(c=>c.tower_status==='existing');
   document.getElementById('ex-list').innerHTML=ex.map(c=>
     `<div class="ex-item" data-id="${c.id}">
       <span class="ex-dot"></span>
-      <span>${c.nameEn}</span>
-      <span class="ex-pref">${c.prefectureEn}</span>
+      <span>${c.name_en}</span>
+      <span class="ex-pref">${c.prefecture_en}</span>
     </div>`
   ).join('');
   document.getElementById('ex-list').querySelectorAll('.ex-item').forEach(el=>{
@@ -704,7 +704,7 @@ async function loadData() {
   const data=await loadData();
   allCastles=data;
   data.forEach(c=>{
-    const m=L.marker([c.lat,c.lng],{icon:makeIcon(c),title:c.nameEn});
+    const m=L.marker([c.lat,c.lng],{icon:makeIcon(c),title:c.name_en});
     m.bindPopup(makePopup(c),{maxWidth:300});
     // ② タッチデバイスでもポップアップが確実に開くよう click と touchend 両方に対応
     m.on('click', function() { this.openPopup(); });
