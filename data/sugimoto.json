@@ -27,7 +27,7 @@
     "lat": 34.4598,
     "lng": 133.9985,
     "description": "Renovation of a 17th-century Shinto shrine as part of Benesse's Art House Project. Sugimoto integrated a subterranean glass staircase and underground chamber, connecting the sacred ground above to an ancient void below.",
-    "url": "https://benesse-artsite.jp/en/art/arthouse.html"
+    "url": "https://benesse-artsite.jp/en/story/20210611-1666.html"
   },
   {
     "id": 3,
@@ -42,7 +42,7 @@
     "lat": 34.4478,
     "lng": 133.9941,
     "description": "Permanent outdoor installation at Benesse House Park. A glass sarcophagus-like form filled with light, exploring the boundary between life and death through luminescence.",
-    "url": "https://benesse-artsite.jp/en/art/benessehouse-museum.html"
+    "url": "https://www.sugimotohiroshi.com/coffin-of-light"
   },
   {
     "id": 4,
@@ -57,7 +57,7 @@
     "lat": 34.4476,
     "lng": 133.9938,
     "description": "Permanent outdoor sculpture at Benesse House Park. A large stone form evoking geological deep time, placed in dialogue with the landscape of the Seto Inland Sea.",
-    "url": "https://benesse-artsite.jp/en/art/benessehouse-museum.html"
+    "url": "https://www.sugimotohiroshi.com/new-page-3"
   },
   {
     "id": 5,
@@ -72,7 +72,7 @@
     "lat": 34.448,
     "lng": 133.9942,
     "description": "A fully transparent tea house constructed from optical glass, originally exhibited at Venice and Versailles. Now permanently installed at Benesse House Park, where tea ceremonies are offered to visitors.",
-    "url": "https://benesse-artsite.jp/en/art/benessehouse-park.html"
+    "url": "https://www.sugimotohiroshi.com/the-glass-tea-house-mondrian"
   },
   {
     "id": 6,
@@ -102,7 +102,7 @@
     "lat": 35.1093,
     "lng": 139.0752,
     "description": "New Material Research Laboratory redesigned the entrance hall, main lobby, and key exhibition spaces of this mountainside museum overlooking Sagami Bay, reopened in 2017 after a major renovation.",
-    "url": "https://www.moaart.or.jp/en/"
+    "url": "https://www.moaart.or.jp/en/about/architecture/"
   },
   {
     "id": 8,
@@ -147,7 +147,7 @@
     "lat": 37.8109,
     "lng": -122.3668,
     "description": "A stainless steel sculpture approximately 21 meters tall, installed on a hilltop overlooking San Francisco Bay. Also functions as a sundial. Sugimoto's first large-scale public sculpture in the United States.",
-    "url": "https://ybisf.com/"
+    "url": "https://www.sfartscommission.org/our-role-impact/press-room/press-release/new-monumental-sculpture-internationally-renowned-artist"
   },
   {
     "id": 11,
@@ -192,7 +192,7 @@
     "lat": 43.635,
     "lng": 5.4216,
     "description": "A permanent sculpture based on a mathematical model of a surface of revolution with constant negative curvature, placed on a shallow reflecting pool in the vineyard's art trail alongside works by Tadao Ando, Louise Bourgeois, and others.",
-    "url": "https://www.chateau-la-coste.com/en/art-architecture/"
+    "url": "https://chateau-la-coste.com/en/art-architecture/artists-architects.html"
   },
   {
     "id": 14,
@@ -207,6 +207,6 @@
     "lat": 43.4414,
     "lng": 11.3902,
     "description": "A permanent installation inside an 18th-century chapel at the winery. Mathematical model sculptures in marble and stainless steel are placed within the sacred space, meditating on zero as both nothingness and origin.",
-    "url": "https://www.castellodiama.com/en/art/"
+    "url": "https://castellodiama.com/en/the-artists/hiroshi-sugimoto/"
   }
 ]
