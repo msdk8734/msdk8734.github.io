@@ -107,9 +107,13 @@
   .card-preview.newspaper-theme {
     background: linear-gradient(135deg, #1a1610 0%, #2a2118 50%, #1e1a12 100%);
   }
-  /* ── Sugimoto theme ── */
   .card-preview.sugimoto-theme {
     background: linear-gradient(135deg, #141414 0%, #1c1a18 50%, #1a1710 100%);
+    overflow: hidden;
+  }
+  /* ── Castle theme ── */
+  .card-preview.castle-theme {
+    background: linear-gradient(160deg, #f5e8c8 0%, #e8c87a 40%, #c8783a 75%, #8b2020 100%);
     overflow: hidden;
   }
 
@@ -158,10 +162,7 @@
   }
 
   /* ── Population map ── */
-  .population-rings {
-    position: absolute;
-    inset: 0;
-  }
+  .population-rings { position: absolute; inset: 0; }
   .ring {
     position: absolute;
     border: 3px solid rgba(31,122,67,0.35);
@@ -169,20 +170,8 @@
   }
 
   /* ── Pyramid ── */
-  .pyramid-preview {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .pyramid-bars {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    padding: 16px 24px;
-  }
+  .pyramid-preview { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .pyramid-bars { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 16px 24px; }
   .pb-row { display: flex; align-items: center; justify-content: center; gap: 0; }
   .pb-m { height: 10px; background: #4a90d9; border-radius: 3px 0 0 3px; opacity: 0.75; }
   .pb-center { width: 8px; flex-shrink: 0; }
@@ -202,104 +191,46 @@
 
   /* ── Ramen ── */
   .card-preview .preview-icon { font-size: 56px; opacity: 0.9; }
-  .mini-bars {
-    position: absolute;
-    bottom: 28px;
-    right: 28px;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-  }
+  .mini-bars { position: absolute; bottom: 28px; right: 28px; display: flex; align-items: flex-end; gap: 3px; }
   .mini-bars .mb { width: 4px; border-radius: 2px 2px 0 0; opacity: 0.55; background: #1a6fc4; }
 
   /* ── PV Ranking ── */
   .pvranking-preview {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    padding: 16px 20px;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; gap: 5px; padding: 16px 20px;
   }
   .pvr-row { display: flex; align-items: center; gap: 6px; }
-  .pvr-rank {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 8px; color: #3a3830;
-    width: 14px; text-align: right; flex-shrink: 0;
-  }
+  .pvr-rank { font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: #3a3830; width: 14px; text-align: right; flex-shrink: 0; }
   .pvr-bars { display: flex; align-items: center; flex: 1; height: 10px; }
   .pvr-own { height: 100%; background: #c8a97e; border-radius: 2px 0 0 2px; opacity: 0.85; }
   .pvr-ext { height: 100%; background: #7a8c82; border-radius: 0 2px 2px 0; opacity: 0.75; }
-  .pvranking-label {
-    position: absolute; top: 12px; right: 14px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 8px;
-    letter-spacing: 0.1em; color: #c8a97e; opacity: 0.7; text-transform: uppercase;
-  }
+  .pvranking-label { position: absolute; top: 12px; right: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.1em; color: #c8a97e; opacity: 0.7; text-transform: uppercase; }
 
   /* ── Newspaper ── */
-  .newspaper-bars-preview {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    display: flex; align-items: flex-end; gap: 3px; padding: 0 18px;
-  }
+  .newspaper-bars-preview { position: absolute; bottom: 0; left: 0; right: 0; display: flex; align-items: flex-end; gap: 3px; padding: 0 18px; }
   .newspaper-bars-preview .nb { flex: 1; border-radius: 2px 2px 0 0; }
-  .newspaper-peak-line {
-    position: absolute; left: 18px; right: 18px; height: 1px;
-    background: #c8a96e; opacity: 0.5; top: 62px;
-    border-top: 1px dashed #c8a96e;
-  }
-  .newspaper-label {
-    position: absolute; top: 14px; left: 18px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
-    letter-spacing: 0.12em; color: #c8a96e; opacity: 0.8;
-  }
+  .newspaper-peak-line { position: absolute; left: 18px; right: 18px; height: 1px; background: #c8a96e; opacity: 0.5; top: 62px; border-top: 1px dashed #c8a96e; }
+  .newspaper-label { position: absolute; top: 14px; left: 18px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #c8a96e; opacity: 0.8; }
 
   /* ── Sugimoto map preview ── */
-  .sugimoto-preview {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
+  .sugimoto-preview { position: absolute; inset: 0; overflow: hidden; }
+  .sgmt-label { position: absolute; top: 13px; left: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.14em; color: #c8b89a; opacity: 0.75; text-transform: uppercase; }
 
-  /* label */
-  .sgmt-label {
-    position: absolute;
-    top: 13px; left: 16px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 8px; letter-spacing: 0.14em;
-    color: #c8b89a; opacity: 0.75;
-    text-transform: uppercase;
-  }
-
+  /* ── Castle map preview ── */
+  .castle-preview { position: absolute; inset: 0; overflow: hidden; }
+  .castle-label { position: absolute; bottom: 10px; right: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.14em; color: #fff; opacity: 0.75; text-transform: uppercase; }
 
   /* ── Card body ── */
   .card-body { padding: 18px 20px 20px; }
-  .card-tag {
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-    font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
-    color: #b0b0b0; margin-bottom: 6px;
-  }
+  .card-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #b0b0b0; margin-bottom: 6px; }
   .card-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; line-height: 1.3; }
   .card-desc { font-size: 13px; color: #888; line-height: 1.5; }
-  .card-meta {
-    display: flex; align-items: center; gap: 12px;
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid #f2f2f2; flex-wrap: wrap;
-  }
-  .meta-tag {
-    font-size: 11px; font-weight: 500; color: #aaa;
-    background: #f7f7f7; padding: 3px 8px; border-radius: 4px;
-  }
-  .card-arrow {
-    font-size: 13px; color: #ccc; margin-left: auto;
-    transition: color 0.2s, transform 0.2s;
-  }
+  .card-meta { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f2f2f2; flex-wrap: wrap; }
+  .meta-tag { font-size: 11px; font-weight: 500; color: #aaa; background: #f7f7f7; padding: 3px 8px; border-radius: 4px; }
+  .card-arrow { font-size: 13px; color: #ccc; margin-left: auto; transition: color 0.2s, transform 0.2s; }
   .card:hover .card-arrow { color: #666; transform: translateX(3px); }
 
-  footer {
-    max-width: 960px; margin: 0 auto;
-    padding: 0 40px 40px; font-size: 12px; color: #ccc;
-  }
+  footer { max-width: 960px; margin: 0 auto; padding: 0 40px 40px; font-size: 12px; color: #ccc; }
 
   @media (max-width: 640px) {
     header { padding: 40px 20px 28px; }
@@ -422,61 +353,35 @@
   <a class="card" href="sugimoto-map.html">
     <div class="card-preview sugimoto-theme">
       <div class="sugimoto-preview">
-        <!-- World map SVG background -->
         <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <!-- Graticule lines -->
           <line x1="0" y1="90" x2="300" y2="90" stroke="#c8b89a" stroke-width="0.3" opacity="0.1"/>
           <line x1="150" y1="0" x2="150" y2="180" stroke="#c8b89a" stroke-width="0.3" opacity="0.08"/>
           <line x1="0" y1="45" x2="300" y2="45" stroke="#c8b89a" stroke-width="0.2" opacity="0.06"/>
           <line x1="0" y1="135" x2="300" y2="135" stroke="#c8b89a" stroke-width="0.2" opacity="0.06"/>
           <line x1="75" y1="0" x2="75" y2="180" stroke="#c8b89a" stroke-width="0.2" opacity="0.05"/>
           <line x1="225" y1="0" x2="225" y2="180" stroke="#c8b89a" stroke-width="0.2" opacity="0.05"/>
-
-          <!-- North America -->
           <path d="M 18,28 L 22,24 L 30,22 L 38,20 L 48,22 L 56,26 L 60,32 L 58,40 L 54,46 L 56,52 L 52,58 L 46,62 L 40,66 L 34,70 L 28,68 L 22,62 L 18,54 L 14,44 L 16,34 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Central America -->
           <path d="M 40,66 L 46,68 L 50,74 L 48,80 L 42,78 L 38,72 Z" fill="#c8b89a" opacity="0.11"/>
-          <!-- South America -->
           <path d="M 56,80 L 64,76 L 72,78 L 78,84 L 80,96 L 78,108 L 72,118 L 64,124 L 56,122 L 50,114 L 48,102 L 50,90 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Greenland -->
           <path d="M 52,10 L 58,8 L 66,10 L 68,16 L 64,20 L 56,20 L 50,16 Z" fill="#c8b89a" opacity="0.1"/>
-          <!-- Europe -->
           <path d="M 128,28 L 136,24 L 144,26 L 148,32 L 146,38 L 140,42 L 132,40 L 126,34 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Scandinavia -->
           <path d="M 134,18 L 140,14 L 146,16 L 148,22 L 144,26 L 136,24 L 132,20 Z" fill="#c8b89a" opacity="0.11"/>
-          <!-- UK -->
           <path d="M 122,28 L 126,26 L 128,30 L 126,34 L 122,32 Z" fill="#c8b89a" opacity="0.1"/>
-          <!-- Africa -->
           <path d="M 128,52 L 138,48 L 148,50 L 154,58 L 156,70 L 154,84 L 148,96 L 140,102 L 130,100 L 122,92 L 118,78 L 118,64 L 122,56 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Russia / North Asia -->
           <path d="M 148,20 L 160,16 L 180,14 L 200,16 L 216,20 L 224,26 L 218,32 L 200,34 L 180,32 L 164,30 L 152,28 Z" fill="#c8b89a" opacity="0.12"/>
-          <!-- Middle East -->
           <path d="M 148,50 L 158,46 L 166,48 L 170,56 L 164,62 L 154,60 L 148,54 Z" fill="#c8b89a" opacity="0.11"/>
-          <!-- India -->
           <path d="M 170,56 L 178,54 L 184,60 L 184,70 L 180,78 L 172,80 L 166,74 L 164,64 Z" fill="#c8b89a" opacity="0.12"/>
-          <!-- Southeast Asia -->
           <path d="M 210,62 L 220,58 L 228,62 L 230,70 L 224,74 L 214,72 L 208,68 Z" fill="#c8b89a" opacity="0.11"/>
-          <!-- China / East Asia -->
           <path d="M 200,34 L 216,32 L 228,36 L 234,44 L 232,54 L 222,58 L 208,56 L 198,50 L 196,40 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Japan archipelago (subtle) -->
           <path d="M 238,40 L 242,38 L 246,40 L 246,44 L 242,46 L 238,44 Z" fill="#c8b89a" opacity="0.18"/>
           <path d="M 244,46 L 248,44 L 250,48 L 248,52 L 244,50 Z" fill="#c8b89a" opacity="0.16"/>
-          <!-- Korea -->
           <path d="M 230,42 L 234,40 L 236,44 L 234,48 L 230,46 Z" fill="#c8b89a" opacity="0.13"/>
-          <!-- Australia -->
           <path d="M 224,106 L 238,100 L 252,102 L 260,110 L 258,122 L 248,130 L 234,132 L 222,126 L 216,116 Z" fill="#c8b89a" opacity="0.12"/>
-          <!-- New Zealand -->
           <path d="M 266,122 L 270,118 L 272,124 L 268,128 Z" fill="#c8b89a" opacity="0.1"/>
-          <!-- Indonesia -->
           <path d="M 220,80 L 230,78 L 238,80 L 240,86 L 232,88 L 222,86 Z" fill="#c8b89a" opacity="0.1"/>
           <path d="M 242,82 L 252,80 L 256,84 L 252,88 L 242,86 Z" fill="#c8b89a" opacity="0.1"/>
-
-          <!-- Arc lines: Japan → USA and Japan → Europe (very faint great-circle-ish) -->
           <path d="M 242,42 Q 200,20 58,70" stroke="#c8b89a" stroke-width="0.6" fill="none" opacity="0.12" stroke-dasharray="3,3"/>
           <path d="M 242,42 Q 196,30 140,34" stroke="#c8b89a" stroke-width="0.6" fill="none" opacity="0.12" stroke-dasharray="3,3"/>
-
-          <!-- Work dots -->
-          <!-- Japan: Enoura, Naoshima x4, MOA, Oak Omotesando, Otemachi -->
           <circle cx="241" cy="43" r="3.5" fill="#c8b89a" opacity="0.9"/>
           <circle cx="238" cy="47" r="3" fill="#c8b89a" opacity="0.85"/>
           <circle cx="240" cy="45" r="2.5" fill="#b89ac8" opacity="0.8"/>
@@ -486,10 +391,8 @@
           <circle cx="244" cy="42" r="2" fill="#c8b89a" opacity="0.7"/>
           <circle cx="244" cy="44" r="2" fill="#c8b89a" opacity="0.7"/>
           <circle cx="245" cy="46" r="2" fill="#b89ac8" opacity="0.7"/>
-          <!-- USA: San Francisco, Washington DC -->
           <circle cx="30" cy="52" r="3" fill="#9ab8c8" opacity="0.85"/>
           <circle cx="52" cy="55" r="2.5" fill="#c8b89a" opacity="0.8"/>
-          <!-- Europe: Provence, Tuscany -->
           <circle cx="138" cy="46" r="2.5" fill="#9ab8c8" opacity="0.8"/>
           <circle cx="144" cy="50" r="2.5" fill="#b89ac8" opacity="0.8"/>
         </svg>
@@ -509,82 +412,153 @@
     </div>
   </a>
 
-  <!-- 5. Tokyo Heatmap -->
+  <!-- 5. Japanese Castle Map -->
+  <a class="card" href="castles-map.html">
+    <div class="card-preview castle-theme">
+      <div class="castle-preview">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sky gradient layer -->
+          <rect x="0" y="0" width="300" height="180" fill="url(#sky)"/>
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fde8a0"/>
+              <stop offset="55%" stop-color="#f5a84a"/>
+              <stop offset="100%" stop-color="#c84820"/>
+            </linearGradient>
+            <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8dcc8"/>
+              <stop offset="100%" stop-color="#c8b890"/>
+            </linearGradient>
+            <linearGradient id="roof1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a2840"/>
+              <stop offset="100%" stop-color="#0a1828"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Sun disc -->
+          <circle cx="220" cy="42" r="28" fill="#ffe040" opacity="0.9"/>
+          <circle cx="220" cy="42" r="22" fill="#ffd020" opacity="0.7"/>
+
+          <!-- Cloud wisps -->
+          <ellipse cx="60" cy="28" rx="32" ry="10" fill="#fff" opacity="0.45"/>
+          <ellipse cx="80" cy="24" rx="22" ry="8" fill="#fff" opacity="0.35"/>
+          <ellipse cx="42" cy="32" rx="18" ry="7" fill="#fff" opacity="0.3"/>
+          <ellipse cx="248" cy="72" rx="25" ry="8" fill="#fff" opacity="0.3"/>
+          <ellipse cx="265" cy="68" rx="18" ry="6" fill="#fff" opacity="0.25"/>
+
+          <!-- Cherry blossom tree (left) -->
+          <!-- trunk -->
+          <rect x="28" y="108" width="7" height="40" rx="3" fill="#7a4820"/>
+          <rect x="25" y="120" width="5" height="18" rx="2" fill="#7a4820" transform="rotate(-20 25 120)"/>
+          <!-- blossoms -->
+          <circle cx="32" cy="100" r="22" fill="#f8b8c8" opacity="0.85"/>
+          <circle cx="18" cy="108" r="15" fill="#f8a0b8" opacity="0.8"/>
+          <circle cx="46" cy="105" r="16" fill="#f8c0d0" opacity="0.8"/>
+          <circle cx="30" cy="88"  r="14" fill="#fcb8c8" opacity="0.75"/>
+          <!-- petal dots -->
+          <circle cx="22" cy="96"  r="2" fill="#fff" opacity="0.7"/>
+          <circle cx="38" cy="94"  r="2" fill="#fff" opacity="0.7"/>
+          <circle cx="44" cy="108" r="2" fill="#fff" opacity="0.65"/>
+          <circle cx="16" cy="112" r="2" fill="#fff" opacity="0.65"/>
+          <circle cx="32" cy="80"  r="2" fill="#fff" opacity="0.6"/>
+
+          <!-- Cherry blossom tree (right, smaller) -->
+          <rect x="264" y="118" width="6" height="32" rx="2" fill="#7a4820"/>
+          <circle cx="268" cy="110" r="17" fill="#f8b0c4" opacity="0.8"/>
+          <circle cx="256" cy="116" r="12" fill="#f8a0b8" opacity="0.75"/>
+          <circle cx="278" cy="114" r="13" fill="#fcc0d0" opacity="0.75"/>
+          <circle cx="260" cy="106" r="2" fill="#fff" opacity="0.65"/>
+          <circle cx="275" cy="108" r="2" fill="#fff" opacity="0.65"/>
+
+          <!-- Falling petals -->
+          <ellipse cx="88"  cy="68"  rx="3" ry="2" fill="#f8b8c8" opacity="0.7" transform="rotate(-30 88 68)"/>
+          <ellipse cx="118" cy="52"  rx="3" ry="2" fill="#fcc0cc" opacity="0.65" transform="rotate(20 118 52)"/>
+          <ellipse cx="160" cy="44"  rx="3" ry="2" fill="#f8b0c0" opacity="0.6" transform="rotate(-15 160 44)"/>
+          <ellipse cx="200" cy="78"  rx="3" ry="2" fill="#fcc8d4" opacity="0.6" transform="rotate(40 200 78)"/>
+          <ellipse cx="240" cy="54"  rx="3" ry="2" fill="#f8b8c8" opacity="0.55" transform="rotate(-25 240 54)"/>
+          <ellipse cx="108" cy="88"  rx="2" ry="1.5" fill="#fcc0cc" opacity="0.6" transform="rotate(15 108 88)"/>
+          <ellipse cx="76"  cy="130" rx="2" ry="1.5" fill="#f8b8c8" opacity="0.55" transform="rotate(-10 76 130)"/>
+
+          <!-- Stone wall base -->
+          <path d="M 60,180 L 60,148 Q 62,144 70,142 L 230,142 Q 238,144 240,148 L 240,180 Z" fill="#b8a880" opacity="0.9"/>
+          <!-- Stone texture lines -->
+          <line x1="64" y1="155" x2="236" y2="155" stroke="#a09870" stroke-width="0.8" opacity="0.5"/>
+          <line x1="64" y1="163" x2="236" y2="163" stroke="#a09870" stroke-width="0.8" opacity="0.5"/>
+          <line x1="64" y1="171" x2="236" y2="171" stroke="#a09870" stroke-width="0.8" opacity="0.5"/>
+          <line x1="100" y1="148" x2="100" y2="180" stroke="#a09870" stroke-width="0.8" opacity="0.4"/>
+          <line x1="140" y1="148" x2="140" y2="180" stroke="#a09870" stroke-width="0.8" opacity="0.4"/>
+          <line x1="180" y1="148" x2="180" y2="180" stroke="#a09870" stroke-width="0.8" opacity="0.4"/>
+          <line x1="220" y1="148" x2="220" y2="180" stroke="#a09870" stroke-width="0.8" opacity="0.4"/>
+
+          <!-- Main tower (tenshu) — 3 tiers -->
+          <!-- Tier 1 (bottom) -->
+          <rect x="88" y="128" width="124" height="22" fill="url(#wall)"/>
+          <path d="M 84,128 L 88,116 L 212,116 L 216,128 Z" fill="#1a2840"/>
+          <path d="M 86,128 L 90,117 L 210,117 L 214,128 Z" fill="#243450" opacity="0.6"/>
+          <!-- Tier 1 eaves curve -->
+          <path d="M 84,128 Q 150,134 216,128" fill="none" stroke="#0a1828" stroke-width="1.5"/>
+          <!-- Tier 2 (middle) -->
+          <rect x="100" y="100" width="100" height="20" fill="url(#wall)"/>
+          <path d="M 96,100 L 100,89 L 200,89 L 204,100 Z" fill="#1a2840"/>
+          <path d="M 98,100 Q 150,105 202,100" fill="none" stroke="#0a1828" stroke-width="1.5"/>
+          <!-- Tier 3 (top) -->
+          <rect x="114" y="74" width="72" height="18" fill="url(#wall)"/>
+          <path d="M 110,74 L 114,64 L 186,64 L 190,74 Z" fill="#1a2840"/>
+          <path d="M 112,74 Q 150,79 188,74" fill="none" stroke="#0a1828" stroke-width="1.5"/>
+
+          <!-- Windows (tier 1) -->
+          <rect x="108" y="120" width="12" height="10" rx="1" fill="#1a2840" opacity="0.8"/>
+          <rect x="144" y="120" width="12" height="10" rx="1" fill="#1a2840" opacity="0.8"/>
+          <rect x="180" y="120" width="12" height="10" rx="1" fill="#1a2840" opacity="0.8"/>
+          <!-- Windows (tier 2) -->
+          <rect x="122" y="93" width="10" height="8" rx="1" fill="#1a2840" opacity="0.8"/>
+          <rect x="168" y="93" width="10" height="8" rx="1" fill="#1a2840" opacity="0.8"/>
+          <!-- Windows (tier 3) -->
+          <rect x="142" y="68" width="8" height="7" rx="1" fill="#1a2840" opacity="0.8"/>
+          <rect x="158" y="68" width="8" height="7" rx="1" fill="#1a2840" opacity="0.8"/>
+
+          <!-- Finial / sorin (top spike) -->
+          <rect x="148" y="56" width="4" height="10" fill="#c8901a"/>
+          <polygon points="150,48 153,57 147,57" fill="#e8b030"/>
+
+          <!-- Golden shachi (ornamental fish) on ridge ends -->
+          <!-- Left shachi -->
+          <path d="M 110,64 Q 106,58 108,54 Q 111,56 112,60 Q 114,56 116,58 Q 114,63 110,64 Z" fill="#e8b030"/>
+          <!-- Right shachi -->
+          <path d="M 190,64 Q 194,58 192,54 Q 189,56 188,60 Q 186,56 184,58 Q 186,63 190,64 Z" fill="#e8b030"/>
+
+          <!-- Red-orange shimmer/reflection in water below wall -->
+          <rect x="0" y="162" width="300" height="18" fill="#c84820" opacity="0.25"/>
+          <rect x="0" y="168" width="300" height="12" fill="#e87030" opacity="0.15"/>
+
+          <!-- Label -->
+          <text x="289" y="175" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="8" fill="#fff" opacity="0.7" letter-spacing="0.12em">200 CASTLES</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Japanese Castle Map</div>
+      <div class="card-desc">All 200 castles from the 100 Famous Castles and The Next 100 lists, mapped with Leaflet.js. Filter by type, surviving keeps, and National Treasures.</div>
+      <div class="card-meta">
+        <span class="meta-tag">Leaflet.js</span>
+        <span class="meta-tag">Castles</span>
+        <span class="meta-tag">History</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 6. Tokyo Heatmap -->
   <a class="card" href="tokyo-heatmap.html">
     <div class="card-preview heatmap-theme">
       <div class="heat-grid">
-        <div class="heat-cell" style="background:#6ea9d9"></div>
-        <div class="heat-cell" style="background:#8bc1d8"></div>
-        <div class="heat-cell" style="background:#b7ddc9"></div>
-        <div class="heat-cell" style="background:#f2efaf"></div>
-        <div class="heat-cell" style="background:#f9d585"></div>
-        <div class="heat-cell" style="background:#f4bb74"></div>
-        <div class="heat-cell" style="background:#ec8c6d"></div>
-        <div class="heat-cell" style="background:#db6f68"></div>
-        <div class="heat-cell" style="background:#c85966"></div>
-        <div class="heat-cell" style="background:#b14e65"></div>
-        <div class="heat-cell" style="background:#964d67"></div>
-        <div class="heat-cell" style="background:#7a5b7e"></div>
-        <div class="heat-cell" style="background:#88bddb"></div>
-        <div class="heat-cell" style="background:#a5d2d0"></div>
-        <div class="heat-cell" style="background:#d8e7bf"></div>
-        <div class="heat-cell" style="background:#f8e7a0"></div>
-        <div class="heat-cell" style="background:#f8cf7b"></div>
-        <div class="heat-cell" style="background:#f0ad6d"></div>
-        <div class="heat-cell" style="background:#e38468"></div>
-        <div class="heat-cell" style="background:#d66966"></div>
-        <div class="heat-cell" style="background:#c25967"></div>
-        <div class="heat-cell" style="background:#aa5067"></div>
-        <div class="heat-cell" style="background:#8a5672"></div>
-        <div class="heat-cell" style="background:#745f83"></div>
-        <div class="heat-cell" style="background:#9cc8d8"></div>
-        <div class="heat-cell" style="background:#b9dbca"></div>
-        <div class="heat-cell" style="background:#e3eab8"></div>
-        <div class="heat-cell" style="background:#fbe0a3"></div>
-        <div class="heat-cell" style="background:#f8c67f"></div>
-        <div class="heat-cell" style="background:#eea870"></div>
-        <div class="heat-cell" style="background:#df8169"></div>
-        <div class="heat-cell" style="background:#d36767"></div>
-        <div class="heat-cell" style="background:#be5967"></div>
-        <div class="heat-cell" style="background:#a65268"></div>
-        <div class="heat-cell" style="background:#885a76"></div>
-        <div class="heat-cell" style="background:#716489"></div>
-        <div class="heat-cell" style="background:#aacfd5"></div>
-        <div class="heat-cell" style="background:#c7e0c8"></div>
-        <div class="heat-cell" style="background:#ececb7"></div>
-        <div class="heat-cell" style="background:#fcd8a0"></div>
-        <div class="heat-cell" style="background:#f7c07f"></div>
-        <div class="heat-cell" style="background:#eb9f70"></div>
-        <div class="heat-cell" style="background:#dd7b69"></div>
-        <div class="heat-cell" style="background:#d06467"></div>
-        <div class="heat-cell" style="background:#bb5868"></div>
-        <div class="heat-cell" style="background:#a05269"></div>
-        <div class="heat-cell" style="background:#855b79"></div>
-        <div class="heat-cell" style="background:#6f678d"></div>
-        <div class="heat-cell" style="background:#bad6d2"></div>
-        <div class="heat-cell" style="background:#d4e4c5"></div>
-        <div class="heat-cell" style="background:#f1edb6"></div>
-        <div class="heat-cell" style="background:#fdd39f"></div>
-        <div class="heat-cell" style="background:#f6ba7f"></div>
-        <div class="heat-cell" style="background:#ea9a70"></div>
-        <div class="heat-cell" style="background:#dc786a"></div>
-        <div class="heat-cell" style="background:#ce6268"></div>
-        <div class="heat-cell" style="background:#b85769"></div>
-        <div class="heat-cell" style="background:#9d536c"></div>
-        <div class="heat-cell" style="background:#825c7d"></div>
-        <div class="heat-cell" style="background:#6d6a90"></div>
-        <div class="heat-cell" style="background:#c5dbd0"></div>
-        <div class="heat-cell" style="background:#dde7c3"></div>
-        <div class="heat-cell" style="background:#f5efb6"></div>
-        <div class="heat-cell" style="background:#fdcf9d"></div>
-        <div class="heat-cell" style="background:#f5b67d"></div>
-        <div class="heat-cell" style="background:#e99670"></div>
-        <div class="heat-cell" style="background:#db766a"></div>
-        <div class="heat-cell" style="background:#cc6169"></div>
-        <div class="heat-cell" style="background:#b6586a"></div>
-        <div class="heat-cell" style="background:#9b546d"></div>
-        <div class="heat-cell" style="background:#815d80"></div>
-        <div class="heat-cell" style="background:#6c6c93"></div>
+        <div class="heat-cell" style="background:#6ea9d9"></div><div class="heat-cell" style="background:#8bc1d8"></div><div class="heat-cell" style="background:#b7ddc9"></div><div class="heat-cell" style="background:#f2efaf"></div><div class="heat-cell" style="background:#f9d585"></div><div class="heat-cell" style="background:#f4bb74"></div><div class="heat-cell" style="background:#ec8c6d"></div><div class="heat-cell" style="background:#db6f68"></div><div class="heat-cell" style="background:#c85966"></div><div class="heat-cell" style="background:#b14e65"></div><div class="heat-cell" style="background:#964d67"></div><div class="heat-cell" style="background:#7a5b7e"></div>
+        <div class="heat-cell" style="background:#88bddb"></div><div class="heat-cell" style="background:#a5d2d0"></div><div class="heat-cell" style="background:#d8e7bf"></div><div class="heat-cell" style="background:#f8e7a0"></div><div class="heat-cell" style="background:#f8cf7b"></div><div class="heat-cell" style="background:#f0ad6d"></div><div class="heat-cell" style="background:#e38468"></div><div class="heat-cell" style="background:#d66966"></div><div class="heat-cell" style="background:#c25967"></div><div class="heat-cell" style="background:#aa5067"></div><div class="heat-cell" style="background:#8a5672"></div><div class="heat-cell" style="background:#745f83"></div>
+        <div class="heat-cell" style="background:#9cc8d8"></div><div class="heat-cell" style="background:#b9dbca"></div><div class="heat-cell" style="background:#e3eab8"></div><div class="heat-cell" style="background:#fbe0a3"></div><div class="heat-cell" style="background:#f8c67f"></div><div class="heat-cell" style="background:#eea870"></div><div class="heat-cell" style="background:#df8169"></div><div class="heat-cell" style="background:#d36767"></div><div class="heat-cell" style="background:#be5967"></div><div class="heat-cell" style="background:#a65268"></div><div class="heat-cell" style="background:#885a76"></div><div class="heat-cell" style="background:#716489"></div>
+        <div class="heat-cell" style="background:#aacfd5"></div><div class="heat-cell" style="background:#c7e0c8"></div><div class="heat-cell" style="background:#ececb7"></div><div class="heat-cell" style="background:#fcd8a0"></div><div class="heat-cell" style="background:#f7c07f"></div><div class="heat-cell" style="background:#eb9f70"></div><div class="heat-cell" style="background:#dd7b69"></div><div class="heat-cell" style="background:#d06467"></div><div class="heat-cell" style="background:#bb5868"></div><div class="heat-cell" style="background:#a05269"></div><div class="heat-cell" style="background:#855b79"></div><div class="heat-cell" style="background:#6f678d"></div>
+        <div class="heat-cell" style="background:#bad6d2"></div><div class="heat-cell" style="background:#d4e4c5"></div><div class="heat-cell" style="background:#f1edb6"></div><div class="heat-cell" style="background:#fdd39f"></div><div class="heat-cell" style="background:#f6ba7f"></div><div class="heat-cell" style="background:#ea9a70"></div><div class="heat-cell" style="background:#dc786a"></div><div class="heat-cell" style="background:#ce6268"></div><div class="heat-cell" style="background:#b85769"></div><div class="heat-cell" style="background:#9d536c"></div><div class="heat-cell" style="background:#825c7d"></div><div class="heat-cell" style="background:#6d6a90"></div>
+        <div class="heat-cell" style="background:#c5dbd0"></div><div class="heat-cell" style="background:#dde7c3"></div><div class="heat-cell" style="background:#f5efb6"></div><div class="heat-cell" style="background:#fdcf9d"></div><div class="heat-cell" style="background:#f5b67d"></div><div class="heat-cell" style="background:#e99670"></div><div class="heat-cell" style="background:#db766a"></div><div class="heat-cell" style="background:#cc6169"></div><div class="heat-cell" style="background:#b6586a"></div><div class="heat-cell" style="background:#9b546d"></div><div class="heat-cell" style="background:#815d80"></div><div class="heat-cell" style="background:#6c6c93"></div>
       </div>
     </div>
     <div class="card-body">
@@ -600,7 +574,7 @@
     </div>
   </a>
 
-  <!-- 6. Ramen Map -->
+  <!-- 7. Ramen Map -->
   <a class="card" href="ramen-map.html">
     <div class="card-preview ramen-theme">
       <span class="preview-icon">🍜</span>
@@ -627,7 +601,7 @@
     </div>
   </a>
 
-  <!-- 7. PV Ranking -->
+  <!-- 8. PV Ranking -->
   <a class="card" href="page-view-ranking.html">
     <div class="card-preview pvranking-theme">
       <div class="pvranking-label">Top 10 · Q4 2025</div>
@@ -657,7 +631,7 @@
     </div>
   </a>
 
-  <!-- 8. Newspaper -->
+  <!-- 9. Newspaper -->
   <a class="card" href="newspaper-circulation.html">
     <div class="card-preview newspaper-theme">
       <div class="newspaper-peak-line"></div>
