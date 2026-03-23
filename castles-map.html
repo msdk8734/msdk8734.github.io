@@ -249,17 +249,105 @@
 
     /* ── Mobile ── */
     @media (max-width:680px) {
+      /* ① 明るくする */
+      .leaflet-tile { filter: brightness(0.88) saturate(0.55) hue-rotate(185deg); }
+
       header { height:48px; }
       .filter-wrap { display:none; }
+
+      /* 地図領域をボトムパネルの高さ分だけ縮める */
+      .main { margin-bottom: 0; }
+      #map  { margin-bottom: 0; }
+
+      /* ② サイドバーをボトムパネルに */
       .sidebar {
-        position:fixed; bottom:0; left:0; right:0;
-        width:100%; flex:0 0 190px;
-        border-left:none; border-top:1px solid var(--border);
-        flex-direction:row;
-        z-index:500;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        width: 100%;
+        height: auto;
+        flex: none;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        flex-direction: column;
+        z-index: 600;
+        max-height: 50vh;
       }
-      .sidebar-inner { display:flex; flex-direction:row; overflow-x:auto; overflow-y:hidden; }
-      .s-section { min-width:200px; border-bottom:none; border-right:1px solid rgba(201,146,26,0.1); }
+
+      /* モバイルではスクロールなし・縦構造 */
+      .sidebar-inner {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 50vh;
+      }
+
+      /* ランキングと現存天守リストは非表示 */
+      .s-section.mob-hide { display: none; }
+
+      /* モバイル専用: フィルターバー（ボトムパネル内） */
+      .mob-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.65rem 0.85rem 0.5rem;
+        border-bottom: 1px solid rgba(201,146,26,0.1);
+      }
+      .mob-filters .fbtn {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.65rem;
+        min-height: 34px;  /* タッチしやすく */
+      }
+      .mob-filters .flabel {
+        width: 100%;
+        font-size: 0.58rem;
+        color: var(--silver);
+        margin-bottom: 0.1rem;
+      }
+
+      /* Stats をコンパクトに横並び */
+      .mob-stats-row {
+        display: flex;
+        gap: 0.35rem;
+        padding: 0.55rem 0.85rem;
+        border-bottom: 1px solid rgba(201,146,26,0.1);
+      }
+      .mob-stat {
+        flex: 1;
+        text-align: center;
+        background: rgba(201,146,26,0.05);
+        border: 1px solid rgba(201,146,26,0.13);
+        border-radius: 3px;
+        padding: 0.3rem 0.2rem;
+      }
+      .mob-stat .stat-n { font-size: 1rem; }
+      .mob-stat .stat-l { font-size: 0.5rem; }
+
+      /* Legend をコンパクト横並び */
+      .mob-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 0.75rem;
+        padding: 0.5rem 0.85rem 0.65rem;
+      }
+      .mob-leg-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.62rem;
+        color: rgba(245,240,232,0.82);
+        white-space: nowrap;
+      }
+      .mob-leg-cnt {
+        color: var(--silver);
+        font-size: 0.58rem;
+        margin-left: 0.15rem;
+      }
+    }
+
+    /* デスクトップでモバイル専用要素を非表示 */
+    @media (min-width:681px) {
+      .mob-filters, .mob-stats-row, .mob-legend { display: none; }
     }
   </style>
 </head>
@@ -295,9 +383,41 @@
 <div class="main">
   <div id="map"></div>
 
-  <aside class="sidebar">
+<aside class="sidebar">
     <div class="sidebar-inner">
 
+      <!-- ③ モバイル専用フィルターバー -->
+      <div class="mob-filters">
+        <span class="flabel">List</span>
+        <button class="fbtn on" data-f="list" data-v="all">All</button>
+        <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
+        <button class="fbtn"    data-f="list" data-v="続100">The Next 100</button>
+        <span class="flabel" style="margin-top:0.3rem">Type</span>
+        <button class="fbtn on" data-f="type" data-v="all">All</button>
+        <button class="fbtn"    data-f="type" data-v="existing">Surviving</button>
+        <button class="fbtn"    data-f="type" data-v="reconstructed">Reconstructed</button>
+        <button class="fbtn"    data-f="type" data-v="ruins">Ruins</button>
+        <button class="fbtn" id="nat-btn-m">Nat. Treasure only</button>
+      </div>
+
+      <!-- ③ モバイル専用 Stats（横並び） -->
+      <div class="mob-stats-row">
+        <div class="mob-stat"><div class="stat-n" id="st-shown-m">—</div><div class="stat-l">Shown</div></div>
+        <div class="mob-stat"><div class="stat-n" id="st-surv-m">—</div><div class="stat-l">Surviving</div></div>
+        <div class="mob-stat"><div class="stat-n" id="st-nat-m">—</div><div class="stat-l">Nat. Treas.</div></div>
+        <div class="mob-stat"><div class="stat-n" id="st-pref-m">—</div><div class="stat-l">Prefs.</div></div>
+      </div>
+
+      <!-- ③ モバイル専用 Legend（横並び） -->
+      <div class="mob-legend">
+        <div class="mob-leg-item"><span class="leg-dot" style="background:#f0c040;box-shadow:0 0 4px rgba(240,192,64,0.5)"></span>Surviving<span class="mob-leg-cnt" id="mlc-ex">—</span></div>
+        <div class="mob-leg-item"><span class="leg-dot" style="background:#4caf7d"></span>Wood<span class="mob-leg-cnt" id="mlc-rw">—</span></div>
+        <div class="mob-leg-item"><span class="leg-dot" style="background:#4a90c8"></span>Concrete<span class="mob-leg-cnt" id="mlc-rc">—</span></div>
+        <div class="mob-leg-item"><span class="leg-dot" style="background:#e07d40"></span>Replica<span class="mob-leg-cnt" id="mlc-rep">—</span></div>
+        <div class="mob-leg-item"><span class="leg-dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins<span class="mob-leg-cnt" id="mlc-ru">—</span></div>
+      </div>
+
+      <!-- デスクトップ用 Stats -->
       <div class="s-section">
         <div class="s-title">Stats</div>
         <div class="stats-grid">
@@ -308,6 +428,7 @@
         </div>
       </div>
 
+      <!-- デスクトップ用 Legend -->
       <div class="s-section">
         <div class="s-title">Legend</div>
         <div class="leg-item"><span class="leg-dot" style="background:#f0c040;box-shadow:0 0 5px rgba(240,192,64,0.5)"></span>Surviving Keep<span class="leg-cnt" id="lc-ex">—</span></div>
@@ -317,12 +438,13 @@
         <div class="leg-item"><span class="leg-dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins / Site only<span class="leg-cnt" id="lc-ru">—</span></div>
       </div>
 
-      <div class="s-section">
+      <!-- ランキングと現存天守はモバイルで非表示 -->
+      <div class="s-section mob-hide">
         <div class="s-title">The 12 Surviving Keeps</div>
         <div id="ex-list"></div>
       </div>
 
-      <div class="s-section">
+      <div class="s-section mob-hide">
         <div class="s-title">By Prefecture</div>
         <div id="rank-list"></div>
       </div>
@@ -423,17 +545,44 @@ function applyFilters() {
 }
 
 function updateStats(vis) {
-  document.getElementById('st-shown').textContent = vis.length;
-  document.getElementById('st-surv').textContent  = vis.filter(c=>c.tenshukaku==='existing').length;
-  document.getElementById('st-nat').textContent   = vis.filter(c=>c.kokuho).length;
-  document.getElementById('st-pref').textContent  = new Set(vis.map(c=>c.prefecture)).size;
+  const shown = vis.length;
+  const surv  = vis.filter(c=>c.tenshukaku==='existing').length;
+  const nat   = vis.filter(c=>c.kokuho).length;
+  const pref  = new Set(vis.map(c=>c.prefecture)).size;
+
+  // デスクトップ
+  document.getElementById('st-shown').textContent = shown;
+  document.getElementById('st-surv').textContent  = surv;
+  document.getElementById('st-nat').textContent   = nat;
+  document.getElementById('st-pref').textContent  = pref;
+
+  // モバイル
+  document.getElementById('st-shown-m').textContent = shown;
+  document.getElementById('st-surv-m').textContent  = surv;
+  document.getElementById('st-nat-m').textContent   = nat;
+  document.getElementById('st-pref-m').textContent  = pref;
+
   const cnt={};
   vis.forEach(c=>cnt[c.tenshukaku]=(cnt[c.tenshukaku]||0)+1);
-  document.getElementById('lc-ex').textContent  = cnt['existing']||0;
-  document.getElementById('lc-rw').textContent  = cnt['reconstructed-wood']||0;
-  document.getElementById('lc-rc').textContent  = cnt['reconstructed-concrete']||0;
-  document.getElementById('lc-rep').textContent = cnt['replica']||0;
-  document.getElementById('lc-ru').textContent  = cnt['ruins']||0;
+  const ex  = cnt['existing']||0;
+  const rw  = cnt['reconstructed-wood']||0;
+  const rc  = cnt['reconstructed-concrete']||0;
+  const rep = cnt['replica']||0;
+  const ru  = cnt['ruins']||0;
+
+  // デスクトップ Legend
+  document.getElementById('lc-ex').textContent  = ex;
+  document.getElementById('lc-rw').textContent  = rw;
+  document.getElementById('lc-rc').textContent  = rc;
+  document.getElementById('lc-rep').textContent = rep;
+  document.getElementById('lc-ru').textContent  = ru;
+
+  // モバイル Legend
+  document.getElementById('mlc-ex').textContent  = ex;
+  document.getElementById('mlc-rw').textContent  = rw;
+  document.getElementById('mlc-rc').textContent  = rc;
+  document.getElementById('mlc-rep').textContent = rep;
+  document.getElementById('mlc-ru').textContent  = ru;
 }
 
 function updateRanking(vis) {
@@ -508,9 +657,19 @@ function bindFilters(root) {
   });
 }
 bindFilters(document.getElementById('fw'));
+// モバイルフィルター（ボトムパネル内）も同じ関数でバインド
+const mobFilters = document.querySelector('.mob-filters');
+if (mobFilters) bindFilters(mobFilters);
 
 document.getElementById('nat-btn').addEventListener('click',function(){
   fNat=!fNat; this.classList.toggle('on',fNat); applyFilters();
+});
+const natBtnM = document.getElementById('nat-btn-m');
+if (natBtnM) natBtnM.addEventListener('click',function(){
+  fNat=!fNat;
+  this.classList.toggle('on',fNat);
+  document.getElementById('nat-btn').classList.toggle('on',fNat);
+  applyFilters();
 });
 
 // Load
@@ -538,6 +697,8 @@ async function loadData() {
   data.forEach(c=>{
     const m=L.marker([c.lat,c.lng],{icon:makeIcon(c),title:c.nameEn});
     m.bindPopup(makePopup(c),{maxWidth:300});
+    // ② タッチデバイスでもポップアップが確実に開くよう click と touchend 両方に対応
+    m.on('click', function() { this.openPopup(); });
     markers.push(m);
     layer.addLayer(m);
   });
