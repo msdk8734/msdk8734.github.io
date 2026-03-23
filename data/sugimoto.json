@@ -208,5 +208,35 @@
     "lng": 11.3902,
     "description": "A permanent installation inside an 18th-century chapel at the winery. Mathematical model sculptures in marble and stainless steel are placed within the sacred space, meditating on zero as both nothingness and origin.",
     "url": "https://castellodiama.com/en/the-artists/hiroshi-sugimoto/"
+  },
+  {
+    "id": 15,
+    "name": "Japan Society Atrium Garden",
+    "nameJa": "ジャパン・ソサエティー アトリウム・ガーデン",
+    "year": 2017,
+    "location": "Japan Society, 333 East 47th Street, New York, NY, USA",
+    "locationJa": "ジャパン・ソサエティー、ニューヨーク",
+    "country": "USA",
+    "category": "architecture",
+    "access": "public",
+    "lat": 40.7525,
+    "lng": -73.9683,
+    "description": "Renovation of the Japan Society's atrium and interior garden by New Material Research Laboratory. A serene stone garden and water feature transform the building's central space, bringing a meditative Japanese sensibility to Midtown Manhattan.",
+    "url": "https://japansociety.org/"
+  },
+  {
+    "id": 16,
+    "name": "Time Exposed",
+    "nameJa": "タイム・エクスポーズド",
+    "year": 2006,
+    "location": "Benesse House Museum, Naoshima, Kagawa, Japan",
+    "locationJa": "香川県直島町 ベネッセハウスミュージアム",
+    "country": "Japan",
+    "category": "permanent-collection",
+    "access": "public",
+    "lat": 34.4452,
+    "lng": 133.9909,
+    "description": "A permanent installation of Sugimoto's 'Seascapes' series photographs at Benesse House Museum. The works are displayed as a unified site-specific presentation, in dialogue with the actual sea view visible through the museum's windows.",
+    "url": "https://benesse-artsite.jp/en/art/benessehouse-museum.html"
   }
 ]
