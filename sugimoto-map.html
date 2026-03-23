@@ -586,6 +586,12 @@ function applyFilters() {
     const vis = filtered.includes(w);
     if (vis) { if (!map.hasLayer(markers[w.id])) markers[w.id].addTo(map); }
     else       { if (map.hasLayer(markers[w.id])) map.removeLayer(markers[w.id]); }
+    // sync east duplicate for USA works
+    const eastKey = 'east_' + w.id;
+    if (markers[eastKey]) {
+      if (vis) { if (!map.hasLayer(markers[eastKey])) markers[eastKey].addTo(map); }
+      else     { if (map.hasLayer(markers[eastKey])) map.removeLayer(markers[eastKey]); }
+    }
   });
 
   buildList(filtered);
@@ -629,6 +635,20 @@ fetch('data/sugimoto.json')
       });
       marker.addTo(map);
       markers[w.id] = marker;
+
+      // For USA works: also place a duplicate marker at lng+360 so they're
+      // visible when navigating eastward from Japan (within maxBounds 280°)
+      if (w.country === 'USA') {
+        const markerEast = L.marker([w.lat, w.lng + 360], { icon: makeIcon(w) });
+        markerEast.bindPopup(popupHTML(w), {
+          maxWidth: 280, minWidth: 260,
+          className: 'sugimoto-popup',
+          closeButton: true
+        });
+        markerEast.on('click', () => selectWork(w.id));
+        markerEast.addTo(map);
+        markers['east_' + w.id] = markerEast;
+      }
     });
     document.querySelector('.count-badge').innerHTML =
       `<span id="visible-count">${works.length}</span> / ${works.length} works`;
