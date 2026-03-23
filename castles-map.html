@@ -314,7 +314,7 @@
         <div class="leg-item"><span class="leg-dot" style="background:#4caf7d"></span>Reconstructed (Wood)<span class="leg-cnt" id="lc-rw">—</span></div>
         <div class="leg-item"><span class="leg-dot" style="background:#4a90c8"></span>Reconstructed (Concrete)<span class="leg-cnt" id="lc-rc">—</span></div>
         <div class="leg-item"><span class="leg-dot" style="background:#e07d40"></span>Replica<span class="leg-cnt" id="lc-rep">—</span></div>
-        <div class="leg-item"><span class="leg-dot" style="background:transparent;border:1.5px solid #8a9aaa"></span>Ruins / Site only<span class="leg-cnt" id="lc-ru">—</span></div>
+        <div class="leg-item"><span class="leg-dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins / Site only<span class="leg-cnt" id="lc-ru">—</span></div>
       </div>
 
       <div class="s-section">
@@ -337,7 +337,7 @@ const TYPE_CFG = {
   'reconstructed-wood':     {color:'#4caf7d', glow:false, size:9,  border:null},
   'reconstructed-concrete': {color:'#4a90c8', glow:false, size:9,  border:null},
   'replica':                {color:'#e07d40', glow:false, size:9,  border:null},
-  'ruins':                  {color:'transparent', glow:false, size:8, border:'#8a9aaa'},
+  'ruins':                  {color:'#c8b89a', glow:false, size:8, border:'#7a6a55'},
 };
 const TYPE_EN = {
   'existing':               'Surviving Keep',
@@ -373,7 +373,7 @@ function makeIcon(c) {
 function makePopup(c) {
   const cfg = TYPE_CFG[c.tenshukaku] || TYPE_CFG.ruins;
   const dot  = cfg.color === 'transparent'
-    ? `background:transparent;border:1.5px solid #8a9aaa`
+    ? `background:#c8b89a;border:1.5px solid #7a6a55`
     : `background:${cfg.color}`;
   const built = c.built == null ? 'Unknown'
               : c.built < 0    ? `ca. ${Math.abs(c.built)} BC`
