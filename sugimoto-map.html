@@ -307,36 +307,6 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.7);
     }
 
-    /* ── LEGEND ──────────────────────────────────────── */
-    #legend {
-      position: absolute;
-      top: 16px; right: 16px;
-      z-index: 800;
-      background: rgba(28,28,28,0.94);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 12px 14px;
-      backdrop-filter: blur(8px);
-    }
-    .legend-title {
-      font-size: 8px; font-weight: 400;
-      letter-spacing: 0.22em; text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .legend-row {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 5px;
-    }
-    .legend-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .legend-text {
-      font-size: 10px; font-weight: 300;
-      color: var(--text-secondary);
-      letter-spacing: 0.04em;
-    }
     .legend-sep {
       height: 1px; background: var(--border);
       margin: 8px 0;
@@ -409,8 +379,6 @@
   </div>
 
   <div id="map">
-    <div id="legend">
-      <div class="legend-title">Category</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--cat-architecture)"></div><span class="legend-text">Architecture</span></div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--cat-sculpture)"></div><span class="legend-text">Sculpture</span></div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--cat-installation)"></div><span class="legend-text">Installation</span></div>
