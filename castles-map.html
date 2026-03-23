@@ -268,7 +268,7 @@
 <header>
   <div class="h-title">
     <h1>🏯 Japanese Castle Map</h1>
-    <div class="sub">100 Famous Castles &amp; Zoku 100 Famous Castles</div>
+    <div class="sub">100 Famous Castles &amp; The Next 100</div>
   </div>
   <div class="hdiv"></div>
 
@@ -277,7 +277,7 @@
       <span class="flabel">List</span>
       <button class="fbtn on" data-f="list" data-v="all">All</button>
       <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
-      <button class="fbtn"    data-f="list" data-v="続100">Zoku 100</button>
+      <button class="fbtn"    data-f="list" data-v="続100">The Next 100</button>
     </div>
     <div class="hdiv"></div>
     <div class="fgrp">
@@ -381,7 +381,7 @@ function makePopup(c) {
 
   return `<div class="pop-head">
     <div class="pop-badges">
-      <span class="pop-badge ${c.list==='100'?'pb-100':'pb-zoku'}">${c.list==='100'?'100 Famous':'Zoku 100'} · No.${c.number}</span>
+      <span class="pop-badge ${c.list==='100'?'pb-100':'pb-zoku'}">${c.list==='100'?'100 Famous':'The Next 100'} · No.${c.number}</span>
       ${c.kokuho?'<span class="pop-badge pb-nat">National Treasure</span>':''}
     </div>
     <div class="pop-en">${c.nameEn}</div>
@@ -444,15 +444,23 @@ function updateRanking(vis) {
   });
   const sorted=Object.entries(cm).sort((a,b)=>b[1]-a[1]);
   const max=sorted[0]?.[1]||1;
-  document.getElementById('rank-list').innerHTML=sorted.map(([k,n],i)=>{
+
+  // 同率ランキング: 同じ件数には同じ順位を付ける
+  let rank=1;
+  const rows = sorted.map(([k,n], i)=>{
+    if (i>0 && n < sorted[i-1][1]) rank = i+1;
     const [en,ja]=k.split('|');
-    return `<div class="rank-item" data-pref="${ja}">
-      <span class="rank-n">${i+1}</span>
-      <span class="rank-nm">${en}</span>
-      <div class="rank-bar-w"><div class="rank-bar" style="width:${n/max*100}%"></div></div>
-      <span class="rank-c">${n}</span>
-    </div>`;
-  }).join('');
+    return {rank, en, ja, n};
+  });
+
+  document.getElementById('rank-list').innerHTML=rows.map(r=>`
+    <div class="rank-item" data-pref="${r.ja}">
+      <span class="rank-n">${r.rank}</span>
+      <span class="rank-nm">${r.en}</span>
+      <div class="rank-bar-w"><div class="rank-bar" style="width:${r.n/max*100}%"></div></div>
+      <span class="rank-c">${r.n}</span>
+    </div>`).join('');
+
   document.getElementById('rank-list').querySelectorAll('.rank-item').forEach(el=>{
     el.addEventListener('click',()=>{
       const pts=allCastles.filter(c=>c.prefecture===el.dataset.pref);
