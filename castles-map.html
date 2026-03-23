@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日本名城マップ — 100名城・続100名城</title>
+
+  <!-- Leaflet.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- Leaflet MarkerCluster -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #1a1209;
+      --parchment: #f5f0e8;
+      --gold: #c9921a;
+      --gold-light: #e8b84b;
+      --silver: #8a9aaa;
+      --red: #c0392b;
+      --panel-bg: rgba(20, 15, 8, 0.92);
+      --border-gold: rgba(201, 146, 26, 0.4);
+      --jade: #2d6e4e;
+      --indigo: #2c3e6b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Serif JP', serif;
+      background: var(--ink);
+      color: var(--parchment);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      position: relative;
+      z-index: 1000;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .header-title {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .header-title h1 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .header-title span {
+      font-size: 0.7rem;
+      color: var(--silver);
+      letter-spacing: 0.05em;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border-gold);
+      flex-shrink: 0;
+    }
+
+    /* ── フィルターバー ── */
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .filter-label {
+      font-size: 0.65rem;
+      color: var(--silver);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border-gold);
+      color: var(--parchment);
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .filter-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .filter-btn:hover:not(.active) {
+      border-color: var(--gold-light);
+      color: var(--gold-light);
+    }
+
+    /* 凡例ドット */
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* ── メインレイアウト ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── 地図 ── */
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #0d1117;
+    }
+
+    /* Leafletのタイルを暗めに */
+    .leaflet-tile {
+      filter: brightness(0.75) saturate(0.6) hue-rotate(180deg);
+    }
+
+    /* ── サイドパネル ── */
+    .sidebar {
+      width: 260px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border-gold);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar-section {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(201, 146, 26, 0.15);
+    }
+
+    .sidebar-section h3 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 0.7rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    /* 凡例 */
+    .legend-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: rgba(245, 240, 232, 0.8);
+      cursor: pointer;
+      transition: color 0.15s;
+      padding: 0.2rem 0;
+      border-radius: 2px;
+    }
+
+    .legend-item:hover { color: var(--gold-light); }
+
+    .legend-item .count {
+      margin-left: auto;
+      color: var(--silver);
+      font-size: 0.65rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .legend-item.dimmed { opacity: 0.35; }
+
+    /* 都道府県ランキング */
+    .ranking-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.75rem 1rem;
+    }
+
+    .ranking-list::-webkit-scrollbar { width: 3px; }
+    .ranking-list::-webkit-scrollbar-track { background: transparent; }
+    .ranking-list::-webkit-scrollbar-thumb { background: var(--border-gold); }
+
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(201, 146, 26, 0.08);
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 2px;
+    }
+
+    .ranking-item:hover {
+      background: rgba(201, 146, 26, 0.07);
+      padding-left: 4px;
+    }
+
+    .rank-num {
+      width: 18px;
+      text-align: right;
+      font-size: 0.6rem;
+      color: var(--silver);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .rank-name {
+      font-size: 0.72rem;
+      color: var(--parchment);
+      flex: 1;
+    }
+
+    .rank-bar-wrap {
+      width: 60px;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .rank-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 2px;
+    }
+
+    .rank-count {
+      font-size: 0.65rem;
+      color: var(--gold);
+      width: 20px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 統計 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .stat-box {
+      background: rgba(201, 146, 26, 0.06);
+      border: 1px solid rgba(201, 146, 26, 0.15);
+      border-radius: 3px;
+      padding: 0.5rem 0.6rem;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.4rem;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+      color: var(--silver);
+      margin-top: 0.2rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── ポップアップ ── */
+    .leaflet-popup-content-wrapper {
+      background: rgba(20, 15, 8, 0.96);
+      border: 1px solid var(--border-gold);
+      border-radius: 3px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      color: var(--parchment);
+      font-family: 'Noto Serif JP', serif;
+    }
+
+    .leaflet-popup-tip { background: rgba(20, 15, 8, 0.96); }
+
+    .leaflet-popup-content {
+      margin: 0;
+      min-width: 220px;
+    }
+
+    .popup-header {
+      padding: 0.8rem 1rem 0.6rem;
+      border-bottom: 1px solid rgba(201, 146, 26, 0.2);
+    }
+
+    .popup-list-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.06em;
+    }
+
+    .badge-100 { background: var(--gold); color: var(--ink); }
+    .badge-続100 { background: rgba(201, 146, 26, 0.2); color: var(--gold-light); border: 1px solid var(--border-gold); }
+
+    .popup-name-ja {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--parchment);
+      line-height: 1.2;
+    }
+
+    .popup-name-en {
+      font-size: 0.65rem;
+      color: var(--silver);
+      margin-top: 0.15rem;
+    }
+
+    .popup-body {
+      padding: 0.6rem 1rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .popup-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+    }
+
+    .popup-row-label {
+      color: var(--silver);
+      width: 52px;
+      flex-shrink: 0;
+      font-size: 0.63rem;
+    }
+
+    .popup-type-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.68rem;
+    }
+
+    .popup-notes {
+      font-size: 0.67rem;
+      color: rgba(245, 240, 232, 0.65);
+      line-height: 1.5;
+      border-top: 1px solid rgba(201, 146, 26, 0.1);
+      margin-top: 0.25rem;
+      padding-top: 0.4rem;
+    }
+
+    .kokuho-badge {
+      display: inline-block;
+      background: rgba(192, 57, 43, 0.15);
+      border: 1px solid rgba(192, 57, 43, 0.4);
+      color: #e74c3c;
+      font-size: 0.6rem;
+      padding: 0.05rem 0.35rem;
+      border-radius: 2px;
+    }
+
+    /* ── クラスター ── */
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large {
+      background-clip: padding-box;
+    }
+
+    .marker-cluster-small { background-color: rgba(201, 146, 26, 0.2); }
+    .marker-cluster-medium { background-color: rgba(201, 146, 26, 0.3); }
+    .marker-cluster-large { background-color: rgba(201, 146, 26, 0.4); }
+
+    .marker-cluster-small div,
+    .marker-cluster-medium div,
+    .marker-cluster-large div {
+      background-color: rgba(201, 146, 26, 0.7);
+      color: #fff;
+      font-family: 'Noto Serif JP', serif;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ── 現存天守リスト ── */
+    .existing-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .existing-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: rgba(245, 240, 232, 0.8);
+      cursor: pointer;
+      padding: 0.25rem 0.3rem;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+
+    .existing-item:hover {
+      background: rgba(201, 146, 26, 0.1);
+      color: var(--gold-light);
+    }
+
+    .existing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      flex-shrink: 0;
+      box-shadow: 0 0 4px rgba(232, 184, 75, 0.6);
+    }
+
+    .existing-pref {
+      color: var(--silver);
+      font-size: 0.62rem;
+      margin-left: auto;
+    }
+
+    /* ── スマホ対応 ── */
+    @media (max-width: 700px) {
+      header { padding: 0 0.75rem; gap: 0.75rem; height: 50px; }
+      .header-title h1 { font-size: 0.95rem; }
+      .filters { display: none; }
+      .sidebar { 
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 220px;
+        border-left: none;
+        border-top: 1px solid var(--border-gold);
+        z-index: 1000;
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      .sidebar-section { min-width: 200px; border-bottom: none; border-right: 1px solid rgba(201, 146, 26, 0.15); }
+      .ranking-list { min-width: 260px; }
+      #map { height: calc(100vh - 50px - 220px); }
+    }
+
+    /* ── モバイル向けフィルターボタン ── */
+    .mobile-filter-btn {
+      display: none;
+    }
+    @media (max-width: 700px) {
+      .mobile-filter-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        background: transparent;
+        border: 1px solid var(--border-gold);
+        color: var(--gold-light);
+        font-size: 1rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+    }
+
+    /* ── フィルターモーダル（モバイル） ── */
+    .filter-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      align-items: flex-end;
+    }
+    .filter-modal.open { display: flex; }
+    .filter-modal-content {
+      background: var(--panel-bg);
+      border-top: 1px solid var(--border-gold);
+      width: 100%;
+      padding: 1.5rem 1.25rem 2rem;
+    }
+    .filter-modal-content h3 {
+      font-family: 'Shippori Mincho', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+    .filter-modal-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .filter-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--silver);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header>
+  <div class="header-title">
+    <h1>日本名城マップ</h1>
+    <span>100名城 · 続100名城</span>
+  </div>
+  <div class="header-divider"></div>
+
+  <!-- フィルター（デスクトップ） -->
+  <div class="filters" id="filters-desktop">
+    <div class="filter-group">
+      <span class="filter-label">リスト</span>
+      <button class="filter-btn active" data-filter="list" data-value="all">全て</button>
+      <button class="filter-btn" data-filter="list" data-value="100">100名城</button>
+      <button class="filter-btn" data-filter="list" data-value="続100">続100名城</button>
+    </div>
+    <div class="header-divider"></div>
+    <div class="filter-group">
+      <span class="filter-label">天守</span>
+      <button class="filter-btn active" data-filter="type" data-value="all">全て</button>
+      <button class="filter-btn" data-filter="type" data-value="existing">現存</button>
+      <button class="filter-btn" data-filter="type" data-value="reconstructed">復元</button>
+      <button class="filter-btn" data-filter="type" data-value="ruins">城跡</button>
+    </div>
+    <div class="header-divider"></div>
+    <div class="filter-group">
+      <button class="filter-btn" id="kokuho-toggle">国宝のみ</button>
+    </div>
+  </div>
+
+  <button class="mobile-filter-btn" id="mobile-filter-open">☰</button>
+</header>
+
+<!-- モバイルフィルターモーダル -->
+<div class="filter-modal" id="filter-modal">
+  <div class="filter-modal-content" style="position:relative">
+    <button class="filter-modal-close" id="filter-modal-close">✕</button>
+    <h3>フィルター</h3>
+    <div class="filter-modal-row">
+      <button class="filter-btn active" data-filter="list" data-value="all">全て</button>
+      <button class="filter-btn" data-filter="list" data-value="100">100名城</button>
+      <button class="filter-btn" data-filter="list" data-value="続100">続100名城</button>
+    </div>
+    <div class="filter-modal-row">
+      <button class="filter-btn active" data-filter="type" data-value="all">全ての天守</button>
+      <button class="filter-btn" data-filter="type" data-value="existing">現存</button>
+      <button class="filter-btn" data-filter="type" data-value="reconstructed">復元</button>
+      <button class="filter-btn" data-filter="type" data-value="ruins">城跡</button>
+    </div>
+    <div class="filter-modal-row">
+      <button class="filter-btn" id="kokuho-toggle-m">国宝のみ</button>
+    </div>
+  </div>
+</div>
+
+<!-- メイン -->
+<div class="main">
+  <div id="map"></div>
+
+  <aside class="sidebar">
+    <!-- 統計 -->
+    <div class="sidebar-section">
+      <h3>統計</h3>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-total">200</div>
+          <div class="stat-label">表示中</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-existing">12</div>
+          <div class="stat-label">現存天守</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-kokuho">5</div>
+          <div class="stat-label">国宝</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-pref">47</div>
+          <div class="stat-label">都道府県</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 凡例 -->
+    <div class="sidebar-section">
+      <h3>凡例</h3>
+      <div class="legend-items">
+        <div class="legend-item" data-type="existing">
+          <span class="legend-dot" style="background:#f0c040;box-shadow:0 0 4px rgba(240,192,64,0.5)"></span>
+          現存天守
+          <span class="count">12</span>
+        </div>
+        <div class="legend-item" data-type="reconstructed-wood">
+          <span class="legend-dot" style="background:#4caf7d"></span>
+          木造復元天守
+          <span class="count">11</span>
+        </div>
+        <div class="legend-item" data-type="reconstructed-concrete">
+          <span class="legend-dot" style="background:#4a90c8"></span>
+          外観復元天守
+          <span class="count">28</span>
+        </div>
+        <div class="legend-item" data-type="replica">
+          <span class="legend-dot" style="background:#e07d40"></span>
+          模擬天守
+          <span class="count">1</span>
+        </div>
+        <div class="legend-item" data-type="ruins">
+          <span class="legend-dot" style="background:transparent;border:1.5px solid #8a9aaa"></span>
+          城跡のみ
+          <span class="count">148</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 現存天守 -->
+    <div class="sidebar-section">
+      <h3>現存天守 12城</h3>
+      <div class="existing-list" id="existing-list"></div>
+    </div>
+
+    <!-- 都道府県ランキング -->
+    <div class="sidebar-section" style="border-bottom:none; padding-bottom:0.25rem">
+      <h3>都道府県別</h3>
+    </div>
+    <div class="ranking-list" id="ranking-list"></div>
+  </aside>
+</div>
+
+<script>
+// ── マーカー色設定 ──
+const TYPE_CONFIG = {
+  'existing':                { color: '#f0c040', shadow: '0 0 8px rgba(240,192,64,0.7)', size: 12, ring: true },
+  'reconstructed-wood':      { color: '#4caf7d', shadow: null, size: 9, ring: false },
+  'reconstructed-concrete':  { color: '#4a90c8', shadow: null, size: 9, ring: false },
+  'replica':                 { color: '#e07d40', shadow: null, size: 9, ring: false },
+  'ruins':                   { color: 'transparent', shadow: null, size: 8, border: '#8a9aaa', ring: false },
+};
+
+const TYPE_LABEL = {
+  'existing': '現存天守',
+  'reconstructed-wood': '木造復元天守',
+  'reconstructed-concrete': '外観復元天守',
+  'replica': '模擬天守',
+  'ruins': '城跡のみ',
+};
+
+function makeIcon(castle) {
+  const cfg = TYPE_CONFIG[castle.tenshukaku] || TYPE_CONFIG['ruins'];
+  const s = cfg.size;
+  const isBig = castle.tenshukaku === 'existing';
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s+6}" height="${s+6}">
+    ${isBig ? `<circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2+2}" fill="none" stroke="#f0c040" stroke-width="1.5" opacity="0.5"/>` : ''}
+    <circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2}"
+      fill="${cfg.color}"
+      stroke="${cfg.border || (cfg.color === 'transparent' ? '#8a9aaa' : 'rgba(0,0,0,0.4)')}"
+      stroke-width="${cfg.color === 'transparent' ? 1.5 : 1}"
+      ${cfg.shadow ? `filter="drop-shadow(0 0 3px ${cfg.color})"` : ''}
+    />
+    ${castle.kokuho ? `<circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2-3}" fill="none" stroke="#e74c3c" stroke-width="1.5"/>` : ''}
+  </svg>`;
+
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [s+6, s+6],
+    iconAnchor: [(s+6)/2, (s+6)/2],
+    popupAnchor: [0, -(s+6)/2 - 2],
+  });
+}
+
+function makePopup(c) {
+  const cfg = TYPE_CONFIG[c.tenshukaku] || TYPE_CONFIG['ruins'];
+  const typeLabel = TYPE_LABEL[c.tenshukaku] || c.tenshukaku;
+  const builtStr = c.built ? (c.built < 0 ? `紀元前${Math.abs(c.built)}年頃` : `${c.built}年頃`) : '不明';
+
+  return `
+    <div class="popup-header">
+      <div>
+        <span class="popup-list-badge ${c.list === '100' ? 'badge-100' : 'badge-続100'}">
+          ${c.list === '100' ? '日本100名城' : '続日本100名城'} No.${c.number}
+        </span>
+        ${c.kokuho ? '<span class="kokuho-badge">国宝</span>' : ''}
+      </div>
+      <div class="popup-name-ja">${c.nameJa}</div>
+      <div class="popup-name-en">${c.nameEn}</div>
+    </div>
+    <div class="popup-body">
+      <div class="popup-row">
+        <span class="popup-row-label">都道府県</span>
+        <span>${c.prefecture}</span>
+      </div>
+      <div class="popup-row">
+        <span class="popup-row-label">天守種別</span>
+        <span class="popup-type-pill">
+          <span class="legend-dot" style="background:${cfg.color === 'transparent' ? 'transparent' : cfg.color};border:${cfg.color === 'transparent' ? '1.5px solid #8a9aaa' : 'none'};display:inline-block;width:8px;height:8px;border-radius:50%;"></span>
+          ${typeLabel}
+        </span>
+      </div>
+      <div class="popup-row">
+        <span class="popup-row-label">築城</span>
+        <span>${builtStr}</span>
+      </div>
+      ${c.notes ? `<div class="popup-notes">${c.notes}</div>` : ''}
+    </div>
+  `;
+}
+
+// ── 地図初期化 ──
+const map = L.map('map', {
+  center: [36.5, 137.5],
+  zoom: 5,
+  zoomControl: true,
+  attributionControl: true,
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+  maxZoom: 18,
+}).addTo(map);
+
+// ── データとクラスター ──
+let allCastles = [];
+let markers = [];
+let clusterGroup = L.markerClusterGroup({
+  maxClusterRadius: 40,
+  iconCreateFunction(cluster) {
+    const count = cluster.getChildCount();
+    const size = count < 10 ? 'small' : count < 30 ? 'medium' : 'large';
+    return L.divIcon({
+      html: `<div><span>${count}</span></div>`,
+      className: `marker-cluster marker-cluster-${size}`,
+      iconSize: L.point(36, 36),
+    });
+  },
+  spiderfyOnMaxZoom: true,
+  showCoverageOnHover: false,
+  zoomToBoundsOnClick: true,
+});
+map.addLayer(clusterGroup);
+
+// フィルター状態
+let filterList = 'all';
+let filterType = 'all';
+let filterKokuho = false;
+
+function applyFilters() {
+  clusterGroup.clearLayers();
+  let visible = [];
+
+  allCastles.forEach((c, i) => {
+    let show = true;
+    if (filterList !== 'all' && c.list !== filterList) show = false;
+    if (filterType === 'existing' && c.tenshukaku !== 'existing') show = false;
+    if (filterType === 'reconstructed' && !c.tenshukaku.startsWith('reconstructed')) show = false;
+    if (filterType === 'ruins' && c.tenshukaku !== 'ruins') show = false;
+    if (filterKokuho && !c.kokuho) show = false;
+
+    if (show) {
+      clusterGroup.addLayer(markers[i]);
+      visible.push(c);
+    }
+  });
+
+  // 統計更新
+  document.getElementById('stat-total').textContent = visible.length;
+  document.getElementById('stat-existing').textContent = visible.filter(c => c.tenshukaku === 'existing').length;
+  document.getElementById('stat-kokuho').textContent = visible.filter(c => c.kokuho).length;
+  const prefs = new Set(visible.map(c => c.prefecture));
+  document.getElementById('stat-pref').textContent = prefs.size;
+
+  updateRanking(visible);
+}
+
+function updateRanking(castles) {
+  const counts = {};
+  castles.forEach(c => {
+    counts[c.prefecture] = (counts[c.prefecture] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+
+  const el = document.getElementById('ranking-list');
+  el.innerHTML = sorted.map(([pref, cnt], i) => `
+    <div class="ranking-item" data-pref="${pref}">
+      <span class="rank-num">${i + 1}</span>
+      <span class="rank-name">${pref}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${cnt/max*100}%"></div></div>
+      <span class="rank-count">${cnt}</span>
+    </div>
+  `).join('');
+
+  // クリックで都道府県絞り込み（ズーム）
+  el.querySelectorAll('.ranking-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const pref = el.dataset.pref;
+      const prefCastles = allCastles.filter(c => c.prefecture === pref);
+      if (prefCastles.length === 0) return;
+      const bounds = L.latLngBounds(prefCastles.map(c => [c.lat, c.lng]));
+      map.fitBounds(bounds, { padding: [60, 60] });
+    });
+  });
+}
+
+// ── データ読み込み ──
+// インラインデータ（GitHub Pages用にJSONを埋め込む場合はここを使う）
+// 実際の運用では fetch('./data/castles.json') を使う
+async function loadData() {
+  // castles.jsonと同ディレクトリ、またはdata/castles.jsonから読み込む
+  let data;
+  try {
+    const res = await fetch('./data/castles.json');
+    data = await res.json();
+  } catch {
+    try {
+      const res = await fetch('./castles.json');
+      data = await res.json();
+    } catch {
+      // デモ用：インラインデータ（最初の数城）
+      data = INLINE_DATA;
+    }
+  }
+  return data;
+}
+
+// ── 現存天守リスト ──
+function buildExistingList(castles) {
+  const existing = castles.filter(c => c.tenshukaku === 'existing');
+  const el = document.getElementById('existing-list');
+  el.innerHTML = existing.map(c => `
+    <div class="existing-item" data-id="${c.id}">
+      <span class="existing-dot"></span>
+      ${c.nameJa}
+      <span class="existing-pref">${c.prefecture}</span>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.existing-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = parseInt(item.dataset.id);
+      const castle = castles.find(c => c.id === id);
+      if (!castle) return;
+      map.setView([castle.lat, castle.lng], 12, { animate: true });
+      // マーカーのポップアップを開く
+      const marker = markers[allCastles.findIndex(c => c.id === id)];
+      if (marker) setTimeout(() => marker.openPopup(), 600);
+    });
+  });
+}
+
+// ── フィルターボタン ──
+function setupFilters(scope) {
+  document.querySelectorAll(`${scope} [data-filter="list"]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter="list"]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll(`[data-filter="list"][data-value="${btn.dataset.value}"]`).forEach(b => b.classList.add('active'));
+      filterList = btn.dataset.value;
+      applyFilters();
+    });
+  });
+
+  document.querySelectorAll(`${scope} [data-filter="type"]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll(`[data-filter="type"][data-value="${btn.dataset.value}"]`).forEach(b => b.classList.add('active'));
+      filterType = btn.dataset.value;
+      applyFilters();
+    });
+  });
+}
+
+['#kokuho-toggle', '#kokuho-toggle-m'].forEach(id => {
+  const el = document.querySelector(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
+    filterKokuho = !filterKokuho;
+    document.querySelectorAll('#kokuho-toggle, #kokuho-toggle-m').forEach(b => b.classList.toggle('active', filterKokuho));
+    applyFilters();
+  });
+});
+
+setupFilters('#filters-desktop');
+
+// モバイルモーダル
+document.getElementById('mobile-filter-open').addEventListener('click', () => {
+  document.getElementById('filter-modal').classList.add('open');
+  setupFilters('#filter-modal');
+});
+document.getElementById('filter-modal-close').addEventListener('click', () => {
+  document.getElementById('filter-modal').classList.remove('open');
+});
+
+// ── メイン初期化 ──
+(async () => {
+  const data = await loadData();
+  allCastles = data;
+
+  data.forEach((castle, i) => {
+    const marker = L.marker([castle.lat, castle.lng], {
+      icon: makeIcon(castle),
+      title: castle.nameJa,
+    });
+    marker.bindPopup(makePopup(castle), {
+      maxWidth: 280,
+      className: '',
+    });
+    markers.push(marker);
+    clusterGroup.addLayer(marker);
+  });
+
+  buildExistingList(data);
+  updateRanking(data);
+  document.getElementById('stat-total').textContent = data.length;
+})();
+
+// ── インラインデモデータ（フェッチ失敗時のフォールバック） ──
+const INLINE_DATA = [];
+</script>
+</body>
+</html>
