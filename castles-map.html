@@ -249,105 +249,93 @@
 
     /* ── Mobile ── */
     @media (max-width:680px) {
-      /* ① 明るくする */
       .leaflet-tile { filter: brightness(0.88) saturate(0.55) hue-rotate(185deg); }
-
       header { height:48px; }
       .filter-wrap { display:none; }
 
-      /* 地図領域をボトムパネルの高さ分だけ縮める */
-      .main { margin-bottom: 0; }
-      #map  { margin-bottom: 0; }
+      /* デスクトップ用サイドバーを完全に隠す */
+      .sidebar { display: none !important; }
 
-      /* ② サイドバーをボトムパネルに */
-      .sidebar {
+      /* 地図の下にボトムパネルの高さ分の余白を確保 */
+      .main { padding-bottom: 0; }
+    }
+
+    /* ── モバイル専用ボトムパネル（bodyの直下、.mainの外） ── */
+    .mob-panel {
+      display: none;
+    }
+    @media (max-width:680px) {
+      .mob-panel {
+        display: block;
         position: fixed;
         bottom: 0; left: 0; right: 0;
-        width: 100%;
-        height: auto;
-        flex: none;
-        border-left: none;
+        background: var(--panel-bg);
         border-top: 1px solid var(--border);
-        flex-direction: column;
-        z-index: 600;
-        max-height: 50vh;
+        z-index: 1000;
+        backdrop-filter: blur(8px);
       }
 
-      /* モバイルではスクロールなし・縦構造 */
-      .sidebar-inner {
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        overflow-x: hidden;
-        max-height: 50vh;
-      }
-
-      /* ランキングと現存天守リストは非表示 */
-      .s-section.mob-hide { display: none; }
-
-      /* モバイル専用: フィルターバー（ボトムパネル内） */
-      .mob-filters {
+      /* フィルター行 */
+      .mob-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.35rem;
-        padding: 0.65rem 0.85rem 0.5rem;
-        border-bottom: 1px solid rgba(201,146,26,0.1);
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.5rem 0.75rem 0.3rem;
+        border-bottom: 1px solid rgba(201,146,26,0.08);
       }
-      .mob-filters .fbtn {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.65rem;
-        min-height: 34px;  /* タッチしやすく */
-      }
-      .mob-filters .flabel {
-        width: 100%;
+      .mob-row .flabel {
         font-size: 0.58rem;
         color: var(--silver);
-        margin-bottom: 0.1rem;
+        white-space: nowrap;
       }
+      .mob-row .fbtn {
+        font-size: 0.68rem;
+        padding: 0.28rem 0.6rem;
+        min-height: 32px;
+      }
+      .mob-divider { width:1px; height:20px; background:var(--border); flex-shrink:0; }
 
-      /* Stats をコンパクトに横並び */
-      .mob-stats-row {
+      /* Stats行 */
+      .mob-stats {
         display: flex;
-        gap: 0.35rem;
-        padding: 0.55rem 0.85rem;
-        border-bottom: 1px solid rgba(201,146,26,0.1);
+        gap: 0.3rem;
+        padding: 0.35rem 0.75rem;
+        border-bottom: 1px solid rgba(201,146,26,0.08);
       }
       .mob-stat {
         flex: 1;
         text-align: center;
-        background: rgba(201,146,26,0.05);
-        border: 1px solid rgba(201,146,26,0.13);
+        background: rgba(201,146,26,0.06);
+        border: 1px solid rgba(201,146,26,0.14);
         border-radius: 3px;
-        padding: 0.3rem 0.2rem;
+        padding: 0.25rem 0.1rem;
       }
-      .mob-stat .stat-n { font-size: 1rem; }
-      .mob-stat .stat-l { font-size: 0.5rem; }
+      .mob-stat .sn { font-family:'Cinzel',serif; font-size:0.95rem; color:var(--gold-light); line-height:1; }
+      .mob-stat .sl { font-size:0.48rem; color:var(--silver); margin-top:0.15rem; }
 
-      /* Legend をコンパクト横並び */
+      /* Legend行 */
       .mob-legend {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem 0.75rem;
-        padding: 0.5rem 0.85rem 0.65rem;
+        gap: 0.2rem 0.6rem;
+        padding: 0.3rem 0.75rem 0.45rem;
       }
-      .mob-leg-item {
+      .mob-leg {
         display: flex;
         align-items: center;
-        gap: 0.3rem;
-        font-size: 0.62rem;
-        color: rgba(245,240,232,0.82);
+        gap: 0.28rem;
+        font-size: 0.6rem;
+        color: rgba(245,240,232,0.8);
         white-space: nowrap;
       }
-      .mob-leg-cnt {
-        color: var(--silver);
-        font-size: 0.58rem;
-        margin-left: 0.15rem;
-      }
+      .mob-leg .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+      .mob-leg .cnt { color:var(--silver); font-size:0.55rem; }
     }
 
-    /* デスクトップでモバイル専用要素を非表示 */
+    /* デスクトップではモバイルパネル非表示 */
     @media (min-width:681px) {
-      .mob-filters, .mob-stats-row, .mob-legend { display: none; }
+      .mob-panel { display: none !important; }
     }
   </style>
 </head>
@@ -386,37 +374,6 @@
 <aside class="sidebar">
     <div class="sidebar-inner">
 
-      <!-- ③ モバイル専用フィルターバー -->
-      <div class="mob-filters">
-        <span class="flabel">List</span>
-        <button class="fbtn on" data-f="list" data-v="all">All</button>
-        <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
-        <button class="fbtn"    data-f="list" data-v="続100">The Next 100</button>
-        <span class="flabel" style="margin-top:0.3rem">Type</span>
-        <button class="fbtn on" data-f="type" data-v="all">All</button>
-        <button class="fbtn"    data-f="type" data-v="existing">Surviving</button>
-        <button class="fbtn"    data-f="type" data-v="reconstructed">Reconstructed</button>
-        <button class="fbtn"    data-f="type" data-v="ruins">Ruins</button>
-        <button class="fbtn" id="nat-btn-m">Nat. Treasure only</button>
-      </div>
-
-      <!-- ③ モバイル専用 Stats（横並び） -->
-      <div class="mob-stats-row">
-        <div class="mob-stat"><div class="stat-n" id="st-shown-m">—</div><div class="stat-l">Shown</div></div>
-        <div class="mob-stat"><div class="stat-n" id="st-surv-m">—</div><div class="stat-l">Surviving</div></div>
-        <div class="mob-stat"><div class="stat-n" id="st-nat-m">—</div><div class="stat-l">Nat. Treas.</div></div>
-        <div class="mob-stat"><div class="stat-n" id="st-pref-m">—</div><div class="stat-l">Prefs.</div></div>
-      </div>
-
-      <!-- ③ モバイル専用 Legend（横並び） -->
-      <div class="mob-legend">
-        <div class="mob-leg-item"><span class="leg-dot" style="background:#f0c040;box-shadow:0 0 4px rgba(240,192,64,0.5)"></span>Surviving<span class="mob-leg-cnt" id="mlc-ex">—</span></div>
-        <div class="mob-leg-item"><span class="leg-dot" style="background:#4caf7d"></span>Wood<span class="mob-leg-cnt" id="mlc-rw">—</span></div>
-        <div class="mob-leg-item"><span class="leg-dot" style="background:#4a90c8"></span>Concrete<span class="mob-leg-cnt" id="mlc-rc">—</span></div>
-        <div class="mob-leg-item"><span class="leg-dot" style="background:#e07d40"></span>Replica<span class="mob-leg-cnt" id="mlc-rep">—</span></div>
-        <div class="mob-leg-item"><span class="leg-dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins<span class="mob-leg-cnt" id="mlc-ru">—</span></div>
-      </div>
-
       <!-- デスクトップ用 Stats -->
       <div class="s-section">
         <div class="s-title">Stats</div>
@@ -428,7 +385,6 @@
         </div>
       </div>
 
-      <!-- デスクトップ用 Legend -->
       <div class="s-section">
         <div class="s-title">Legend</div>
         <div class="leg-item"><span class="leg-dot" style="background:#f0c040;box-shadow:0 0 5px rgba(240,192,64,0.5)"></span>Surviving Keep<span class="leg-cnt" id="lc-ex">—</span></div>
@@ -438,7 +394,6 @@
         <div class="leg-item"><span class="leg-dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins / Site only<span class="leg-cnt" id="lc-ru">—</span></div>
       </div>
 
-      <!-- ランキングと現存天守はモバイルで非表示 -->
       <div class="s-section mob-hide">
         <div class="s-title">The 12 Surviving Keeps</div>
         <div id="ex-list"></div>
@@ -451,6 +406,44 @@
 
     </div>
   </aside>
+</div>
+
+<!-- モバイル専用ボトムパネル（.mainの外に配置） -->
+<div class="mob-panel">
+
+  <!-- フィルター行 -->
+  <div class="mob-row">
+    <span class="flabel">List</span>
+    <button class="fbtn on" data-f="list" data-v="all">All</button>
+    <button class="fbtn"    data-f="list" data-v="100">100</button>
+    <button class="fbtn"    data-f="list" data-v="続100">Next 100</button>
+    <div class="mob-divider"></div>
+    <span class="flabel">Type</span>
+    <button class="fbtn on" data-f="type" data-v="all">All</button>
+    <button class="fbtn"    data-f="type" data-v="existing">Surviving</button>
+    <button class="fbtn"    data-f="type" data-v="reconstructed">Recon.</button>
+    <button class="fbtn"    data-f="type" data-v="ruins">Ruins</button>
+    <div class="mob-divider"></div>
+    <button class="fbtn" id="nat-btn-m">★ Nat. Treasure</button>
+  </div>
+
+  <!-- Stats行 -->
+  <div class="mob-stats">
+    <div class="mob-stat"><div class="sn" id="st-shown-m">—</div><div class="sl">Shown</div></div>
+    <div class="mob-stat"><div class="sn" id="st-surv-m">—</div><div class="sl">Surviving</div></div>
+    <div class="mob-stat"><div class="sn" id="st-nat-m">—</div><div class="sl">Nat. Treas.</div></div>
+    <div class="mob-stat"><div class="sn" id="st-pref-m">—</div><div class="sl">Prefs.</div></div>
+  </div>
+
+  <!-- Legend行 -->
+  <div class="mob-legend">
+    <div class="mob-leg"><span class="dot" style="background:#f0c040;box-shadow:0 0 4px rgba(240,192,64,0.5)"></span>Surviving<span class="cnt" id="mlc-ex">—</span></div>
+    <div class="mob-leg"><span class="dot" style="background:#4caf7d"></span>Wood<span class="cnt" id="mlc-rw">—</span></div>
+    <div class="mob-leg"><span class="dot" style="background:#4a90c8"></span>Concrete<span class="cnt" id="mlc-rc">—</span></div>
+    <div class="mob-leg"><span class="dot" style="background:#e07d40"></span>Replica<span class="cnt" id="mlc-rep">—</span></div>
+    <div class="mob-leg"><span class="dot" style="background:#c8b89a;border:1.5px solid #7a6a55"></span>Ruins<span class="cnt" id="mlc-ru">—</span></div>
+  </div>
+
 </div>
 
 <script>
@@ -523,6 +516,22 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a> | Castle data: <a href="https://www.jokaku.jp" target="_blank">公益財団法人 日本城郭協会</a>',
   maxZoom:18,
 }).addTo(map);
+
+// モバイル時: ボトムパネルの高さ分だけLeafletの表示領域を上にずらす
+function adjustMapForPanel() {
+  const panel = document.querySelector('.mob-panel');
+  if (panel && window.innerWidth <= 680) {
+    const h = panel.offsetHeight;
+    map.getContainer().style.paddingBottom = h + 'px';
+    map.invalidateSize();
+  } else {
+    map.getContainer().style.paddingBottom = '';
+    map.invalidateSize();
+  }
+}
+window.addEventListener('resize', adjustMapForPanel);
+// DOM確定後に実行
+setTimeout(adjustMapForPanel, 100);
 
 let allCastles = [], markers = [];
 const layer = L.layerGroup().addTo(map);
@@ -657,9 +666,9 @@ function bindFilters(root) {
   });
 }
 bindFilters(document.getElementById('fw'));
-// モバイルフィルター（ボトムパネル内）も同じ関数でバインド
-const mobFilters = document.querySelector('.mob-filters');
-if (mobFilters) bindFilters(mobFilters);
+// モバイルボトムパネルのフィルターもバインド
+const mobPanel = document.querySelector('.mob-panel');
+if (mobPanel) bindFilters(mobPanel);
 
 document.getElementById('nat-btn').addEventListener('click',function(){
   fNat=!fNat; this.classList.toggle('on',fNat); applyFilters();
