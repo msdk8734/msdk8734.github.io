@@ -3,937 +3,617 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日本名城マップ — 100名城・続100名城</title>
-
-  <!-- Leaflet.js -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  <!-- Google Fonts -->
+  <title>Hiroshi Sugimoto — Public Art &amp; Architecture Map</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --ink: #1a1209;
-      --parchment: #f5f0e8;
-      --gold: #c9921a;
-      --gold-light: #e8b84b;
-      --silver: #8a9aaa;
-      --red: #c0392b;
-      --panel-bg: rgba(20, 15, 8, 0.92);
-      --border-gold: rgba(201, 146, 26, 0.4);
-      --jade: #2d6e4e;
-      --indigo: #2c3e6b;
+      --bg: #141414;
+      --surface: #1c1c1c;
+      --border: #2a2a2a;
+      --border-mid: #383838;
+      --text-primary: #f0ece4;
+      --text-secondary: #9a9690;
+      --text-muted: #6a6a64;
+      --accent: #c8b89a;
+      --accent-dim: rgba(200,184,154,0.15);
+
+      --cat-architecture: #c8b89a;
+      --cat-sculpture:    #9ab8c8;
+      --cat-installation: #b89ac8;
+      --cat-permanent:    #9ac8b0;
+
+      --access-public:      #9ac8b0;
+      --access-reservation: #c8b89a;
+      --access-limited:     #c8a09a;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Noto Serif JP', serif;
-      background: var(--ink);
-      color: var(--parchment);
-      height: 100vh;
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'IBM Plex Sans', 'IBM Plex Sans JP', sans-serif;
+      font-weight: 300;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
     }
 
-    /* ── ヘッダー ── */
-    header {
-      position: relative;
-      z-index: 1000;
-      background: var(--panel-bg);
-      border-bottom: 1px solid var(--border-gold);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      flex-shrink: 0;
-      backdrop-filter: blur(8px);
+    /* ── HEADER ─────────────────────────────────────── */
+    #header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      height: 52px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
     }
-
-    .header-title {
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
+    #header .logo {
+      display: flex; align-items: baseline; gap: 12px;
     }
-
-    .header-title h1 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--gold-light);
+    #header .logo-jp {
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-size: 13px; font-weight: 400;
       letter-spacing: 0.08em;
-      white-space: nowrap;
+      color: var(--text-primary);
     }
-
-    .header-title span {
-      font-size: 0.7rem;
-      color: var(--silver);
+    #header .logo-en {
+      font-size: 11px; font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--text-secondary);
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    #header .count-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; font-weight: 300;
+      color: var(--text-muted);
       letter-spacing: 0.05em;
     }
-
-    .header-divider {
-      width: 1px;
-      height: 28px;
-      background: var(--border-gold);
-      flex-shrink: 0;
+    #header .count-badge span {
+      color: var(--accent);
+      font-weight: 400;
     }
 
-    /* ── フィルターバー ── */
-    .filters {
+    /* ── LAYOUT ──────────────────────────────────────── */
+    #app {
+      position: fixed;
+      top: 52px; bottom: 0; left: 0; right: 0;
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-      flex-wrap: wrap;
     }
 
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .filter-label {
-      font-size: 0.65rem;
-      color: var(--silver);
-      letter-spacing: 0.06em;
-      white-space: nowrap;
-    }
-
-    .filter-btn {
-      background: transparent;
-      border: 1px solid var(--border-gold);
-      color: var(--parchment);
-      font-family: 'Noto Serif JP', serif;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.65rem;
-      border-radius: 2px;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.04em;
-      white-space: nowrap;
-    }
-
-    .filter-btn.active {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: var(--ink);
-      font-weight: 700;
-    }
-
-    .filter-btn:hover:not(.active) {
-      border-color: var(--gold-light);
-      color: var(--gold-light);
-    }
-
-    /* 凡例ドット */
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    /* ── メインレイアウト ── */
-    .main {
-      display: flex;
-      flex: 1;
+    /* ── SIDEBAR ─────────────────────────────────────── */
+    #sidebar {
+      width: 320px; min-width: 320px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
       overflow: hidden;
     }
 
-    /* ── 地図 ── */
+    /* filters */
+    #filters {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .filter-label {
+      font-size: 9px; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .chip-group {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .chip {
+      padding: 3px 10px;
+      border: 1px solid var(--border-mid);
+      border-radius: 2px;
+      font-size: 10px; font-weight: 400;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-secondary);
+      background: transparent;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--text-primary); }
+    .chip.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .chip[data-cat="architecture"].active  { border-color: var(--cat-architecture); color: var(--cat-architecture); background: rgba(200,184,154,0.12); }
+    .chip[data-cat="sculpture"].active     { border-color: var(--cat-sculpture);    color: var(--cat-sculpture);    background: rgba(154,184,200,0.12); }
+    .chip[data-cat="installation"].active  { border-color: var(--cat-installation); color: var(--cat-installation); background: rgba(184,154,200,0.12); }
+    .chip[data-cat="permanent-collection"].active { border-color: var(--cat-permanent); color: var(--cat-permanent); background: rgba(154,200,176,0.12); }
+    .chip[data-access="public"].active     { border-color: var(--access-public);      color: var(--access-public);      background: rgba(154,200,176,0.12); }
+    .chip[data-access="reservation"].active{ border-color: var(--access-reservation); color: var(--access-reservation); background: rgba(200,184,154,0.12); }
+    .chip[data-access="limited"].active    { border-color: var(--access-limited);     color: var(--access-limited);     background: rgba(200,160,154,0.12); }
+
+    /* work list */
+    #work-list {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-mid) transparent;
+    }
+    #work-list::-webkit-scrollbar { width: 3px; }
+    #work-list::-webkit-scrollbar-track { background: transparent; }
+    #work-list::-webkit-scrollbar-thumb { background: var(--border-mid); }
+
+    .work-item {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.12s;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .work-item:hover { background: rgba(255,255,255,0.05); }
+    .work-item.active { background: var(--accent-dim); }
+
+    .work-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+    }
+    .work-info { flex: 1; min-width: 0; }
+    .work-name-ja {
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-size: 12px; font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .work-name-en {
+      font-size: 10px; font-weight: 300;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .work-meta {
+      display: flex; gap: 6px; margin-top: 5px; align-items: center;
+    }
+    .tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; font-weight: 300;
+      padding: 1px 5px;
+      border-radius: 1px;
+      letter-spacing: 0.04em;
+    }
+    .tag-year { color: var(--text-muted); background: transparent; }
+
+    /* ── MAP ─────────────────────────────────────────── */
     #map {
       flex: 1;
-      height: 100%;
-      background: #0d1117;
+      background: var(--bg);
     }
 
-    /* Leafletのタイルを暗めに */
-    .leaflet-tile {
-      filter: brightness(0.75) saturate(0.6) hue-rotate(180deg);
-    }
+    /* Leaflet tile override for dark */
+    .leaflet-tile { filter: brightness(0.32) grayscale(1) contrast(1.2); }
+    .leaflet-container { background: var(--bg); }
 
-    /* ── サイドパネル ── */
-    .sidebar {
-      width: 260px;
-      background: var(--panel-bg);
-      border-left: 1px solid var(--border-gold);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      flex-shrink: 0;
-      backdrop-filter: blur(8px);
-    }
-
-    .sidebar-section {
-      padding: 1rem;
-      border-bottom: 1px solid rgba(201, 146, 26, 0.15);
-    }
-
-    .sidebar-section h3 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 0.7rem;
-      color: var(--gold);
-      letter-spacing: 0.12em;
-      margin-bottom: 0.75rem;
-      text-transform: uppercase;
-    }
-
-    /* 凡例 */
-    .legend-items {
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-      color: rgba(245, 240, 232, 0.8);
-      cursor: pointer;
-      transition: color 0.15s;
-      padding: 0.2rem 0;
-      border-radius: 2px;
-    }
-
-    .legend-item:hover { color: var(--gold-light); }
-
-    .legend-item .count {
-      margin-left: auto;
-      color: var(--silver);
-      font-size: 0.65rem;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .legend-item.dimmed { opacity: 0.35; }
-
-    /* 都道府県ランキング */
-    .ranking-list {
-      overflow-y: auto;
-      flex: 1;
-      padding: 0.75rem 1rem;
-    }
-
-    .ranking-list::-webkit-scrollbar { width: 3px; }
-    .ranking-list::-webkit-scrollbar-track { background: transparent; }
-    .ranking-list::-webkit-scrollbar-thumb { background: var(--border-gold); }
-
-    .ranking-item {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.35rem 0;
-      border-bottom: 1px solid rgba(201, 146, 26, 0.08);
-      cursor: pointer;
-      transition: background 0.15s;
-      border-radius: 2px;
-    }
-
-    .ranking-item:hover {
-      background: rgba(201, 146, 26, 0.07);
-      padding-left: 4px;
-    }
-
-    .rank-num {
-      width: 18px;
-      text-align: right;
-      font-size: 0.6rem;
-      color: var(--silver);
-      font-variant-numeric: tabular-nums;
-      flex-shrink: 0;
-    }
-
-    .rank-name {
-      font-size: 0.72rem;
-      color: var(--parchment);
-      flex: 1;
-    }
-
-    .rank-bar-wrap {
-      width: 60px;
-      height: 3px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .rank-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold), var(--gold-light));
-      border-radius: 2px;
-    }
-
-    .rank-count {
-      font-size: 0.65rem;
-      color: var(--gold);
-      width: 20px;
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* 統計 */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
-
-    .stat-box {
-      background: rgba(201, 146, 26, 0.06);
-      border: 1px solid rgba(201, 146, 26, 0.15);
-      border-radius: 3px;
-      padding: 0.5rem 0.6rem;
-      text-align: center;
-    }
-
-    .stat-num {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1.4rem;
-      color: var(--gold-light);
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 0.6rem;
-      color: var(--silver);
-      margin-top: 0.2rem;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── ポップアップ ── */
-    .leaflet-popup-content-wrapper {
-      background: rgba(20, 15, 8, 0.96);
-      border: 1px solid var(--border-gold);
-      border-radius: 3px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      color: var(--parchment);
-      font-family: 'Noto Serif JP', serif;
-    }
-
-    .leaflet-popup-tip { background: rgba(20, 15, 8, 0.96); }
-
-    .leaflet-popup-content {
-      margin: 0;
-      min-width: 220px;
-    }
-
-    .popup-header {
-      padding: 0.8rem 1rem 0.6rem;
-      border-bottom: 1px solid rgba(201, 146, 26, 0.2);
-    }
-
-    .popup-list-badge {
-      display: inline-block;
-      font-size: 0.58rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 2px;
-      margin-bottom: 0.35rem;
-      letter-spacing: 0.06em;
-    }
-
-    .badge-100 { background: var(--gold); color: var(--ink); }
-    .badge-続100 { background: rgba(201, 146, 26, 0.2); color: var(--gold-light); border: 1px solid var(--border-gold); }
-
-    .popup-name-ja {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--parchment);
-      line-height: 1.2;
-    }
-
-    .popup-name-en {
-      font-size: 0.65rem;
-      color: var(--silver);
-      margin-top: 0.15rem;
-    }
-
-    .popup-body {
-      padding: 0.6rem 1rem 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-
-    .popup-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-    }
-
-    .popup-row-label {
-      color: var(--silver);
-      width: 52px;
-      flex-shrink: 0;
-      font-size: 0.63rem;
-    }
-
-    .popup-type-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 0.68rem;
-    }
-
-    .popup-notes {
-      font-size: 0.67rem;
-      color: rgba(245, 240, 232, 0.65);
-      line-height: 1.5;
-      border-top: 1px solid rgba(201, 146, 26, 0.1);
-      margin-top: 0.25rem;
-      padding-top: 0.4rem;
-    }
-
-    .kokuho-badge {
-      display: inline-block;
-      background: rgba(192, 57, 43, 0.15);
-      border: 1px solid rgba(192, 57, 43, 0.4);
-      color: #e74c3c;
-      font-size: 0.6rem;
-      padding: 0.05rem 0.35rem;
-      border-radius: 2px;
-    }
-
-    /* ── 現存天守リスト ── */
-    .existing-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .existing-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-      color: rgba(245, 240, 232, 0.8);
-      cursor: pointer;
-      padding: 0.25rem 0.3rem;
-      border-radius: 2px;
-      transition: background 0.15s;
-    }
-
-    .existing-item:hover {
-      background: rgba(201, 146, 26, 0.1);
-      color: var(--gold-light);
-    }
-
-    .existing-dot {
-      width: 6px;
-      height: 6px;
+    /* Custom marker */
+    .custom-marker {
+      width: 12px; height: 12px;
       border-radius: 50%;
-      background: var(--gold-light);
-      flex-shrink: 0;
-      box-shadow: 0 0 4px rgba(232, 184, 75, 0.6);
-    }
-
-    .existing-pref {
-      color: var(--silver);
-      font-size: 0.62rem;
-      margin-left: auto;
-    }
-
-    /* ── スマホ対応 ── */
-    @media (max-width: 700px) {
-      header { padding: 0 0.75rem; gap: 0.75rem; height: 50px; }
-      .header-title h1 { font-size: 0.95rem; }
-      .filters { display: none; }
-      .sidebar { 
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 220px;
-        border-left: none;
-        border-top: 1px solid var(--border-gold);
-        z-index: 1000;
-        flex-direction: row;
-        overflow-x: auto;
-      }
-      .sidebar-section { min-width: 200px; border-bottom: none; border-right: 1px solid rgba(201, 146, 26, 0.15); }
-      .ranking-list { min-width: 260px; }
-      #map { height: calc(100vh - 50px - 220px); }
-    }
-
-    /* ── モバイル向けフィルターボタン ── */
-    .mobile-filter-btn {
-      display: none;
-    }
-    @media (max-width: 700px) {
-      .mobile-filter-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: auto;
-        background: transparent;
-        border: 1px solid var(--border-gold);
-        color: var(--gold-light);
-        font-size: 1rem;
-        width: 32px;
-        height: 32px;
-        border-radius: 2px;
-        cursor: pointer;
-      }
-    }
-
-    /* ── フィルターモーダル（モバイル） ── */
-    .filter-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 2000;
-      align-items: flex-end;
-    }
-    .filter-modal.open { display: flex; }
-    .filter-modal-content {
-      background: var(--panel-bg);
-      border-top: 1px solid var(--border-gold);
-      width: 100%;
-      padding: 1.5rem 1.25rem 2rem;
-    }
-    .filter-modal-content h3 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 0.8rem;
-      color: var(--gold);
-      letter-spacing: 0.1em;
-      margin-bottom: 1rem;
-    }
-    .filter-modal-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-    .filter-modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      color: var(--silver);
-      font-size: 1.2rem;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.2), 0 2px 8px rgba(0,0,0,0.8);
+      transition: transform 0.15s;
       cursor: pointer;
+    }
+    .custom-marker:hover, .custom-marker.hover { transform: scale(1.5); }
+    .custom-marker.pulse {
+      animation: pulse 1.5s ease-out;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0px rgba(200,184,154,0.6), 0 0 0 1px rgba(255,255,255,0.2); }
+      100% { box-shadow: 0 0 0 12px rgba(200,184,154,0), 0 0 0 1px rgba(255,255,255,0.1); }
+    }
+
+    /* Popup */
+    .leaflet-popup-content-wrapper {
+      background: var(--surface) !important;
+      border: 1px solid var(--border-mid) !important;
+      border-radius: 3px !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.8) !important;
+      padding: 0 !important;
+    }
+    .leaflet-popup-content {
+      margin: 0 !important;
+      width: 260px !important;
+    }
+    .leaflet-popup-tip-container { display: none; }
+    .leaflet-popup-close-button {
+      color: var(--text-muted) !important;
+      font-size: 16px !important;
+      top: 8px !important; right: 8px !important;
+      width: 20px !important; height: 20px !important;
+      line-height: 20px !important;
+    }
+    .leaflet-popup-close-button:hover { color: var(--text-primary) !important; }
+
+    .popup-inner { padding: 16px; }
+    .popup-cat-bar {
+      height: 2px; width: 28px;
+      border-radius: 1px;
+      margin-bottom: 10px;
+    }
+    .popup-name-ja {
+      font-family: 'IBM Plex Sans JP', sans-serif;
+      font-size: 14px; font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+    }
+    .popup-name-en {
+      font-size: 11px; font-weight: 300;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .popup-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0;
+    }
+    .popup-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 4px;
+    }
+    .popup-row-key {
+      font-size: 9px; font-weight: 400;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .popup-row-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 300;
+      color: var(--text-secondary);
+      text-align: right;
+    }
+    .popup-desc {
+      font-size: 10px; font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-top: 10px;
+    }
+    .popup-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 9px; font-weight: 400;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(200,184,154,0.3);
+      padding-bottom: 1px;
+      transition: border-color 0.15s;
+    }
+    .popup-link:hover { border-color: var(--accent); }
+
+    /* ── DETAIL PANEL ────────────────────────────────── */
+    #detail {
+      position: absolute;
+      bottom: 20px; right: 20px;
+      width: 280px;
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 3px;
+      z-index: 800;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    }
+
+    .legend-sep {
+      height: 1px; background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* ── MOBILE ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      #sidebar { display: none; }
+      #legend { display: none; }
+    }
+
+    /* no-results */
+    #no-results {
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
-<header>
-  <div class="header-title">
-    <h1>日本名城マップ</h1>
-    <span>100名城 · 続100名城</span>
+<div id="header">
+  <div class="logo">
+    <span class="logo-jp">Hiroshi Sugimoto</span>
+    <span class="logo-en">Public Art &amp; Architecture Map</span>
   </div>
-  <div class="header-divider"></div>
-
-  <!-- フィルター（デスクトップ） -->
-  <div class="filters" id="filters-desktop">
-    <div class="filter-group">
-      <span class="filter-label">リスト</span>
-      <button class="filter-btn active" data-filter="list" data-value="all">全て</button>
-      <button class="filter-btn" data-filter="list" data-value="100">100名城</button>
-      <button class="filter-btn" data-filter="list" data-value="続100">続100名城</button>
-    </div>
-    <div class="header-divider"></div>
-    <div class="filter-group">
-      <span class="filter-label">天守</span>
-      <button class="filter-btn active" data-filter="type" data-value="all">全て</button>
-      <button class="filter-btn" data-filter="type" data-value="existing">現存</button>
-      <button class="filter-btn" data-filter="type" data-value="reconstructed">復元</button>
-      <button class="filter-btn" data-filter="type" data-value="ruins">城跡</button>
-    </div>
-    <div class="header-divider"></div>
-    <div class="filter-group">
-      <button class="filter-btn" id="kokuho-toggle">国宝のみ</button>
-    </div>
-  </div>
-
-  <button class="mobile-filter-btn" id="mobile-filter-open">☰</button>
-</header>
-
-<!-- モバイルフィルターモーダル -->
-<div class="filter-modal" id="filter-modal">
-  <div class="filter-modal-content" style="position:relative">
-    <button class="filter-modal-close" id="filter-modal-close">✕</button>
-    <h3>フィルター</h3>
-    <div class="filter-modal-row">
-      <button class="filter-btn active" data-filter="list" data-value="all">全て</button>
-      <button class="filter-btn" data-filter="list" data-value="100">100名城</button>
-      <button class="filter-btn" data-filter="list" data-value="続100">続100名城</button>
-    </div>
-    <div class="filter-modal-row">
-      <button class="filter-btn active" data-filter="type" data-value="all">全ての天守</button>
-      <button class="filter-btn" data-filter="type" data-value="existing">現存</button>
-      <button class="filter-btn" data-filter="type" data-value="reconstructed">復元</button>
-      <button class="filter-btn" data-filter="type" data-value="ruins">城跡</button>
-    </div>
-    <div class="filter-modal-row">
-      <button class="filter-btn" id="kokuho-toggle-m">国宝のみ</button>
-    </div>
+  <div class="count-badge">
+    <span id="visible-count">14</span> / 14 works
   </div>
 </div>
 
-<!-- メイン -->
-<div class="main">
-  <div id="map"></div>
-
-  <aside class="sidebar">
-    <!-- 統計 -->
-    <div class="sidebar-section">
-      <h3>統計</h3>
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-num" id="stat-total">200</div>
-          <div class="stat-label">表示中</div>
+<div id="app">
+  <div id="sidebar">
+    <div id="filters">
+      <div>
+        <div class="filter-label">Category</div>
+        <div class="chip-group">
+          <button class="chip active" data-filter="cat" data-value="all">All</button>
+          <button class="chip" data-filter="cat" data-cat="architecture" data-value="architecture">Architecture</button>
+          <button class="chip" data-filter="cat" data-cat="sculpture" data-value="sculpture">Sculpture</button>
+          <button class="chip" data-filter="cat" data-cat="installation" data-value="installation">Installation</button>
+          <button class="chip" data-filter="cat" data-cat="permanent-collection" data-value="permanent-collection">Collection</button>
         </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-existing">12</div>
-          <div class="stat-label">現存天守</div>
+      </div>
+      <div>
+        <div class="filter-label">Access</div>
+        <div class="chip-group">
+          <button class="chip active" data-filter="access" data-value="all">All</button>
+          <button class="chip" data-filter="access" data-access="public" data-value="public">Public</button>
+          <button class="chip" data-filter="access" data-access="reservation" data-value="reservation">Reservation</button>
+          <button class="chip" data-filter="access" data-access="limited" data-value="limited">Limited</button>
         </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-kokuho">5</div>
-          <div class="stat-label">国宝</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num" id="stat-pref">47</div>
-          <div class="stat-label">都道府県</div>
+      </div>
+      <div>
+        <div class="filter-label">Region</div>
+        <div class="chip-group">
+          <button class="chip active" data-filter="country" data-value="all">All</button>
+          <button class="chip" data-filter="country" data-value="Japan">Japan</button>
+          <button class="chip" data-filter="country" data-value="USA">USA</button>
+          <button class="chip" data-filter="country" data-value="France">France</button>
+          <button class="chip" data-filter="country" data-value="Italy">Italy</button>
         </div>
       </div>
     </div>
 
-    <!-- 凡例 -->
-    <div class="sidebar-section">
-      <h3>凡例</h3>
-      <div class="legend-items">
-        <div class="legend-item" data-type="existing">
-          <span class="legend-dot" style="background:#f0c040;box-shadow:0 0 4px rgba(240,192,64,0.5)"></span>
-          現存天守
-          <span class="count">12</span>
-        </div>
-        <div class="legend-item" data-type="reconstructed-wood">
-          <span class="legend-dot" style="background:#4caf7d"></span>
-          木造復元天守
-          <span class="count">11</span>
-        </div>
-        <div class="legend-item" data-type="reconstructed-concrete">
-          <span class="legend-dot" style="background:#4a90c8"></span>
-          外観復元天守
-          <span class="count">28</span>
-        </div>
-        <div class="legend-item" data-type="replica">
-          <span class="legend-dot" style="background:#e07d40"></span>
-          模擬天守
-          <span class="count">1</span>
-        </div>
-        <div class="legend-item" data-type="ruins">
-          <span class="legend-dot" style="background:transparent;border:1.5px solid #8a9aaa"></span>
-          城跡のみ
-          <span class="count">148</span>
-        </div>
-      </div>
-    </div>
+    <div id="work-list"></div>
+    <div id="no-results">No works match the current filters.</div>
+  </div>
 
-    <!-- 現存天守 -->
-    <div class="sidebar-section">
-      <h3>現存天守 12城</h3>
-      <div class="existing-list" id="existing-list"></div>
+  <div id="map">
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-architecture)"></div><span class="legend-text">Architecture</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-sculpture)"></div><span class="legend-text">Sculpture</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-installation)"></div><span class="legend-text">Installation</span></div>
+      <div class="legend-sep"></div>
+      <div class="legend-title">Access</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-public); border-radius:2px;"></div><span class="legend-text">Public</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-reservation); border-radius:2px;"></div><span class="legend-text">Reservation required</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-limited); border-radius:2px;"></div><span class="legend-text">Limited access</span></div>
     </div>
-
-    <!-- 都道府県ランキング -->
-    <div class="sidebar-section" style="border-bottom:none; padding-bottom:0.25rem">
-      <h3>都道府県別</h3>
-    </div>
-    <div class="ranking-list" id="ranking-list"></div>
-  </aside>
+  </div>
 </div>
 
 <script>
-// ── マーカー色設定 ──
-const TYPE_CONFIG = {
-  'existing':                { color: '#f0c040', shadow: '0 0 8px rgba(240,192,64,0.7)', size: 12, ring: true },
-  'reconstructed-wood':      { color: '#4caf7d', shadow: null, size: 9, ring: false },
-  'reconstructed-concrete':  { color: '#4a90c8', shadow: null, size: 9, ring: false },
-  'replica':                 { color: '#e07d40', shadow: null, size: 9, ring: false },
-  'ruins':                   { color: 'transparent', shadow: null, size: 8, border: '#8a9aaa', ring: false },
+// ── DATA (fetched from data/sugimoto.json) ────────────
+let works = [];
+
+// ── COLORS ────────────────────────────────────────────
+const CAT_COLOR = {
+  architecture:        '#c8b89a',
+  sculpture:           '#9ab8c8',
+  installation:        '#b89ac8',
+  'permanent-collection': '#9ac8b0'
+};
+const ACCESS_LABEL = {
+  public:      'Public',
+  reservation: 'Reservation required',
+  limited:     'Limited access'
+};
+const ACCESS_COLOR = {
+  public:      '#9ac8b0',
+  reservation: '#c8b89a',
+  limited:     '#c8a09a'
 };
 
-const TYPE_LABEL = {
-  'existing': '現存天守',
-  'reconstructed-wood': '木造復元天守',
-  'reconstructed-concrete': '外観復元天守',
-  'replica': '模擬天守',
-  'ruins': '城跡のみ',
-};
-
-function makeIcon(castle) {
-  const cfg = TYPE_CONFIG[castle.tenshukaku] || TYPE_CONFIG['ruins'];
-  const s = cfg.size;
-  const isBig = castle.tenshukaku === 'existing';
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s+6}" height="${s+6}">
-    ${isBig ? `<circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2+2}" fill="none" stroke="#f0c040" stroke-width="1.5" opacity="0.5"/>` : ''}
-    <circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2}"
-      fill="${cfg.color}"
-      stroke="${cfg.border || (cfg.color === 'transparent' ? '#8a9aaa' : 'rgba(0,0,0,0.4)')}"
-      stroke-width="${cfg.color === 'transparent' ? 1.5 : 1}"
-      ${cfg.shadow ? `filter="drop-shadow(0 0 3px ${cfg.color})"` : ''}
-    />
-    ${castle.kokuho ? `<circle cx="${(s+6)/2}" cy="${(s+6)/2}" r="${s/2-3}" fill="none" stroke="#e74c3c" stroke-width="1.5"/>` : ''}
-  </svg>`;
-
-  return L.divIcon({
-    html: svg,
-    className: '',
-    iconSize: [s+6, s+6],
-    iconAnchor: [(s+6)/2, (s+6)/2],
-    popupAnchor: [0, -(s+6)/2 - 2],
-  });
-}
-
-function makePopup(c) {
-  const cfg = TYPE_CONFIG[c.tenshukaku] || TYPE_CONFIG['ruins'];
-  const typeLabel = TYPE_LABEL[c.tenshukaku] || c.tenshukaku;
-  const builtStr = c.built ? (c.built < 0 ? `紀元前${Math.abs(c.built)}年頃` : `${c.built}年頃`) : '不明';
-
-  return `
-    <div class="popup-header">
-      <div>
-        <span class="popup-list-badge ${c.list === '100' ? 'badge-100' : 'badge-続100'}">
-          ${c.list === '100' ? '日本100名城' : '続日本100名城'} No.${c.number}
-        </span>
-        ${c.kokuho ? '<span class="kokuho-badge">国宝</span>' : ''}
-      </div>
-      <div class="popup-name-ja">${c.nameJa}</div>
-      <div class="popup-name-en">${c.nameEn}</div>
-    </div>
-    <div class="popup-body">
-      <div class="popup-row">
-        <span class="popup-row-label">都道府県</span>
-        <span>${c.prefecture}</span>
-      </div>
-      <div class="popup-row">
-        <span class="popup-row-label">天守種別</span>
-        <span class="popup-type-pill">
-          <span class="legend-dot" style="background:${cfg.color === 'transparent' ? 'transparent' : cfg.color};border:${cfg.color === 'transparent' ? '1.5px solid #8a9aaa' : 'none'};display:inline-block;width:8px;height:8px;border-radius:50%;"></span>
-          ${typeLabel}
-        </span>
-      </div>
-      <div class="popup-row">
-        <span class="popup-row-label">築城</span>
-        <span>${builtStr}</span>
-      </div>
-      ${c.notes ? `<div class="popup-notes">${c.notes}</div>` : ''}
-    </div>
-  `;
-}
-
-// ── 地図初期化 ──
+// ── MAP INIT ──────────────────────────────────────────
 const map = L.map('map', {
-  center: [36.5, 137.5],
-  zoom: 5,
-  zoomControl: true,
-  attributionControl: true,
+  center: [35.5, 138],
+  zoom: 3,
+  zoomControl: false,
+  attributionControl: false,
+  worldCopyJump: false,
+  maxBounds: [[-80, -100], [85, 370]],
+  maxBoundsViscosity: 0.6
 });
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-  maxZoom: 18,
+  maxZoom: 18
 }).addTo(map);
 
-// ── データとレイヤー ──
-let allCastles = [];
-let markers = [];
-let markerLayer = L.layerGroup().addTo(map);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+L.control.attribution({ position: 'bottomleft', prefix: '© OpenStreetMap contributors' }).addTo(map);
 
-// フィルター状態
-let filterList = 'all';
-let filterType = 'all';
-let filterKokuho = false;
+// ── STATE ─────────────────────────────────────────────
+let filters = { cat: 'all', access: 'all', country: 'all' };
+let activeId = null;
+const markers = {};
 
-function applyFilters() {
-  markerLayer.clearLayers();
-  let visible = [];
-
-  allCastles.forEach((c, i) => {
-    let show = true;
-    if (filterList !== 'all' && c.list !== filterList) show = false;
-    if (filterType === 'existing' && c.tenshukaku !== 'existing') show = false;
-    if (filterType === 'reconstructed' && !c.tenshukaku.startsWith('reconstructed')) show = false;
-    if (filterType === 'ruins' && c.tenshukaku !== 'ruins') show = false;
-    if (filterKokuho && !c.kokuho) show = false;
-
-    if (show) {
-      markerLayer.addLayer(markers[i]);
-      visible.push(c);
-    }
+// ── MARKER ICON ───────────────────────────────────────
+function makeIcon(work, size = 12) {
+  const color = CAT_COLOR[work.category] || '#888';
+  return L.divIcon({
+    className: '',
+    html: `<div class="custom-marker" style="background:${color};width:${size}px;height:${size}px;"></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2 - 4]
   });
-
-  // 統計更新
-  document.getElementById('stat-total').textContent = visible.length;
-  document.getElementById('stat-existing').textContent = visible.filter(c => c.tenshukaku === 'existing').length;
-  document.getElementById('stat-kokuho').textContent = visible.filter(c => c.kokuho).length;
-  const prefs = new Set(visible.map(c => c.prefecture));
-  document.getElementById('stat-pref').textContent = prefs.size;
-
-  updateRanking(visible);
 }
 
-function updateRanking(castles) {
-  const counts = {};
-  castles.forEach(c => {
-    counts[c.prefecture] = (counts[c.prefecture] || 0) + 1;
-  });
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const max = sorted[0]?.[1] || 1;
-
-  const el = document.getElementById('ranking-list');
-  el.innerHTML = sorted.map(([pref, cnt], i) => `
-    <div class="ranking-item" data-pref="${pref}">
-      <span class="rank-num">${i + 1}</span>
-      <span class="rank-name">${pref}</span>
-      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${cnt/max*100}%"></div></div>
-      <span class="rank-count">${cnt}</span>
+// ── POPUP CONTENT ─────────────────────────────────────
+function popupHTML(w) {
+  const catColor = CAT_COLOR[w.category] || '#888';
+  const accessColor = ACCESS_COLOR[w.access] || '#888';
+  return `<div class="popup-inner">
+    <div class="popup-cat-bar" style="background:${catColor}"></div>
+    <div class="popup-name-ja">${w.name}</div>
+    ${w.nameJa ? `<div class="popup-name-en">${w.nameJa}</div>` : ''}
+    <div class="popup-divider"></div>
+    <div class="popup-row">
+      <span class="popup-row-key">Year</span>
+      <span class="popup-row-val">${w.year}</span>
     </div>
-  `).join('');
-
-  // クリックで都道府県絞り込み（ズーム）
-  el.querySelectorAll('.ranking-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const pref = el.dataset.pref;
-      const prefCastles = allCastles.filter(c => c.prefecture === pref);
-      if (prefCastles.length === 0) return;
-      const bounds = L.latLngBounds(prefCastles.map(c => [c.lat, c.lng]));
-      map.fitBounds(bounds, { padding: [60, 60] });
-    });
-  });
+    <div class="popup-row">
+      <span class="popup-row-key">Category</span>
+      <span class="popup-row-val" style="color:${catColor}">${w.category}</span>
+    </div>
+    <div class="popup-row">
+      <span class="popup-row-key">Access</span>
+      <span class="popup-row-val" style="color:${accessColor}">${ACCESS_LABEL[w.access]}</span>
+    </div>
+    <div class="popup-row">
+      <span class="popup-row-key">Location</span>
+      <span class="popup-row-val" style="max-width:150px;white-space:normal;font-size:9px">${w.location}</span>
+    </div>
+    <div class="popup-desc">${w.description}</div>
+    ${w.url ? `<a class="popup-link" href="${w.url}" target="_blank" rel="noopener">Learn more →</a>` : ''}
+  </div>`;
 }
 
-// ── データ読み込み ──
-async function loadData() {
-  const paths = ['./data/castles.json', './castles.json'];
-  for (const path of paths) {
-    try {
-      const res = await fetch(path);
-      if (!res.ok) continue;
-      return await res.json();
-    } catch { /* 次を試す */ }
+// ── SELECT WORK ───────────────────────────────────────
+function selectWork(id) {
+  activeId = id;
+  // sidebar highlight
+  document.querySelectorAll('.work-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.id) === id);
+  });
+  // marker pulse
+  const w = works.find(x => x.id === id);
+  if (!w) return;
+  const marker = markers[id];
+  const el = marker.getElement();
+  if (el) {
+    const dot = el.querySelector('.custom-marker');
+    dot?.classList.remove('pulse');
+    void dot?.offsetWidth;
+    dot?.classList.add('pulse');
+    setTimeout(() => dot?.classList.remove('pulse'), 1600);
   }
-  // 全て失敗した場合
-  document.getElementById('map').insertAdjacentHTML('afterbegin', `
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      z-index:9999;background:rgba(20,15,8,0.95);border:1px solid #c9921a;
-      padding:2rem 2.5rem;border-radius:4px;text-align:center;font-family:'Noto Serif JP',serif;color:#f5f0e8;">
-      <div style="color:#e8b84b;font-size:1.1rem;margin-bottom:0.75rem">データ読み込みエラー</div>
-      <div style="font-size:0.75rem;color:#8a9aaa;line-height:1.7">
-        <code>data/castles.json</code> が見つかりません。<br>
-        GitHub Pages にアップロードするか、<br>
-        ローカルでは簡易サーバーを起動してください。<br><br>
-        <code style="color:#c9921a">python3 -m http.server 8000</code>
-      </div>
-    </div>
-  `);
-  return [];
+  // open popup
+  marker.openPopup();
+  // scroll list
+  const listItem = document.querySelector(`.work-item[data-id="${id}"]`);
+  listItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// ── 現存天守リスト ──
-function buildExistingList(castles) {
-  const existing = castles.filter(c => c.tenshukaku === 'existing');
-  const el = document.getElementById('existing-list');
-  el.innerHTML = existing.map(c => `
-    <div class="existing-item" data-id="${c.id}">
-      <span class="existing-dot"></span>
-      ${c.nameJa}
-      <span class="existing-pref">${c.prefecture}</span>
-    </div>
-  `).join('');
+// ── BUILD LIST ────────────────────────────────────────
+function buildList(filteredWorks) {
+  const list = document.getElementById('work-list');
+  const noRes = document.getElementById('no-results');
+  const countEl = document.getElementById('visible-count');
 
-  el.querySelectorAll('.existing-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const id = parseInt(item.dataset.id);
-      const castle = castles.find(c => c.id === id);
-      if (!castle) return;
-      map.setView([castle.lat, castle.lng], 12, { animate: true });
-      // マーカーのポップアップを開く
-      const marker = markers[allCastles.findIndex(c => c.id === id)];
-      if (marker) setTimeout(() => marker.openPopup(), 600);
+  list.innerHTML = '';
+  countEl.textContent = filteredWorks.length;
+
+  if (filteredWorks.length === 0) {
+    noRes.style.display = 'block';
+    return;
+  }
+  noRes.style.display = 'none';
+
+  filteredWorks.forEach(w => {
+    const color = CAT_COLOR[w.category] || '#888';
+    const div = document.createElement('div');
+    div.className = 'work-item' + (w.id === activeId ? ' active' : '');
+    div.dataset.id = w.id;
+    div.innerHTML = `
+      <div class="work-dot" style="background:${color}"></div>
+      <div class="work-info">
+        <div class="work-name-ja">${w.name}</div>
+        ${w.nameJa ? `<div class="work-name-en">${w.nameJa}</div>` : ''}
+        <div class="work-meta">
+          <span class="tag tag-year">${w.year}</span>
+          <span class="tag" style="color:${color};background:${color}18">${w.category}</span>
+        </div>
+      </div>`;
+    div.addEventListener('click', () => {
+      map.setView([w.lat, w.lng], Math.max(map.getZoom(), 8), { animate: true });
+      selectWork(w.id);
     });
+    list.appendChild(div);
   });
 }
 
-// ── フィルターボタン ──
-function setupFilters(scope) {
-  document.querySelectorAll(`${scope} [data-filter="list"]`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-filter="list"]').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll(`[data-filter="list"][data-value="${btn.dataset.value}"]`).forEach(b => b.classList.add('active'));
-      filterList = btn.dataset.value;
-      applyFilters();
-    });
+// ── FILTER ────────────────────────────────────────────
+function applyFilters() {
+  const filtered = works.filter(w => {
+    if (filters.cat !== 'all' && w.category !== filters.cat) return false;
+    if (filters.access !== 'all' && w.access !== filters.access) return false;
+    if (filters.country !== 'all' && w.country !== filters.country) return false;
+    return true;
   });
 
-  document.querySelectorAll(`${scope} [data-filter="type"]`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll(`[data-filter="type"][data-value="${btn.dataset.value}"]`).forEach(b => b.classList.add('active'));
-      filterType = btn.dataset.value;
-      applyFilters();
-    });
+  works.forEach(w => {
+    const vis = filtered.includes(w);
+    if (vis) { if (!map.hasLayer(markers[w.id])) markers[w.id].addTo(map); }
+    else       { if (map.hasLayer(markers[w.id])) map.removeLayer(markers[w.id]); }
+
   });
+
+  buildList(filtered);
 }
 
-['#kokuho-toggle', '#kokuho-toggle-m'].forEach(id => {
-  const el = document.querySelector(id);
-  if (!el) return;
-  el.addEventListener('click', () => {
-    filterKokuho = !filterKokuho;
-    document.querySelectorAll('#kokuho-toggle, #kokuho-toggle-m').forEach(b => b.classList.toggle('active', filterKokuho));
+// ── CHIPS ─────────────────────────────────────────────
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const filterType = chip.dataset.filter;
+    const value = chip.dataset.value;
+
+    // deactivate siblings
+    document.querySelectorAll(`.chip[data-filter="${filterType}"]`).forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+
+    filters[filterType] = value;
     applyFilters();
   });
 });
 
-setupFilters('#filters-desktop');
-
-// モバイルモーダル
-document.getElementById('mobile-filter-open').addEventListener('click', () => {
-  document.getElementById('filter-modal').classList.add('open');
-  setupFilters('#filter-modal');
-});
-document.getElementById('filter-modal-close').addEventListener('click', () => {
-  document.getElementById('filter-modal').classList.remove('open');
-});
-
-// ── メイン初期化 ──
-(async () => {
-  const data = await loadData();
-  allCastles = data;
-
-  data.forEach((castle, i) => {
-    const marker = L.marker([castle.lat, castle.lng], {
-      icon: makeIcon(castle),
-      title: castle.nameJa,
+// ── INIT (fetch data/sugimoto.json) ───────────────────
+fetch('data/sugimoto.json')
+  .then(r => r.json())
+  .then(data => {
+    works = data;
+    works.forEach(w => {
+      // USA works: place at lng+360 so they appear east of Japan on the map.
+      // All other works: place at original coordinates.
+      const placeLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
+      const marker = L.marker([w.lat, placeLng], { icon: makeIcon(w) });
+      marker.bindPopup(popupHTML(w), {
+        maxWidth: 280, minWidth: 260,
+        className: 'sugimoto-popup',
+        closeButton: true
+      });
+      marker.on('click', () => selectWork(w.id));
+      marker.on('mouseover', () => {
+        const el = marker.getElement();
+        if (el) el.querySelector('.custom-marker')?.classList.add('hover');
+      });
+      marker.on('mouseout', () => {
+        const el = marker.getElement();
+        if (el) el.querySelector('.custom-marker')?.classList.remove('hover');
+      });
+      marker.addTo(map);
+      markers[w.id] = marker;
     });
-    marker.bindPopup(makePopup(castle), {
-      maxWidth: 280,
-      className: '',
-    });
-    markers.push(marker);
-    markerLayer.addLayer(marker);
+    document.querySelector('.count-badge').innerHTML =
+      `<span id="visible-count">${works.length}</span> / ${works.length} works`;
+    applyFilters();
+  })
+  .catch(err => {
+    console.error('Failed to load sugimoto.json:', err);
+    document.getElementById('no-results').textContent = 'Failed to load sugimoto.json.';
+    document.getElementById('no-results').style.display = 'block';
   });
-
-  buildExistingList(data);
-  updateRanking(data);
-  document.getElementById('stat-total').textContent = data.length;
-})();
-
 </script>
 </body>
 </html>
