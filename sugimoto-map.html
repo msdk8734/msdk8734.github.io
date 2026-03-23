@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>杉本博司 — パブリックアートマップ</title>
+  <title>Hiroshi Sugimoto — Public Art &amp; Architecture Map</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,13 +12,13 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --border: #222222;
-      --border-mid: #2e2e2e;
-      --text-primary: #e8e4dc;
-      --text-secondary: #888880;
-      --text-muted: #555550;
+      --bg: #141414;
+      --surface: #1c1c1c;
+      --border: #2a2a2a;
+      --border-mid: #383838;
+      --text-primary: #f0ece4;
+      --text-secondary: #9a9690;
+      --text-muted: #6a6a64;
       --accent: #c8b89a;
       --accent-dim: rgba(200,184,154,0.15);
 
@@ -150,7 +150,7 @@
       transition: background 0.12s;
       display: flex; gap: 10px; align-items: flex-start;
     }
-    .work-item:hover { background: rgba(255,255,255,0.03); }
+    .work-item:hover { background: rgba(255,255,255,0.05); }
     .work-item.active { background: var(--accent-dim); }
 
     .work-dot {
@@ -192,7 +192,7 @@
     }
 
     /* Leaflet tile override for dark */
-    .leaflet-tile { filter: brightness(0.2) grayscale(1) contrast(1.3); }
+    .leaflet-tile { filter: brightness(0.32) grayscale(1) contrast(1.2); }
     .leaflet-container { background: var(--bg); }
 
     /* Custom marker */
@@ -312,7 +312,7 @@
       position: absolute;
       top: 16px; right: 16px;
       z-index: 800;
-      background: rgba(17,17,17,0.92);
+      background: rgba(28,28,28,0.94);
       border: 1px solid var(--border);
       border-radius: 3px;
       padding: 12px 14px;
@@ -363,8 +363,8 @@
 
 <div id="header">
   <div class="logo">
-    <span class="logo-jp">杉本博司 パブリックアートマップ</span>
-    <span class="logo-en">Hiroshi Sugimoto — Public Works</span>
+    <span class="logo-jp">Hiroshi Sugimoto</span>
+    <span class="logo-en">Public Art &amp; Architecture Map</span>
   </div>
   <div class="count-badge">
     <span id="visible-count">14</span> / 14 works
@@ -375,50 +375,50 @@
   <div id="sidebar">
     <div id="filters">
       <div>
-        <div class="filter-label">カテゴリ</div>
+        <div class="filter-label">Category</div>
         <div class="chip-group">
-          <button class="chip active" data-filter="cat" data-value="all">すべて</button>
-          <button class="chip" data-filter="cat" data-cat="architecture" data-value="architecture">建築</button>
-          <button class="chip" data-filter="cat" data-cat="sculpture" data-value="sculpture">彫刻</button>
-          <button class="chip" data-filter="cat" data-cat="installation" data-value="installation">インスタレーション</button>
+          <button class="chip active" data-filter="cat" data-value="all">All</button>
+          <button class="chip" data-filter="cat" data-cat="architecture" data-value="architecture">Architecture</button>
+          <button class="chip" data-filter="cat" data-cat="sculpture" data-value="sculpture">Sculpture</button>
+          <button class="chip" data-filter="cat" data-cat="installation" data-value="installation">Installation</button>
         </div>
       </div>
       <div>
-        <div class="filter-label">公開状況</div>
+        <div class="filter-label">Access</div>
         <div class="chip-group">
-          <button class="chip active" data-filter="access" data-value="all">すべて</button>
-          <button class="chip" data-filter="access" data-access="public" data-value="public">常時公開</button>
-          <button class="chip" data-filter="access" data-access="reservation" data-value="reservation">要予約</button>
-          <button class="chip" data-filter="access" data-access="limited" data-value="limited">条件付き</button>
+          <button class="chip active" data-filter="access" data-value="all">All</button>
+          <button class="chip" data-filter="access" data-access="public" data-value="public">Public</button>
+          <button class="chip" data-filter="access" data-access="reservation" data-value="reservation">Reservation</button>
+          <button class="chip" data-filter="access" data-access="limited" data-value="limited">Limited</button>
         </div>
       </div>
       <div>
-        <div class="filter-label">地域</div>
+        <div class="filter-label">Region</div>
         <div class="chip-group">
-          <button class="chip active" data-filter="country" data-value="all">すべて</button>
-          <button class="chip" data-filter="country" data-value="Japan">日本</button>
-          <button class="chip" data-filter="country" data-value="USA">アメリカ</button>
-          <button class="chip" data-filter="country" data-value="France">フランス</button>
-          <button class="chip" data-filter="country" data-value="Italy">イタリア</button>
+          <button class="chip active" data-filter="country" data-value="all">All</button>
+          <button class="chip" data-filter="country" data-value="Japan">Japan</button>
+          <button class="chip" data-filter="country" data-value="USA">USA</button>
+          <button class="chip" data-filter="country" data-value="France">France</button>
+          <button class="chip" data-filter="country" data-value="Italy">Italy</button>
         </div>
       </div>
     </div>
 
     <div id="work-list"></div>
-    <div id="no-results">該当する作品がありません</div>
+    <div id="no-results">No works match the current filters.</div>
   </div>
 
   <div id="map">
     <div id="legend">
-      <div class="legend-title">カテゴリ</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-architecture)"></div><span class="legend-text">建築 Architecture</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-sculpture)"></div><span class="legend-text">彫刻 Sculpture</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-installation)"></div><span class="legend-text">インスタレーション</span></div>
+      <div class="legend-title">Category</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-architecture)"></div><span class="legend-text">Architecture</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-sculpture)"></div><span class="legend-text">Sculpture</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-installation)"></div><span class="legend-text">Installation</span></div>
       <div class="legend-sep"></div>
-      <div class="legend-title">公開状況</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-public); border-radius:2px;"></div><span class="legend-text">常時公開</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-reservation); border-radius:2px;"></div><span class="legend-text">要予約</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-limited); border-radius:2px;"></div><span class="legend-text">条件付き</span></div>
+      <div class="legend-title">Access</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-public); border-radius:2px;"></div><span class="legend-text">Public</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-reservation); border-radius:2px;"></div><span class="legend-text">Reservation required</span></div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--access-limited); border-radius:2px;"></div><span class="legend-text">Limited access</span></div>
     </div>
   </div>
 </div>
@@ -434,9 +434,9 @@ const CAT_COLOR = {
   installation: '#b89ac8'
 };
 const ACCESS_LABEL = {
-  public:      '常時公開',
-  reservation: '要予約',
-  limited:     '条件付き'
+  public:      'Public',
+  reservation: 'Reservation required',
+  limited:     'Limited access'
 };
 const ACCESS_COLOR = {
   public:      '#9ac8b0',
@@ -447,9 +447,12 @@ const ACCESS_COLOR = {
 // ── MAP INIT ──────────────────────────────────────────
 const map = L.map('map', {
   center: [35.5, 138],
-  zoom: 4,
+  zoom: 3,
   zoomControl: false,
-  attributionControl: false
+  attributionControl: false,
+  worldCopyJump: false,
+  maxBounds: [[-60, -30], [75, 200]],
+  maxBoundsViscosity: 0.85
 });
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -482,8 +485,8 @@ function popupHTML(w) {
   const accessColor = ACCESS_COLOR[w.access] || '#888';
   return `<div class="popup-inner">
     <div class="popup-cat-bar" style="background:${catColor}"></div>
-    <div class="popup-name-ja">${w.nameJa}</div>
-    <div class="popup-name-en">${w.name}</div>
+    <div class="popup-name-ja">${w.name}</div>
+    ${w.nameJa ? `<div class="popup-name-en">${w.nameJa}</div>` : ''}
     <div class="popup-divider"></div>
     <div class="popup-row">
       <span class="popup-row-key">Year</span>
@@ -555,8 +558,8 @@ function buildList(filteredWorks) {
     div.innerHTML = `
       <div class="work-dot" style="background:${color}"></div>
       <div class="work-info">
-        <div class="work-name-ja">${w.nameJa}</div>
-        <div class="work-name-en">${w.name}</div>
+        <div class="work-name-ja">${w.name}</div>
+        ${w.nameJa ? `<div class="work-name-en">${w.nameJa}</div>` : ''}
         <div class="work-meta">
           <span class="tag tag-year">${w.year}</span>
           <span class="tag" style="color:${color};background:${color}18">${w.category}</span>
@@ -633,7 +636,7 @@ fetch('data/sugimoto.json')
   })
   .catch(err => {
     console.error('Failed to load sugimoto.json:', err);
-    document.getElementById('no-results').textContent = 'データの読み込みに失敗しました。';
+    document.getElementById('no-results').textContent = 'Failed to load sugimoto.json.';
     document.getElementById('no-results').style.display = 'block';
   });
 </script>
