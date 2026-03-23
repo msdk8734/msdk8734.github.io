@@ -128,6 +128,7 @@
     .chip[data-cat="architecture"].active  { border-color: var(--cat-architecture); color: var(--cat-architecture); background: rgba(200,184,154,0.12); }
     .chip[data-cat="sculpture"].active     { border-color: var(--cat-sculpture);    color: var(--cat-sculpture);    background: rgba(154,184,200,0.12); }
     .chip[data-cat="installation"].active  { border-color: var(--cat-installation); color: var(--cat-installation); background: rgba(184,154,200,0.12); }
+    .chip[data-cat="permanent-collection"].active { border-color: var(--cat-permanent); color: var(--cat-permanent); background: rgba(154,200,176,0.12); }
     .chip[data-access="public"].active     { border-color: var(--access-public);      color: var(--access-public);      background: rgba(154,200,176,0.12); }
     .chip[data-access="reservation"].active{ border-color: var(--access-reservation); color: var(--access-reservation); background: rgba(200,184,154,0.12); }
     .chip[data-access="limited"].active    { border-color: var(--access-limited);     color: var(--access-limited);     background: rgba(200,160,154,0.12); }
@@ -351,6 +352,7 @@
           <button class="chip" data-filter="cat" data-cat="architecture" data-value="architecture">Architecture</button>
           <button class="chip" data-filter="cat" data-cat="sculpture" data-value="sculpture">Sculpture</button>
           <button class="chip" data-filter="cat" data-cat="installation" data-value="installation">Installation</button>
+          <button class="chip" data-filter="cat" data-cat="permanent-collection" data-value="permanent-collection">Collection</button>
         </div>
       </div>
       <div>
@@ -397,9 +399,10 @@ let works = [];
 
 // ── COLORS ────────────────────────────────────────────
 const CAT_COLOR = {
-  architecture: '#c8b89a',
-  sculpture:    '#9ab8c8',
-  installation: '#b89ac8'
+  architecture:        '#c8b89a',
+  sculpture:           '#9ab8c8',
+  installation:        '#b89ac8',
+  'permanent-collection': '#9ac8b0'
 };
 const ACCESS_LABEL = {
   public:      'Public',
