@@ -451,8 +451,8 @@ const map = L.map('map', {
   zoomControl: false,
   attributionControl: false,
   worldCopyJump: false,
-  maxBounds: [[-75, 10], [80, 310]],
-  maxBoundsViscosity: 0.7
+  maxBounds: [[-80, -30], [85, 330]],
+  maxBoundsViscosity: 0.6
 });
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -586,12 +586,7 @@ function applyFilters() {
     const vis = filtered.includes(w);
     if (vis) { if (!map.hasLayer(markers[w.id])) markers[w.id].addTo(map); }
     else       { if (map.hasLayer(markers[w.id])) map.removeLayer(markers[w.id]); }
-    // sync east duplicate for USA works
-    const eastKey = 'east_' + w.id;
-    if (markers[eastKey]) {
-      if (vis) { if (!map.hasLayer(markers[eastKey])) markers[eastKey].addTo(map); }
-      else     { if (map.hasLayer(markers[eastKey])) map.removeLayer(markers[eastKey]); }
-    }
+
   });
 
   buildList(filtered);
@@ -618,7 +613,10 @@ fetch('data/sugimoto.json')
   .then(data => {
     works = data;
     works.forEach(w => {
-      const marker = L.marker([w.lat, w.lng], { icon: makeIcon(w) });
+      // USA works: place at lng+360 so they appear east of Japan on the map.
+      // All other works: place at original coordinates.
+      const placeLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
+      const marker = L.marker([w.lat, placeLng], { icon: makeIcon(w) });
       marker.bindPopup(popupHTML(w), {
         maxWidth: 280, minWidth: 260,
         className: 'sugimoto-popup',
@@ -635,20 +633,6 @@ fetch('data/sugimoto.json')
       });
       marker.addTo(map);
       markers[w.id] = marker;
-
-      // For USA works: also place a duplicate marker at lng+360 so they're
-      // visible when navigating eastward from Japan (within maxBounds 280°)
-      if (w.country === 'USA') {
-        const markerEast = L.marker([w.lat, w.lng + 360], { icon: makeIcon(w) });
-        markerEast.bindPopup(popupHTML(w), {
-          maxWidth: 280, minWidth: 260,
-          className: 'sugimoto-popup',
-          closeButton: true
-        });
-        markerEast.on('click', () => selectWork(w.id));
-        markerEast.addTo(map);
-        markers['east_' + w.id] = markerEast;
-      }
     });
     document.querySelector('.count-badge').innerHTML =
       `<span id="visible-count">${works.length}</span> / ${works.length} works`;
