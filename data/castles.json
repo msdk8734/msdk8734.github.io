@@ -89,8 +89,8 @@
     "tower_status": "existing",
     "is_national_treasure": false,
     "built_year": 1611,
-    "lat": 40.60783,
-    "lng": 140.46533,
+    "lat": 40.60794874512902,
+    "lng": 140.46365310087165,
     "coordinate_type": "site_center",
     "locations": {
       "site_center": {
