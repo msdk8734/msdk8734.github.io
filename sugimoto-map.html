@@ -586,7 +586,7 @@ function buildList(filteredWorks) {
       </div>`;
     div.addEventListener('click', () => {
       const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
-      map.flyTo([w.lat, mapLng], 13, { animate: true, duration: 1.2 });
+      map.flyTo([w.lat, mapLng], 17, { animate: true, duration: 1.4 });
       map.once('moveend', () => { selectWork(w.id); });
     });
     list.appendChild(div);
