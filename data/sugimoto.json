@@ -144,8 +144,8 @@
     "country": "USA",
     "category": "sculpture",
     "access": "public",
-    "lat": 37.810502327244436,
-    "lng": -122.36883000612796,
+    "lat": 37.810462395585034,
+    "lng": -122.36890970134446,
     "description": "A stainless steel sculpture approximately 21 meters tall, installed on a hilltop overlooking San Francisco Bay. Also functions as a sundial. Sugimoto's first large-scale public sculpture in the United States.",
     "url": "https://www.sfartscommission.org/our-role-impact/press-room/press-release/new-monumental-sculpture-internationally-renowned-artist"
   },
@@ -204,8 +204,8 @@
     "country": "Italy",
     "category": "installation",
     "access": "limited",
-    "lat": 43.4386111,
-    "lng": 11.3947222,
+    "lat": 43.44142916156772,
+    "lng": 11.390090428144026,
     "description": "A permanent installation inside an 18th-century chapel at the winery. Mathematical model sculptures in marble and stainless steel are placed within the sacred space, meditating on zero as both nothingness and origin.",
     "url": "https://castellodiama.com/en/the-artists/hiroshi-sugimoto/"
   },
