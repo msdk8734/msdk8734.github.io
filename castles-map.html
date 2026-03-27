@@ -344,7 +344,7 @@
 <header>
   <div class="h-title">
     <h1>🏯 Japanese Castle Map</h1>
-    <div class="sub">Best 100 Castles &amp; Next 100</div>
+    <div class="sub">100 Famous Castles &amp; The Next 100</div>
   </div>
   <div class="hdiv"></div>
 
@@ -352,8 +352,8 @@
     <div class="fgrp">
       <span class="flabel">List</span>
       <button class="fbtn on" data-f="list" data-v="all">All</button>
-      <button class="fbtn"    data-f="list" data-v="100">Best 100</button>
-      <button class="fbtn"    data-f="list" data-v="continued_100">Next 100</button>
+      <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
+      <button class="fbtn"    data-f="list" data-v="continued_100">The Next 100</button>
     </div>
     <div class="hdiv"></div>
     <div class="fgrp">
@@ -496,7 +496,7 @@ function makePopup(c) {
 
   return `<div class="pop-head">
     <div class="pop-badges">
-      <span class="pop-badge ${c.list_type==='100'?'pb-100':'pb-zoku'}">${c.list_type==='100'?'Best 100':'Next 100'} · No.${c.number}</span>
+      <span class="pop-badge ${c.list_type==='100'?'pb-100':'pb-zoku'}">${c.list_type==='100'?'100 Famous':'The Next 100'} · No.${c.number}</span>
       ${c.is_national_treasure?'<span class="pop-badge pb-nat">National Treasure</span>':''}
     </div>
     <div class="pop-en">${c.name_en}</div>
@@ -642,8 +642,8 @@ function buildExList(castles) {
       const idx=allCastles.findIndex(c=>c.id===id);
       if(idx<0) return;
       const c=allCastles[idx];
-      map.setView([c.lat,c.lng],13,{animate:true});
-      setTimeout(()=>markers[idx].openPopup(),500);
+      map.flyTo([c.lat,c.lng], 17, {animate:true, duration:1.2});
+      setTimeout(()=>markers[idx].openPopup(), 1300);
     });
   });
 }
@@ -703,11 +703,18 @@ async function loadData() {
 (async()=>{
   const data=await loadData();
   allCastles=data;
-  data.forEach(c=>{
+  data.forEach((c, idx)=>{
     const m=L.marker([c.lat,c.lng],{icon:makeIcon(c),title:c.name_en});
     m.bindPopup(makePopup(c),{maxWidth:300});
-    // ② タッチデバイスでもポップアップが確実に開くよう click と touchend 両方に対応
-    m.on('click', function() { this.openPopup(); });
+    m.on('click', function() {
+      const currentZoom = map.getZoom();
+      if (currentZoom < 17) {
+        map.flyTo([c.lat, c.lng], 17, {animate:true, duration:1.2});
+        setTimeout(()=>this.openPopup(), 1300);
+      } else {
+        this.openPopup();
+      }
+    });
     markers.push(m);
     layer.addLayer(m);
   });
