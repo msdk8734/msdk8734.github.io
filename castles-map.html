@@ -247,6 +247,29 @@
     /* ── Map tile darkening ── */
     .leaflet-tile { filter: brightness(0.7) saturate(0.5) hue-rotate(185deg); }
 
+    /* ── 地図上リセットボタン ── */
+    .leaflet-reset-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--gold-light);
+      font-size: 1.1rem;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s, color 0.15s;
+      margin-top: 4px;
+    }
+    .leaflet-reset-btn:hover {
+      background: var(--gold);
+      color: var(--ink);
+      border-color: var(--gold);
+    }
+
     /* ── Mobile ── */
     @media (max-width:680px) {
       .leaflet-tile { filter: brightness(0.88) saturate(0.55) hue-rotate(185deg); }
@@ -365,6 +388,8 @@
     </div>
     <div class="hdiv"></div>
     <button class="fbtn" id="nat-btn">Nat. Treasure only</button>
+    <div class="hdiv"></div>
+    <button class="fbtn" id="reset-btn" title="Reset to full Japan view">⌂ Reset View</button>
   </div>
 </header>
 
@@ -510,12 +535,37 @@ function makePopup(c) {
   </div>`;
 }
 
-// Map
-const map = L.map('map', {center:[36.2,137.0], zoom:5});
+const INITIAL_CENTER = [36.2, 137.0];
+const INITIAL_ZOOM   = 5;
+
+const map = L.map('map', {center:INITIAL_CENTER, zoom:INITIAL_ZOOM});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a> | Castle data: <a href="https://www.jokaku.jp" target="_blank">公益財団法人 日本城郭協会</a>',
   maxZoom:18,
 }).addTo(map);
+
+// ── リセット関数 ─────────────────────────────
+function resetView() {
+  map.flyTo(INITIAL_CENTER, INITIAL_ZOOM, {animate:true, duration:1.0});
+}
+
+// ヘッダーのリセットボタン
+document.getElementById('reset-btn').addEventListener('click', resetView);
+
+// 地図上にも常時表示されるリセットボタン（スマホ用）
+const ResetControl = L.Control.extend({
+  options: { position: 'topleft' },
+  onAdd() {
+    const btn = L.DomUtil.create('button', 'leaflet-reset-btn');
+    btn.innerHTML = '⌂';
+    btn.title = 'Reset to full Japan view';
+    L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+    L.DomEvent.on(btn, 'click', L.DomEvent.preventDefault);
+    L.DomEvent.on(btn, 'click', resetView);
+    return btn;
+  }
+});
+new ResetControl().addTo(map);
 
 // モバイル時: ボトムパネルの高さ分だけLeafletの表示領域を上にずらす
 function adjustMapForPanel() {
