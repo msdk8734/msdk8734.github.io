@@ -193,7 +193,7 @@
     }
 
     /* Leaflet tile override for dark */
-    .leaflet-tile { filter: brightness(0.32) grayscale(1) contrast(1.2); }
+  
     .leaflet-container { background: var(--bg); }
 
     /* Custom marker */
@@ -415,8 +415,9 @@ const map = L.map('map', {
   maxBoundsViscosity: 0.6
 });
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+  subdomains: 'abcd'
 }).addTo(map);
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
