@@ -194,7 +194,8 @@
 
     /* Leaflet tile override for dark */
   
-    .leaflet-container { background: var(--bg); }
+    .leaflet-tile { filter: brightness(0.38) grayscale(1) contrast(1.1); }
+  .leaflet-container { background: var(--bg); }
 
     /* ── INFO PANEL (fixed top-right) ──────────────────── */
     #info-panel {
@@ -443,9 +444,8 @@ const map = L.map('map', {
   maxBoundsViscosity: 0.6
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_matter_lite/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-  subdomains: 'abcd'
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18
 }).addTo(map);
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
