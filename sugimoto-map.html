@@ -534,10 +534,19 @@ function buildList(filteredWorks) {
         </div>
       </div>`;
     div.addEventListener('click', () => {
-      // For USA works the marker is placed at lng+360
       const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
       map.flyTo([w.lat, mapLng], 13, { animate: true, duration: 1.2 });
-      selectWork(w.id);
+      // After animation, pan so the marker sits in the lower-center of the
+      // viewport — leaving room above for the popup (~220px tall)
+      map.once('moveend', () => {
+        const targetPoint = map.project([w.lat, mapLng], map.getZoom());
+        const mapHeight = map.getSize().y;
+        // Shift the point upward by 25% of map height so popup fits above marker
+        const offsetPoint = targetPoint.add([0, mapHeight * 0.22]);
+        const offsetLatLng = map.unproject(offsetPoint, map.getZoom());
+        map.panTo(offsetLatLng, { animate: true, duration: 0.3 });
+        selectWork(w.id);
+      });
     });
     list.appendChild(div);
   });
