@@ -367,7 +367,7 @@
 <header>
   <div class="h-title">
     <h1>🏯 Japanese Castle Map</h1>
-    <div class="sub">100 Famous Castles &amp; The Next 100</div>
+    <div class="sub">BEST 100 Castles &amp; NEXT 100</div>
   </div>
   <div class="hdiv"></div>
 
@@ -375,8 +375,8 @@
     <div class="fgrp">
       <span class="flabel">List</span>
       <button class="fbtn on" data-f="list" data-v="all">All</button>
-      <button class="fbtn"    data-f="list" data-v="100">100 Famous</button>
-      <button class="fbtn"    data-f="list" data-v="continued_100">The Next 100</button>
+      <button class="fbtn"    data-f="list" data-v="100">BEST 100</button>
+      <button class="fbtn"    data-f="list" data-v="continued_100">NEXT 100</button>
     </div>
     <div class="hdiv"></div>
     <div class="fgrp">
@@ -521,7 +521,7 @@ function makePopup(c) {
 
   return `<div class="pop-head">
     <div class="pop-badges">
-      <span class="pop-badge ${c.list_type==='100'?'pb-100':'pb-zoku'}">${c.list_type==='100'?'100 Famous':'The Next 100'} · No.${c.number}</span>
+      <span class="pop-badge ${c.list_type==='100'?'pb-100':'pb-zoku'}">${c.list_type==='100'?'BEST 100':'NEXT 100'} · No.${c.number}</span>
       ${c.is_national_treasure?'<span class="pop-badge pb-nat">National Treasure</span>':''}
     </div>
     <div class="pop-en">${c.name_en}</div>
