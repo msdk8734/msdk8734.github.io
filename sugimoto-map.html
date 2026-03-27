@@ -537,7 +537,9 @@ function buildList(filteredWorks) {
         </div>
       </div>`;
     div.addEventListener('click', () => {
-      map.setView([w.lat, w.lng], Math.max(map.getZoom(), 8), { animate: true });
+      // For USA works the marker is placed at lng+360
+      const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
+      map.flyTo([w.lat, mapLng], 13, { animate: true, duration: 1.2 });
       selectWork(w.id);
     });
     list.appendChild(div);
