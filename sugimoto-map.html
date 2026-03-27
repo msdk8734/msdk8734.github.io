@@ -497,6 +497,13 @@ function selectWork(id) {
 
 // ── BUILD LIST ────────────────────────────────────────
 function buildList(filteredWorks) {
+  const countryOrder = { 'Japan': 0, 'USA': 1, 'France': 2, 'Italy': 3 };
+  filteredWorks = [...filteredWorks].sort((a, b) => {
+    const ca = countryOrder[a.country] ?? 99;
+    const cb = countryOrder[b.country] ?? 99;
+    if (ca !== cb) return ca - cb;
+    return a.year - b.year;
+  });
   const list = document.getElementById('work-list');
   const noRes = document.getElementById('no-results');
   const countEl = document.getElementById('visible-count');
