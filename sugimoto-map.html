@@ -196,6 +196,33 @@
   
     .leaflet-container { background: var(--bg); }
 
+    /* ── INFO PANEL (fixed top-right) ──────────────────── */
+    #info-panel {
+      position: absolute;
+      top: 68px; right: 16px;
+      width: 260px;
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      border-radius: 3px;
+      z-index: 900;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+      display: none;
+      max-height: calc(100% - 88px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-mid) transparent;
+    }
+    #info-panel.visible { display: block; }
+    #info-panel-close {
+      position: absolute;
+      top: 8px; right: 10px;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-size: 16px; line-height: 1;
+      cursor: pointer; padding: 0;
+    }
+    #info-panel-close:hover { color: var(--text-primary); }
+
     /* Custom marker */
     .custom-marker {
       width: 12px; height: 12px;
@@ -378,6 +405,7 @@
   </div>
 
   <div id="map">
+    <div id="info-panel"><button id="info-panel-close">✕</button><div id="info-panel-content"></div></div>
     </div>
   </div>
 </div>
@@ -471,6 +499,27 @@ function popupHTML(w) {
 }
 
 // ── SELECT WORK ───────────────────────────────────────
+function showInfoPanel(w) {
+  const catColor = CAT_COLOR[w.category] || '#888';
+  const accessColor = ACCESS_COLOR[w.access] || '#888';
+  document.getElementById('info-panel-content').innerHTML = `
+    <div class="popup-inner">
+      <div class="popup-cat-bar" style="background:${catColor}"></div>
+      <div class="popup-name-ja">${w.name}</div>
+      ${w.nameJa ? `<div class="popup-name-en">${w.nameJa}</div>` : ''}
+      <div class="popup-divider"></div>
+      <div class="popup-row"><span class="popup-row-key">Year</span><span class="popup-row-val">${w.year}</span></div>
+      <div class="popup-row"><span class="popup-row-key">Category</span><span class="popup-row-val" style="color:${catColor}">${w.category}</span></div>
+      <div class="popup-row"><span class="popup-row-key">Access</span><span class="popup-row-val" style="color:${accessColor}">${ACCESS_LABEL[w.access]}</span></div>
+      <div class="popup-row"><span class="popup-row-key">Location</span><span class="popup-row-val" style="max-width:140px;white-space:normal;font-size:9px">${w.location}</span></div>
+      <div class="popup-desc">${w.description}</div>
+      ${w.url ? `<a class="popup-link" href="${w.url}" target="_blank" rel="noopener">Learn more →</a>` : ''}
+    </div>`;
+  const panel = document.getElementById('info-panel');
+  panel.classList.add('visible');
+  panel.scrollTop = 0;
+}
+
 function selectWork(id) {
   activeId = id;
   // sidebar highlight
@@ -489,8 +538,10 @@ function selectWork(id) {
     dot?.classList.add('pulse');
     setTimeout(() => dot?.classList.remove('pulse'), 1600);
   }
-  // open popup
-  marker.openPopup();
+
+  // show info panel
+  const w2 = works.find(x => x.id === id);
+  if (w2) showInfoPanel(w2);
   // scroll list
   const listItem = document.querySelector(`.work-item[data-id="${id}"]`);
   listItem?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -536,17 +587,7 @@ function buildList(filteredWorks) {
     div.addEventListener('click', () => {
       const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
       map.flyTo([w.lat, mapLng], 13, { animate: true, duration: 1.2 });
-      // After animation, pan so the marker sits in the lower-center of the
-      // viewport — leaving room above for the popup (~220px tall)
-      map.once('moveend', () => {
-        const targetPoint = map.project([w.lat, mapLng], map.getZoom());
-        const mapHeight = map.getSize().y;
-        // Shift the point upward by 25% of map height so popup fits above marker
-        const offsetPoint = targetPoint.add([0, mapHeight * 0.22]);
-        const offsetLatLng = map.unproject(offsetPoint, map.getZoom());
-        map.panTo(offsetLatLng, { animate: true, duration: 0.3 });
-        selectWork(w.id);
-      });
+      map.once('moveend', () => { selectWork(w.id); });
     });
     list.appendChild(div);
   });
@@ -586,6 +627,13 @@ document.querySelectorAll('.chip').forEach(chip => {
   });
 });
 
+// ── INFO PANEL CLOSE ─────────────────────────────────
+document.getElementById('info-panel-close').addEventListener('click', () => {
+  document.getElementById('info-panel').classList.remove('visible');
+  activeId = null;
+  document.querySelectorAll('.work-item').forEach(el => el.classList.remove('active'));
+});
+
 // ── INIT (fetch data/sugimoto.json) ───────────────────
 fetch('data/sugimoto.json')
   .then(r => r.json())
@@ -596,11 +644,6 @@ fetch('data/sugimoto.json')
       // All other works: place at original coordinates.
       const placeLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
       const marker = L.marker([w.lat, placeLng], { icon: makeIcon(w) });
-      marker.bindPopup(popupHTML(w), {
-        maxWidth: 280, minWidth: 260,
-        className: 'sugimoto-popup',
-        closeButton: true
-      });
       marker.on('click', () => selectWork(w.id));
       marker.on('mouseover', () => {
         const el = marker.getElement();
