@@ -308,15 +308,12 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.7);
     }
 
-    .legend-sep {
-      height: 1px; background: var(--border);
-      margin: 8px 0;
-    }
+
 
     /* ── MOBILE ──────────────────────────────────────── */
     @media (max-width: 640px) {
       #sidebar { display: none; }
-      #legend { display: none; }
+  
     }
 
     /* no-results */
@@ -381,14 +378,6 @@
   </div>
 
   <div id="map">
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-architecture)"></div><span class="legend-text">Architecture</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-sculpture)"></div><span class="legend-text">Sculpture</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--cat-installation)"></div><span class="legend-text">Installation</span></div>
-      <div class="legend-sep"></div>
-      <div class="legend-title">Access</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-public); border-radius:2px;"></div><span class="legend-text">Public</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-reservation); border-radius:2px;"></div><span class="legend-text">Reservation required</span></div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--access-limited); border-radius:2px;"></div><span class="legend-text">Limited access</span></div>
     </div>
   </div>
 </div>
