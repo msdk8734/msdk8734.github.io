@@ -755,16 +755,30 @@ bottomHandle.addEventListener('click', () => {
 });
 
 let touchStartY = 0;
+let touchStartX = 0;
+let touchStartScrollTop = 0;
+let touchOnHandle = false;
+
 bottomSheet.addEventListener('touchstart', e => {
   touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  // Check if touch started on the handle area
+  touchOnHandle = !!e.target.closest('#bottom-sheet-handle');
+  // Record scroll position of the list at touch start
+  const list = document.getElementById('bottom-sheet-list');
+  touchStartScrollTop = list ? list.scrollTop : 0;
 }, { passive: true });
+
 bottomSheet.addEventListener('touchend', e => {
+  // Only allow stage change if touch started on the handle
+  if (!touchOnHandle) return;
+
   const dy = touchStartY - e.changedTouches[0].clientY;
   const s = sheetStage();
-  if (dy > 50) {
+  if (dy > 40) {
     if (s === 'peek') setSheetStage('half');
     else if (s === 'half') setSheetStage('open');
-  } else if (dy < -50) {
+  } else if (dy < -40) {
     if (s === 'open') setSheetStage('half');
     else if (s === 'half') setSheetStage('peek');
   }
