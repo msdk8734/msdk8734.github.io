@@ -370,17 +370,9 @@
         border-top: 1px solid var(--border-mid);
         border-radius: 14px 14px 0 0;
         box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
-        /* Always 80vh tall; transform slides it up/down */
-        height: 80vh;
         display: flex; flex-direction: column;
-        transform: translateY(calc(80vh - 48px));
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-      }
-      #bottom-sheet.half {
-        transform: translateY(calc(80vh - 40vh));
-      }
-      #bottom-sheet.open {
-        transform: translateY(0);
+        /* height and list max-height set by JS */
+        transition: height 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       }
       #bottom-sheet-handle {
         flex-shrink: 0;
@@ -401,10 +393,10 @@
         color: var(--text-muted);
       }
       #bottom-sheet-list {
-        flex: 1;
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: var(--border-mid) transparent;
+        /* max-height set dynamically by JS */
       }
       /* info panel: smaller on mobile */
       #info-panel {
@@ -716,6 +708,10 @@ document.querySelectorAll('.chip').forEach(chip => {
   });
 });
 
+// ── BOTTOM SHEET INIT ────────────────────────────────
+// Run after DOM ready so window.innerHeight is correct
+setTimeout(() => { setSheetStage('peek'); }, 0);
+
 // ── INFO PANEL CLOSE ─────────────────────────────────
 document.getElementById('info-panel-close').addEventListener('click', () => {
   document.getElementById('info-panel').classList.remove('visible');
@@ -738,16 +734,34 @@ const bottomSheet = document.getElementById('bottom-sheet');
 const bottomHandle = document.getElementById('bottom-sheet-handle');
 
 // 2-stage: peek → half → full (tap or swipe)
+const HANDLE_H = 48;
 function sheetStage() {
   if (bottomSheet.classList.contains('open')) return 'open';
   if (bottomSheet.classList.contains('half')) return 'half';
   return 'peek';
 }
 function setSheetStage(stage) {
+  const winH = window.innerHeight;
+  const halfH = Math.round(winH * 0.4);
+  const fullH = Math.round(winH * 0.8);
+  const list  = document.getElementById('bottom-sheet-list');
+
   bottomSheet.classList.remove('half', 'open');
-  if (stage === 'half') bottomSheet.classList.add('half');
-  if (stage === 'open') bottomSheet.classList.add('open');
+  if (stage === 'peek') {
+    bottomSheet.style.height = HANDLE_H + 'px';
+    if (list) list.style.maxHeight = '0px';
+  } else if (stage === 'half') {
+    bottomSheet.classList.add('half');
+    bottomSheet.style.height = halfH + 'px';
+    if (list) list.style.maxHeight = (halfH - HANDLE_H) + 'px';
+  } else {
+    bottomSheet.classList.add('open');
+    bottomSheet.style.height = fullH + 'px';
+    if (list) list.style.maxHeight = (fullH - HANDLE_H) + 'px';
+  }
 }
+// Init on load and on resize
+window.addEventListener('resize', () => { setSheetStage(sheetStage()); });
 bottomHandle.addEventListener('click', () => {
   const s = sheetStage();
   if (s === 'peek') setSheetStage('half');
