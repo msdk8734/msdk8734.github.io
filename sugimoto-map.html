@@ -93,45 +93,6 @@
     }
 
     /* filters */
-    #filters {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .filter-label {
-      font-size: 9px; font-weight: 400;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .chip-group {
-      display: flex; flex-wrap: wrap; gap: 5px;
-    }
-    .chip {
-      padding: 3px 10px;
-      border: 1px solid var(--border-mid);
-      border-radius: 2px;
-      font-size: 10px; font-weight: 400;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: all 0.15s;
-      color: var(--text-secondary);
-      background: transparent;
-      font-family: 'IBM Plex Sans', sans-serif;
-    }
-    .chip:hover { border-color: var(--accent); color: var(--text-primary); }
-    .chip.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .chip[data-cat="architecture"].active  { border-color: var(--cat-architecture); color: var(--cat-architecture); background: rgba(200,184,154,0.12); }
-    .chip[data-cat="sculpture"].active     { border-color: var(--cat-sculpture);    color: var(--cat-sculpture);    background: rgba(154,184,200,0.12); }
-    .chip[data-cat="installation"].active  { border-color: var(--cat-installation); color: var(--cat-installation); background: rgba(184,154,200,0.12); }
-    .chip[data-cat="permanent-collection"].active { border-color: var(--cat-permanent); color: var(--cat-permanent); background: rgba(154,200,176,0.12); }
-    .chip[data-access="public"].active     { border-color: var(--access-public);      color: var(--access-public);      background: rgba(154,200,176,0.12); }
-    .chip[data-access="reservation"].active{ border-color: var(--access-reservation); color: var(--access-reservation); background: rgba(200,184,154,0.12); }
-    .chip[data-access="limited"].active    { border-color: var(--access-limited);     color: var(--access-limited);     background: rgba(200,160,154,0.12); }
 
     /* work list */
     #work-list {
@@ -438,38 +399,6 @@
 
 <div id="app">
   <div id="sidebar">
-    <div id="filters">
-      <div>
-        <div class="filter-label">Category</div>
-        <div class="chip-group">
-          <button class="chip active" data-filter="cat" data-value="all">All</button>
-          <button class="chip" data-filter="cat" data-cat="architecture" data-value="architecture">Architecture</button>
-          <button class="chip" data-filter="cat" data-cat="sculpture" data-value="sculpture">Sculpture</button>
-          <button class="chip" data-filter="cat" data-cat="installation" data-value="installation">Installation</button>
-          <button class="chip" data-filter="cat" data-cat="permanent-collection" data-value="permanent-collection">Collection</button>
-        </div>
-      </div>
-      <div>
-        <div class="filter-label">Access</div>
-        <div class="chip-group">
-          <button class="chip active" data-filter="access" data-value="all">All</button>
-          <button class="chip" data-filter="access" data-access="public" data-value="public">Public</button>
-          <button class="chip" data-filter="access" data-access="reservation" data-value="reservation">Reservation</button>
-          <button class="chip" data-filter="access" data-access="limited" data-value="limited">Limited</button>
-        </div>
-      </div>
-      <div>
-        <div class="filter-label">Region</div>
-        <div class="chip-group">
-          <button class="chip active" data-filter="country" data-value="all">All</button>
-          <button class="chip" data-filter="country" data-value="Japan">Japan</button>
-          <button class="chip" data-filter="country" data-value="USA">USA</button>
-          <button class="chip" data-filter="country" data-value="France">France</button>
-          <button class="chip" data-filter="country" data-value="Italy">Italy</button>
-        </div>
-      </div>
-    </div>
-
     <div id="work-list"></div>
     <div id="no-results">No works match the current filters.</div>
   </div>
@@ -532,7 +461,6 @@ L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.control.attribution({ position: 'bottomleft', prefix: '© OpenStreetMap contributors' }).addTo(map);
 
 // ── STATE ─────────────────────────────────────────────
-let filters = { cat: 'all', access: 'all', country: 'all' };
 let activeId = null;
 const markers = {};
 
@@ -675,38 +603,11 @@ function buildList(filteredWorks) {
 
 // ── FILTER ────────────────────────────────────────────
 function applyFilters() {
-  const filtered = works.filter(w => {
-    if (filters.cat !== 'all' && w.category !== filters.cat) return false;
-    if (filters.access !== 'all' && w.access !== filters.access) return false;
-    if (filters.country !== 'all' && w.country !== filters.country) return false;
-    return true;
-  });
-
-  works.forEach(w => {
-    const vis = filtered.includes(w);
-    if (vis) { if (!map.hasLayer(markers[w.id])) markers[w.id].addTo(map); }
-    else       { if (map.hasLayer(markers[w.id])) map.removeLayer(markers[w.id]); }
-
-  });
-
-  buildList(filtered);
-  buildBottomSheetList(filtered);
+  buildList(works);
+  buildBottomSheetList(works);
 }
 
-// ── CHIPS ─────────────────────────────────────────────
-document.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    const filterType = chip.dataset.filter;
-    const value = chip.dataset.value;
 
-    // deactivate siblings
-    document.querySelectorAll(`.chip[data-filter="${filterType}"]`).forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-
-    filters[filterType] = value;
-    applyFilters();
-  });
-});
 
 // ── BOTTOM SHEET INIT ────────────────────────────────
 // Run after DOM ready so window.innerHeight is correct
