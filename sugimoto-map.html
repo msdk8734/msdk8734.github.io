@@ -65,12 +65,6 @@
       color: var(--text-secondary);
       font-family: 'IBM Plex Sans', sans-serif;
     }
-    #header .count-badge {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px; font-weight: 300;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-    }
     #header .count-badge span {
       color: var(--accent);
       font-weight: 400;
@@ -391,9 +385,6 @@
   <div class="logo">
     <span class="logo-jp">Hiroshi Sugimoto</span>
     <span class="logo-en">Public Art &amp; Architecture Map</span>
-  </div>
-  <div class="count-badge">
-    <span id="visible-count">14</span> / 14 works
   </div>
 </div>
 
@@ -762,8 +753,6 @@ fetch('data/sugimoto.json')
       marker.addTo(map);
       markers[w.id] = marker;
     });
-    document.querySelector('.count-badge').innerHTML =
-      `<span id="visible-count">${works.length}</span> / ${works.length} works`;
     applyFilters();
   })
   .catch(err => {
