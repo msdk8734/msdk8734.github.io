@@ -359,6 +359,7 @@
 
     @media (max-width: 640px) {
       #sidebar { display: none; }
+      .count-badge { display: none; }
 
       /* Bottom sheet */
       #bottom-sheet {
@@ -371,8 +372,11 @@
         box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
         transform: translateY(calc(100% - 48px));
         transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-        max-height: 80vh;
+        height: 80vh;
         display: flex; flex-direction: column;
+      }
+      #bottom-sheet.half {
+        transform: translateY(calc(100% - 40vh));
       }
       #bottom-sheet.open {
         transform: translateY(0);
@@ -409,6 +413,10 @@
       /* reset btn: above bottom sheet handle */
       #reset-btn {
         bottom: 56px;
+      }
+      /* Push leaflet zoom control up so minus button clears bottom sheet */
+      .leaflet-bottom.leaflet-right {
+        bottom: 56px !important;
       }
     }
 
@@ -721,25 +729,45 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   activeId = null;
   document.querySelectorAll('.work-item').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('#bottom-sheet-list .work-item').forEach(el => el.classList.remove('active'));
+  if (typeof setSheetStage === 'function') setSheetStage('peek');
 });
 
 // ── BOTTOM SHEET ──────────────────────────────────────
 const bottomSheet = document.getElementById('bottom-sheet');
 const bottomHandle = document.getElementById('bottom-sheet-handle');
 
+// 2-stage: peek → half → full (tap or swipe)
+function sheetStage() {
+  if (bottomSheet.classList.contains('open')) return 'open';
+  if (bottomSheet.classList.contains('half')) return 'half';
+  return 'peek';
+}
+function setSheetStage(stage) {
+  bottomSheet.classList.remove('half', 'open');
+  if (stage === 'half') bottomSheet.classList.add('half');
+  if (stage === 'open') bottomSheet.classList.add('open');
+}
 bottomHandle.addEventListener('click', () => {
-  bottomSheet.classList.toggle('open');
+  const s = sheetStage();
+  if (s === 'peek') setSheetStage('half');
+  else if (s === 'half') setSheetStage('open');
+  else setSheetStage('peek');
 });
 
-// Swipe up/down on handle
 let touchStartY = 0;
 bottomSheet.addEventListener('touchstart', e => {
   touchStartY = e.touches[0].clientY;
 }, { passive: true });
 bottomSheet.addEventListener('touchend', e => {
   const dy = touchStartY - e.changedTouches[0].clientY;
-  if (dy > 40) bottomSheet.classList.add('open');
-  if (dy < -40) bottomSheet.classList.remove('open');
+  const s = sheetStage();
+  if (dy > 50) {
+    if (s === 'peek') setSheetStage('half');
+    else if (s === 'half') setSheetStage('open');
+  } else if (dy < -50) {
+    if (s === 'open') setSheetStage('half');
+    else if (s === 'half') setSheetStage('peek');
+  }
 }, { passive: true });
 
 function buildBottomSheetList(filteredWorks) {
@@ -771,8 +799,8 @@ function buildBottomSheetList(filteredWorks) {
       const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
       map.flyTo([w.lat, mapLng], 17, { animate: true, duration: 1.4 });
       map.once('moveend', () => { selectWork(w.id); });
-      // Close sheet after tap
-      bottomSheet.classList.remove('open');
+      // Collapse sheet after tap
+      setSheetStage('peek');
     });
     list.appendChild(div);
   });
@@ -788,7 +816,11 @@ fetch('data/sugimoto.json')
       // All other works: place at original coordinates.
       const placeLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
       const marker = L.marker([w.lat, placeLng], { icon: makeIcon(w) });
-      marker.on('click', () => selectWork(w.id));
+      marker.on('click', () => {
+        const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
+        map.flyTo([w.lat, mapLng], 17, { animate: true, duration: 1.4 });
+        map.once('moveend', () => { selectWork(w.id); });
+      });
       marker.on('mouseover', () => {
         const el = marker.getElement();
         if (el) el.querySelector('.custom-marker')?.classList.add('hover');
