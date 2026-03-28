@@ -370,13 +370,14 @@
         border-top: 1px solid var(--border-mid);
         border-radius: 14px 14px 0 0;
         box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
-        transform: translateY(calc(100% - 48px));
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        /* Always 80vh tall; transform slides it up/down */
         height: 80vh;
         display: flex; flex-direction: column;
+        transform: translateY(calc(80vh - 48px));
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       }
       #bottom-sheet.half {
-        transform: translateY(calc(100% - 40vh));
+        transform: translateY(calc(80vh - 40vh));
       }
       #bottom-sheet.open {
         transform: translateY(0);
