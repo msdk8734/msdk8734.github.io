@@ -593,6 +593,42 @@ function buildList(filteredWorks) {
 }
 
 // ── FILTER ────────────────────────────────────────────
+function buildBottomSheetList(filteredWorks) {
+  const list = document.getElementById('bottom-sheet-list');
+  if (!list) return;
+  const countryOrder = { 'Japan': 0, 'USA': 1, 'France': 2, 'Italy': 3 };
+  const sorted = [...filteredWorks].sort((a, b) => {
+    const ca = countryOrder[a.country] ?? 99;
+    const cb = countryOrder[b.country] ?? 99;
+    return ca !== cb ? ca - cb : a.year - b.year;
+  });
+  list.innerHTML = '';
+  sorted.forEach(w => {
+    const color = CAT_COLOR[w.category] || '#888';
+    const div = document.createElement('div');
+    div.className = 'work-item' + (w.id === activeId ? ' active' : '');
+    div.dataset.id = w.id;
+    div.innerHTML = `
+      <div class="work-dot" style="background:${color}"></div>
+      <div class="work-info">
+        <div class="work-name-ja">${w.name}</div>
+        ${w.nameJa ? `<div class="work-name-en">${w.nameJa}</div>` : ''}
+        <div class="work-meta">
+          <span class="tag tag-year">${w.year}</span>
+          <span class="tag" style="color:${color};background:${color}18">${w.category}</span>
+        </div>
+      </div>`;
+    div.addEventListener('click', () => {
+      const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
+      map.flyTo([w.lat, mapLng], 17, { animate: true, duration: 1.4 });
+      map.once('moveend', () => { selectWork(w.id); });
+      // Collapse sheet after tap
+      setSheetStage('peek');
+    });
+    list.appendChild(div);
+  });
+}
+
 function applyFilters() {
   buildList(works);
   buildBottomSheetList(works);
@@ -691,41 +727,6 @@ bottomSheet.addEventListener('touchend', e => {
   }
 }, { passive: true });
 
-function buildBottomSheetList(filteredWorks) {
-  const list = document.getElementById('bottom-sheet-list');
-  if (!list) return;
-  const countryOrder = { 'Japan': 0, 'USA': 1, 'France': 2, 'Italy': 3 };
-  const sorted = [...filteredWorks].sort((a, b) => {
-    const ca = countryOrder[a.country] ?? 99;
-    const cb = countryOrder[b.country] ?? 99;
-    return ca !== cb ? ca - cb : a.year - b.year;
-  });
-  list.innerHTML = '';
-  sorted.forEach(w => {
-    const color = CAT_COLOR[w.category] || '#888';
-    const div = document.createElement('div');
-    div.className = 'work-item' + (w.id === activeId ? ' active' : '');
-    div.dataset.id = w.id;
-    div.innerHTML = `
-      <div class="work-dot" style="background:${color}"></div>
-      <div class="work-info">
-        <div class="work-name-ja">${w.name}</div>
-        ${w.nameJa ? `<div class="work-name-en">${w.nameJa}</div>` : ''}
-        <div class="work-meta">
-          <span class="tag tag-year">${w.year}</span>
-          <span class="tag" style="color:${color};background:${color}18">${w.category}</span>
-        </div>
-      </div>`;
-    div.addEventListener('click', () => {
-      const mapLng = (w.country === 'USA') ? w.lng + 360 : w.lng;
-      map.flyTo([w.lat, mapLng], 17, { animate: true, duration: 1.4 });
-      map.once('moveend', () => { selectWork(w.id); });
-      // Collapse sheet after tap
-      setSheetStage('peek');
-    });
-    list.appendChild(div);
-  });
-}
 
 // ── INIT (fetch data/sugimoto.json) ───────────────────
 fetch('data/sugimoto.json')
