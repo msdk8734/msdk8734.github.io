@@ -553,11 +553,7 @@ function buildList(filteredWorks) {
   });
   const list = document.getElementById('work-list');
   const noRes = document.getElementById('no-results');
-  const countEl = document.getElementById('visible-count');
-
   list.innerHTML = '';
-  countEl.textContent = filteredWorks.length;
-
   if (filteredWorks.length === 0) {
     noRes.style.display = 'block';
     return;
