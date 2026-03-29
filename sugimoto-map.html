@@ -12,24 +12,24 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #141414;
-      --surface: #1c1c1c;
-      --border: #2a2a2a;
-      --border-mid: #383838;
-      --text-primary: #f0ece4;
-      --text-secondary: #9a9690;
-      --text-muted: #6a6a64;
-      --accent: #c8b89a;
-      --accent-dim: rgba(200,184,154,0.15);
+      --bg: #888d8d;
+      --surface: #7a7f7f;
+      --border: #6e7373;
+      --border-mid: #7a8080;
+      --text-primary: #eeeeec;
+      --text-secondary: #d0d2d0;
+      --text-muted: #b0b4b2;
+      --accent: #7a9aa8;
+      --accent-dim: rgba(122,154,168,0.2);
 
-      --cat-architecture: #c8b89a;
-      --cat-sculpture:    #9ab8c8;
-      --cat-installation: #b89ac8;
-      --cat-permanent:    #9ac8b0;
+      --cat-architecture: #e8d8b8;
+      --cat-sculpture:    #a8c8d8;
+      --cat-installation: #c8a8d8;
+      --cat-permanent:    #a8d8c0;
 
-      --access-public:      #9ac8b0;
-      --access-reservation: #c8b89a;
-      --access-limited:     #c8a09a;
+      --access-public:      #a8d8c0;
+      --access-reservation: #e8d8b8;
+      --access-limited:     #d8a8a8;
     }
 
     html, body {
@@ -102,8 +102,8 @@
       transition: background 0.12s;
       display: flex; gap: 10px; align-items: flex-start;
     }
-    .work-item:hover { background: rgba(255,255,255,0.05); }
-    .work-item.active { background: var(--accent-dim); }
+    .work-item:hover { background: rgba(255,255,255,0.08); }
+    .work-item.active { background: rgba(122,154,168,0.2); }
 
     .work-dot {
       width: 7px; height: 7px;
@@ -145,8 +145,8 @@
 
     /* Leaflet tile override for dark */
   
-    .leaflet-tile { filter: brightness(0.38) grayscale(1) contrast(1.1); }
-  .leaflet-container { background: var(--bg); }
+    .leaflet-tile { filter: brightness(0.62) grayscale(0.8) contrast(1.0) saturate(0.6); }
+  .leaflet-container { background: #888d8d; }
 
     /* ── INFO PANEL (fixed top-right) ──────────────────── */
     #info-panel {
@@ -157,7 +157,7 @@
       border: 1px solid var(--border-mid);
       border-radius: 3px;
       z-index: 900;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
       display: none;
       max-height: calc(100% - 88px);
       overflow-y: auto;
@@ -284,7 +284,7 @@
       border-radius: 3px;
       z-index: 800;
       display: none;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
 
 
@@ -320,7 +320,7 @@
         background: var(--surface);
         border-top: 1px solid var(--border-mid);
         border-radius: 14px 14px 0 0;
-        box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
         display: flex; flex-direction: column;
         /* height and list max-height set by JS */
         transition: height 0.35s cubic-bezier(0.32, 0.72, 0, 1);
