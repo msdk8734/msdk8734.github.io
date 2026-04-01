@@ -1,0 +1,581 @@
+{
+  "source": {
+    "csv": "/Users/kohei/Desktop/starbucks-list/starbucks_japan_stores_unique_url.csv",
+    "uniqueStoreUrlCount": 2108
+  },
+  "prefectures": {
+    "01": {
+      "code": "01",
+      "nameJa": "北海道",
+      "nameEn": "Hokkaido",
+      "count": 58
+    },
+    "02": {
+      "code": "02",
+      "nameJa": "青森県",
+      "nameEn": "Aomori Prefecture",
+      "count": 11
+    },
+    "03": {
+      "code": "03",
+      "nameJa": "岩手県",
+      "nameEn": "Iwate Prefecture",
+      "count": 9
+    },
+    "04": {
+      "code": "04",
+      "nameJa": "宮城県",
+      "nameEn": "Miyagi Prefecture",
+      "count": 33
+    },
+    "05": {
+      "code": "05",
+      "nameJa": "秋田県",
+      "nameEn": "Akita Prefecture",
+      "count": 9
+    },
+    "06": {
+      "code": "06",
+      "nameJa": "山形県",
+      "nameEn": "Yamagata Prefecture",
+      "count": 10
+    },
+    "07": {
+      "code": "07",
+      "nameJa": "福島県",
+      "nameEn": "Fukushima Prefecture",
+      "count": 18
+    },
+    "08": {
+      "code": "08",
+      "nameJa": "茨城県",
+      "nameEn": "Ibaraki Prefecture",
+      "count": 43
+    },
+    "09": {
+      "code": "09",
+      "nameJa": "栃木県",
+      "nameEn": "Tochigi Prefecture",
+      "count": 36
+    },
+    "10": {
+      "code": "10",
+      "nameJa": "群馬県",
+      "nameEn": "Gumma Prefecture",
+      "count": 28
+    },
+    "11": {
+      "code": "11",
+      "nameJa": "埼玉県",
+      "nameEn": "Saitama Prefecture",
+      "count": 98
+    },
+    "12": {
+      "code": "12",
+      "nameJa": "千葉県",
+      "nameEn": "Chiba Prefecture",
+      "count": 97
+    },
+    "13": {
+      "code": "13",
+      "nameJa": "東京都",
+      "nameEn": "Tokyo Metropolis",
+      "count": 432
+    },
+    "14": {
+      "code": "14",
+      "nameJa": "神奈川県",
+      "nameEn": "Kanagawa Prefecture",
+      "count": 144
+    },
+    "15": {
+      "code": "15",
+      "nameJa": "新潟県",
+      "nameEn": "Niigata Prefecture",
+      "count": 24
+    },
+    "16": {
+      "code": "16",
+      "nameJa": "富山県",
+      "nameEn": "Toyama Prefecture",
+      "count": 14
+    },
+    "17": {
+      "code": "17",
+      "nameJa": "石川県",
+      "nameEn": "Ishikawa Prefecture",
+      "count": 19
+    },
+    "18": {
+      "code": "18",
+      "nameJa": "福井県",
+      "nameEn": "Fukui Prefecture",
+      "count": 12
+    },
+    "19": {
+      "code": "19",
+      "nameJa": "山梨県",
+      "nameEn": "Yamanashi Prefecture",
+      "count": 13
+    },
+    "20": {
+      "code": "20",
+      "nameJa": "長野県",
+      "nameEn": "Nagano Prefecture",
+      "count": 33
+    },
+    "21": {
+      "code": "21",
+      "nameJa": "岐阜県",
+      "nameEn": "Gifu Prefecture",
+      "count": 26
+    },
+    "22": {
+      "code": "22",
+      "nameJa": "静岡県",
+      "nameEn": "Shizuoka Prefecture",
+      "count": 54
+    },
+    "23": {
+      "code": "23",
+      "nameJa": "愛知県",
+      "nameEn": "Aichi Prefecture",
+      "count": 161
+    },
+    "24": {
+      "code": "24",
+      "nameJa": "三重県",
+      "nameEn": "Mie Prefecture",
+      "count": 28
+    },
+    "25": {
+      "code": "25",
+      "nameJa": "滋賀県",
+      "nameEn": "Shiga Prefecture",
+      "count": 21
+    },
+    "26": {
+      "code": "26",
+      "nameJa": "京都府",
+      "nameEn": "Kyoto Prefecture",
+      "count": 48
+    },
+    "27": {
+      "code": "27",
+      "nameJa": "大阪府",
+      "nameEn": "Osaka Prefecture",
+      "count": 170
+    },
+    "28": {
+      "code": "28",
+      "nameJa": "兵庫県",
+      "nameEn": "Hyogo Prefecture",
+      "count": 75
+    },
+    "29": {
+      "code": "29",
+      "nameJa": "奈良県",
+      "nameEn": "Nara Prefecture",
+      "count": 22
+    },
+    "30": {
+      "code": "30",
+      "nameJa": "和歌山県",
+      "nameEn": "Wakayama Prefecture",
+      "count": 10
+    },
+    "31": {
+      "code": "31",
+      "nameJa": "鳥取県",
+      "nameEn": "Tottori Prefecture",
+      "count": 6
+    },
+    "32": {
+      "code": "32",
+      "nameJa": "島根県",
+      "nameEn": "Shimane Prefecture",
+      "count": 5
+    },
+    "33": {
+      "code": "33",
+      "nameJa": "岡山県",
+      "nameEn": "Okayama Prefecture",
+      "count": 23
+    },
+    "34": {
+      "code": "34",
+      "nameJa": "広島県",
+      "nameEn": "Hiroshima Prefecture",
+      "count": 44
+    },
+    "35": {
+      "code": "35",
+      "nameJa": "山口県",
+      "nameEn": "Yamaguchi Prefecture",
+      "count": 10
+    },
+    "36": {
+      "code": "36",
+      "nameJa": "徳島県",
+      "nameEn": "Tokushima Prefecture",
+      "count": 6
+    },
+    "37": {
+      "code": "37",
+      "nameJa": "香川県",
+      "nameEn": "Kagawa Prefecture",
+      "count": 17
+    },
+    "38": {
+      "code": "38",
+      "nameJa": "愛媛県",
+      "nameEn": "Ehime Prefecture",
+      "count": 14
+    },
+    "39": {
+      "code": "39",
+      "nameJa": "高知県",
+      "nameEn": "Kochi Prefecture",
+      "count": 7
+    },
+    "40": {
+      "code": "40",
+      "nameJa": "福岡県",
+      "nameEn": "Fukuoka Prefecture",
+      "count": 91
+    },
+    "41": {
+      "code": "41",
+      "nameJa": "佐賀県",
+      "nameEn": "Saga Prefecture",
+      "count": 14
+    },
+    "42": {
+      "code": "42",
+      "nameJa": "長崎県",
+      "nameEn": "Nagasaki Prefecture",
+      "count": 15
+    },
+    "43": {
+      "code": "43",
+      "nameJa": "熊本県",
+      "nameEn": "Kumamoto Prefecture",
+      "count": 21
+    },
+    "44": {
+      "code": "44",
+      "nameJa": "大分県",
+      "nameEn": "Oita Prefecture",
+      "count": 17
+    },
+    "45": {
+      "code": "45",
+      "nameJa": "宮崎県",
+      "nameEn": "Miyazaki Prefecture",
+      "count": 14
+    },
+    "46": {
+      "code": "46",
+      "nameJa": "鹿児島県",
+      "nameEn": "Kagoshima Prefecture",
+      "count": 13
+    },
+    "47": {
+      "code": "47",
+      "nameJa": "沖縄県",
+      "nameEn": "Okinawa Prefecture",
+      "count": 35
+    }
+  },
+  "tokyo": {
+    "13204": {
+      "code": "13204",
+      "nameJa": "三鷹市",
+      "nameEn": "Mitaka City",
+      "count": 3
+    },
+    "13112": {
+      "code": "13112",
+      "nameJa": "世田谷区",
+      "nameEn": "Setagaya Ward",
+      "count": 23
+    },
+    "13102": {
+      "code": "13102",
+      "nameJa": "中央区",
+      "nameEn": "Chuo Ward",
+      "count": 28
+    },
+    "13114": {
+      "code": "13114",
+      "nameJa": "中野区",
+      "nameEn": "Nakano Ward",
+      "count": 3
+    },
+    "13201": {
+      "code": "13201",
+      "nameJa": "八王子市",
+      "nameEn": "Hachioji City",
+      "count": 9
+    },
+    "13117": {
+      "code": "13117",
+      "nameJa": "北区",
+      "nameEn": "Kita Ward",
+      "count": 5
+    },
+    "13101": {
+      "code": "13101",
+      "nameJa": "千代田区",
+      "nameEn": "Chiyoda Ward",
+      "count": 48
+    },
+    "13106": {
+      "code": "13106",
+      "nameJa": "台東区",
+      "nameEn": "Taito Ward",
+      "count": 10
+    },
+    "13109": {
+      "code": "13109",
+      "nameJa": "品川区",
+      "nameEn": "Shinagawa Ward",
+      "count": 15
+    },
+    "13214": {
+      "code": "13214",
+      "nameJa": "国分寺市",
+      "nameEn": "Kokubunji City",
+      "count": 2
+    },
+    "13215": {
+      "code": "13215",
+      "nameJa": "国立市",
+      "nameEn": "Kunitachi City",
+      "count": 2
+    },
+    "13107": {
+      "code": "13107",
+      "nameJa": "墨田区",
+      "nameEn": "Sumida Ward",
+      "count": 8
+    },
+    "13224": {
+      "code": "13224",
+      "nameJa": "多摩市",
+      "nameEn": "Tama City",
+      "count": 5
+    },
+    "13111": {
+      "code": "13111",
+      "nameJa": "大田区",
+      "nameEn": "Ota Ward",
+      "count": 10
+    },
+    "13211": {
+      "code": "13211",
+      "nameJa": "小平市",
+      "nameEn": "Kodaira City",
+      "count": 1
+    },
+    "13210": {
+      "code": "13210",
+      "nameJa": "小金井市",
+      "nameEn": "Koganei City",
+      "count": 2
+    },
+    "13206": {
+      "code": "13206",
+      "nameJa": "府中市",
+      "nameEn": "Fuchu City",
+      "count": 3
+    },
+    "13105": {
+      "code": "13105",
+      "nameJa": "文京区",
+      "nameEn": "Bunkyo Ward",
+      "count": 9
+    },
+    "13104": {
+      "code": "13104",
+      "nameJa": "新宿区",
+      "nameEn": "Shinjuku Ward",
+      "count": 34
+    },
+    "13212": {
+      "code": "13212",
+      "nameJa": "日野市",
+      "nameEn": "Hino City",
+      "count": 2
+    },
+    "13207": {
+      "code": "13207",
+      "nameJa": "昭島市",
+      "nameEn": "Akishima City",
+      "count": 2
+    },
+    "13115": {
+      "code": "13115",
+      "nameJa": "杉並区",
+      "nameEn": "Suginami Ward",
+      "count": 6
+    },
+    "13222": {
+      "code": "13222",
+      "nameJa": "東久留米市",
+      "nameEn": "Higashikurume City",
+      "count": 1
+    },
+    "13220": {
+      "code": "13220",
+      "nameJa": "東大和市",
+      "nameEn": "Higashiyamato City",
+      "count": 1
+    },
+    "13119": {
+      "code": "13119",
+      "nameJa": "板橋区",
+      "nameEn": "Itabashi Ward",
+      "count": 6
+    },
+    "13223": {
+      "code": "13223",
+      "nameJa": "武蔵村山市",
+      "nameEn": "Musashimurayama City",
+      "count": 3
+    },
+    "13203": {
+      "code": "13203",
+      "nameJa": "武蔵野市",
+      "nameEn": "Musashino City",
+      "count": 8
+    },
+    "13123": {
+      "code": "13123",
+      "nameJa": "江戸川区",
+      "nameEn": "Edogawa Ward",
+      "count": 4
+    },
+    "13108": {
+      "code": "13108",
+      "nameJa": "江東区",
+      "nameEn": "Koto Ward",
+      "count": 14
+    },
+    "13221": {
+      "code": "13221",
+      "nameJa": "清瀬市",
+      "nameEn": "Kiyose City",
+      "count": 1
+    },
+    "13113": {
+      "code": "13113",
+      "nameJa": "渋谷区",
+      "nameEn": "Shibuya Ward",
+      "count": 42
+    },
+    "13103": {
+      "code": "13103",
+      "nameJa": "港区",
+      "nameEn": "Minato Ward",
+      "count": 44
+    },
+    "13219": {
+      "code": "13219",
+      "nameJa": "狛江市",
+      "nameEn": "Komae City",
+      "count": 1
+    },
+    "13209": {
+      "code": "13209",
+      "nameJa": "町田市",
+      "nameEn": "Machida City",
+      "count": 10
+    },
+    "13110": {
+      "code": "13110",
+      "nameJa": "目黒区",
+      "nameEn": "Meguro Ward",
+      "count": 10
+    },
+    "13218": {
+      "code": "13218",
+      "nameJa": "福生市",
+      "nameEn": "Fussa City",
+      "count": 1
+    },
+    "13225": {
+      "code": "13225",
+      "nameJa": "稲城市",
+      "nameEn": "Inagi City",
+      "count": 3
+    },
+    "13202": {
+      "code": "13202",
+      "nameJa": "立川市",
+      "nameEn": "Tachikawa City",
+      "count": 7
+    },
+    "13120": {
+      "code": "13120",
+      "nameJa": "練馬区",
+      "nameEn": "Nerima Ward",
+      "count": 5
+    },
+    "13227": {
+      "code": "13227",
+      "nameJa": "羽村市",
+      "nameEn": "Hamura City",
+      "count": 1
+    },
+    "13118": {
+      "code": "13118",
+      "nameJa": "荒川区",
+      "nameEn": "Arakawa Ward",
+      "count": 3
+    },
+    "13122": {
+      "code": "13122",
+      "nameJa": "葛飾区",
+      "nameEn": "Katsushika Ward",
+      "count": 5
+    },
+    "13305": {
+      "code": "13305",
+      "nameJa": "西多摩郡日の出町",
+      "nameEn": "Hinode Town",
+      "count": 2
+    },
+    "13229": {
+      "code": "13229",
+      "nameJa": "西東京市",
+      "nameEn": "Nishitokyo City",
+      "count": 2
+    },
+    "13208": {
+      "code": "13208",
+      "nameJa": "調布市",
+      "nameEn": "Chofu City",
+      "count": 4
+    },
+    "13116": {
+      "code": "13116",
+      "nameJa": "豊島区",
+      "nameEn": "Toshima Ward",
+      "count": 17
+    },
+    "13121": {
+      "code": "13121",
+      "nameJa": "足立区",
+      "nameEn": "Adachi Ward",
+      "count": 6
+    },
+    "13205": {
+      "code": "13205",
+      "nameJa": "青梅市",
+      "nameEn": "Ome City",
+      "count": 1
+    }
+  },
+  "tokyoUnmatched": []
+}

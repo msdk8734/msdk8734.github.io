@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta property="og:title" content="Starbucks Japan Store Map">
+<meta property="og:description" content="Interactive map of Starbucks store counts by prefecture, with a Tokyo municipality zoom view.">
+<meta property="og:image" content="https://msdk8734.github.io/data/datavizOGP.png">
+<meta property="og:url" content="https://msdk8734.github.io/starbucks-store-map.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Starbucks Japan Store Map">
+<meta name="twitter:description" content="Interactive map of Starbucks store counts by prefecture, with a Tokyo municipality zoom view.">
+<meta name="twitter:image" content="https://msdk8734.github.io/data/datavizOGP.png">
+<title>Starbucks Japan Store Map</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>☕</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #ffffff;
+  color: #1f2421;
+  font-family: 'IBM Plex Sans', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 250px;
+  z-index: 100;
+  padding: 14px 24px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.95) 72%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  transition: right .3s ease;
+}
+#header > * { pointer-events: auto; }
+.title-block h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #123526;
+  letter-spacing: -.01em;
+}
+.title-block h1 .accent { color: #00754a; }
+.title-block .sub {
+  font-size: 10.5px;
+  color: #6f7b74;
+  margin-top: 2px;
+  max-width: 620px;
+  line-height: 1.45;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  padding-top: 2px;
+}
+.legend-label {
+  font-size: 10px;
+  color: #7b857f;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+}
+.color-bar {
+  width: 148px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: linear-gradient(90deg, rgb(239,248,242), rgb(0,98,65));
+}
+.color-minmax {
+  display: flex;
+  justify-content: space-between;
+  width: 148px;
+  font-size: 9.5px;
+  color: #9ba59f;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+#back-btn {
+  display: none;
+  background: #fff;
+  border: 1px solid #d7ddd8;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e473a;
+  cursor: pointer;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.08);
+}
+#back-btn:hover { background: #f6faf8; }
+#back-btn.visible { display: flex; }
+
+#map-container { width: 100vw; height: 100vh; overflow: hidden; }
+#map-svg { width: 100%; height: 100%; display: block; touch-action: none; }
+
+.pref-path, .city-path {
+  stroke: rgba(255,255,255,.68);
+  stroke-linejoin: round;
+  transition: opacity .16s, filter .16s;
+}
+.pref-path { stroke-width: .28px; cursor: pointer; }
+.city-path { stroke-width: .08px; cursor: pointer; }
+.pref-path.clickable { cursor: zoom-in; }
+.pref-path.dimmed, .city-path.dimmed { opacity: .16; }
+.pref-path.active, .city-path.active {
+  filter: brightness(1.08) drop-shadow(0 2px 10px rgba(0,0,0,.2));
+}
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(16px);
+  border: 1px solid #dfe7e1;
+  border-radius: 12px;
+  padding: 16px 18px;
+  opacity: 0;
+  transition: opacity .12s;
+  z-index: 200;
+  min-width: 250px;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.05);
+}
+.tooltip.visible { opacity: 1; }
+.tt-name { font-size: 17px; font-weight: 700; color: #183428; margin-bottom: 1px; }
+.tt-name-ja { font-size: 12px; color: #7d8a83; margin-bottom: 10px; }
+.tt-rank { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #edf1ee; }
+.tt-rank .num { color: #00754a; font-size: 20px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.tt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.tt-label { font-size: 12px; color: #748179; }
+.tt-val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; color: #18271f; }
+.tt-val .unit { font-size: 11px; color: #93a098; font-weight: 400; margin-left: 2px; }
+.tt-val-sm { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #1c3026; }
+.tt-bar-bg { height: 5px; background: #eef3ef; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.tt-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgb(239,248,242), rgb(0,98,65)); }
+.tt-note { font-size: 9.5px; color: #9ca8a1; margin-top: 10px; line-height: 1.45; }
+
+#ranking {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid #edf1ee;
+  z-index: 90;
+  padding: 16px 10px 12px;
+  overflow-y: auto;
+}
+.rk-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7f8c85;
+  margin-bottom: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.rk-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .12s, opacity .12s, transform .12s;
+}
+.rk-item:hover,
+.rk-item.active {
+  background: rgba(0,117,74,.08);
+}
+.rk-item.active {
+  outline: 2px solid rgba(0,117,74,.18);
+  transform: translateX(-2px);
+}
+.rk-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ccd3ce;
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.rk-num.gold { color: #c9981f; }
+.rk-num.silver { color: #9fa7a1; }
+.rk-num.bronze { color: #b17843; }
+.rk-name {
+  font-size: 11px;
+  color: #3c4e44;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rk-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #809085;
+  flex-shrink: 0;
+}
+.rk-bar {
+  width: 38px;
+  height: 3px;
+  background: #edf2ef;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.rk-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: #00754a;
+  opacity: .72;
+}
+
+#zoom-label {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 150;
+  background: rgba(255,255,255,.94);
+  border: 1px solid #edf1ee;
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #173629;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  pointer-events: none;
+}
+#zoom-label.visible { display: block; }
+
+#status-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 300;
+  background: rgba(255,255,255,.95);
+  font-size: 13px;
+  color: #5c6a62;
+}
+#status-overlay.hidden { display: none; }
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e8efea;
+  border-top-color: #00754a;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.err-detail {
+  display: none;
+  font-size: 11px;
+  color: #4a5650;
+  line-height: 1.7;
+  text-align: left;
+  max-width: 520px;
+  background: #f7faf8;
+  padding: 16px 20px;
+  border-radius: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#hint {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #bcc5bf;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  #ranking { display: none; }
+  #header { right: 0; padding: 12px 14px 8px; }
+  .title-block h1 { font-size: 18px; }
+  .title-block .sub { max-width: 300px; }
+  .tooltip { min-width: 0; max-width: calc(100vw - 24px); padding: 12px 14px; }
+  #zoom-label { top: 108px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+  #hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="status-overlay">
+  <div class="spinner" id="spinner"></div>
+  <div id="status-msg">Loading Starbucks store data…</div>
+  <div class="err-detail" id="err-detail"></div>
+</div>
+
+<div id="header">
+  <div class="title-block">
+    <h1>☕ Starbucks <span class="accent">Japan</span> Store Map</h1>
+    <div class="sub">One dot-free choropleth for all 47 prefectures, plus a Tokyo municipality zoom view built from the official Starbucks Japan store list.</div>
+  </div>
+  <div class="header-right">
+    <button id="back-btn" type="button">← Back to Japan</button>
+    <div class="legend-label" id="legend-label">Store count by prefecture</div>
+    <div class="color-bar" id="color-bar"></div>
+    <div class="color-minmax">
+      <span id="minLabel">0</span>
+      <span id="maxLabel">0</span>
+    </div>
+  </div>
+</div>
+
+<div id="map-container">
+  <svg id="map-svg" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+
+<div id="zoom-label">Tokyo Metropolis / 東京都</div>
+
+<div id="ranking">
+  <div class="rk-title" id="rk-title">Prefecture Ranking</div>
+  <div id="rk-list"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div id="hint">Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in</div>
+
+<script>
+'use strict';
+
+const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const PANEL_W = (window.innerWidth > 720 && !IS_TOUCH) ? 250 : 0;
+const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
+const JAPAN_GEO_URL = 'geo-json/japan.geojson';
+const TOKYO_GEO_URL = 'geo-json/pref_13.geojson';
+const TOKYO_META_URL = 'population-json/municipalities/muni-pop-13.json';
+
+const C_LO = [239, 248, 242];
+const C_HI = [0, 98, 65];
+const HOVER_FILL = 'rgb(40, 127, 84)';
+
+let svgW = window.innerWidth;
+let svgH = window.innerHeight;
+const svgEl = document.getElementById('map-svg');
+svgEl.setAttribute('width', svgW);
+svgEl.setAttribute('height', svgH);
+
+let projScale, projTx, projTy;
+let viewX = 0, viewY = 0, viewScale = 1;
+let isDragging = false, didDrag = false;
+let dragSX, dragSY, dragVX, dragVY;
+let zoomedTokyo = false;
+let cityLayerG = null;
+let tokyoGeo = null;
+let tokyoMeta = null;
+let starbucksData = null;
+let prefFeatMap = {};
+let prefDataMap = {};
+let tokyoDataMap = {};
+let prefRankLookup = {};
+let tokyoRankLookup = {};
+let overviewMin = 0;
+let overviewMax = 0;
+let tokyoMin = 0;
+let tokyoMax = 0;
+let animRaf = null;
+
+function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
+function hideOverlay() { document.getElementById('status-overlay').classList.add('hidden'); }
+function showError(msg) {
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('status-msg').textContent = '⚠️ Error';
+  const detail = document.getElementById('err-detail');
+  detail.innerHTML = msg;
+  detail.style.display = 'block';
+}
+
+function toMerc(lon, lat) {
+  return [lon * Math.PI / 180, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))];
+}
+function project(lon, lat) {
+  const [mx, my] = toMerc(lon, lat);
+  return [projScale * mx + projTx, projScale * -my + projTy];
+}
+function fitProjection(features, W, H, padL, padT, padR, padB) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  features.forEach(feat => {
+    const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
+    polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
+      const [mx, my] = toMerc(lon, lat);
+      if (mx < minX) minX = mx;
+      if (mx > maxX) maxX = mx;
+      if (-my < minY) minY = -my;
+      if (-my > maxY) maxY = -my;
+    })));
+  });
+  projScale = 0.95 * Math.min((W - padL - padR) / (maxX - minX), (H - padT - padB) / (maxY - minY));
+  projTx = W / 2 - projScale * (minX + maxX) / 2;
+  projTy = H / 2 - projScale * (minY + maxY) / 2;
+}
+function featureToPath(feat) {
+  const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
+  let d = '';
+  polys.forEach(poly => poly.forEach(ring => {
+    const pts = ring.map(([lon, lat]) => project(lon, lat));
+    d += `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)} `;
+    for (let i = 1; i < pts.length; i++) d += `L ${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)} `;
+    d += 'Z ';
+  }));
+  return d.trim();
+}
+
+function getColor(v, lo, hi) {
+  if (hi <= lo) return `rgb(${C_LO.join(',')})`;
+  const t = Math.pow(Math.max(0, Math.min(1, (v - lo) / (hi - lo))), 0.58);
+  return `rgb(${Math.round(C_LO[0] + (C_HI[0] - C_LO[0]) * t)},${Math.round(C_LO[1] + (C_HI[1] - C_LO[1]) * t)},${Math.round(C_LO[2] + (C_HI[2] - C_LO[2]) * t)})`;
+}
+
+function clampView() {
+  const maxOff = Math.max(svgW, svgH) * viewScale * 2.5;
+  viewX = Math.max(-maxOff, Math.min(maxOff + svgW, viewX));
+  viewY = Math.max(-maxOff, Math.min(maxOff + svgH, viewY));
+}
+function applyView() {
+  clampView();
+  const g = document.getElementById('map-g');
+  if (g) g.setAttribute('transform', `translate(${viewX},${viewY}) scale(${viewScale})`);
+}
+function zoomAt(mx, my, factor) {
+  const newScale = Math.max(0.5, Math.min(80, viewScale * factor));
+  const k = newScale / viewScale;
+  viewX = mx - k * (mx - viewX);
+  viewY = my - k * (my - viewY);
+  viewScale = newScale;
+  applyView();
+}
+function animateToView(targetX, targetY, targetScale, onComplete) {
+  if (animRaf) {
+    cancelAnimationFrame(animRaf);
+    animRaf = null;
+  }
+  const startX = viewX;
+  const startY = viewY;
+  const startScale = viewScale;
+  const duration = 380;
+  let startTime = null;
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    const raw = Math.min((ts - startTime) / duration, 1);
+    const t = easeOutCubic(raw);
+    viewScale = startScale + (targetScale - startScale) * t;
+    viewX = startX + (targetX - startX) * t;
+    viewY = startY + (targetY - startY) * t;
+    applyView();
+    if (raw < 1) {
+      animRaf = requestAnimationFrame(step);
+    } else {
+      animRaf = null;
+      if (onComplete) onComplete();
+    }
+  }
+  animRaf = requestAnimationFrame(step);
+}
+
+svgEl.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (animRaf) {
+    cancelAnimationFrame(animRaf);
+    animRaf = null;
+  }
+  const rect = svgEl.getBoundingClientRect();
+  zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY > 0 ? 0.85 : 1.18);
+}, { passive: false });
+
+svgEl.addEventListener('mousedown', e => {
+  if (animRaf) {
+    cancelAnimationFrame(animRaf);
+    animRaf = null;
+  }
+  isDragging = true;
+  didDrag = false;
+  dragSX = e.clientX;
+  dragSY = e.clientY;
+  dragVX = viewX;
+  dragVY = viewY;
+  svgEl.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragSX;
+  const dy = e.clientY - dragSY;
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) didDrag = true;
+  viewX = dragVX + dx;
+  viewY = dragVY + dy;
+  applyView();
+});
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  svgEl.style.cursor = '';
+});
+
+const tipEl = document.getElementById('tooltip');
+function moveTip(e) {
+  tipEl.style.left = '-9999px';
+  tipEl.style.top = '-9999px';
+  const tw = tipEl.offsetWidth;
+  const th = tipEl.offsetHeight;
+  const gap = 20;
+  let x = (e.clientX || 0) + gap;
+  let y = (e.clientY || 0) + gap;
+  if (x + tw > svgW - 12) x = (e.clientX || 0) - gap - tw;
+  if (y + th > svgH - 12) y = (e.clientY || 0) - gap - th;
+  tipEl.style.left = Math.max(12, x) + 'px';
+  tipEl.style.top = Math.max(12, y) + 'px';
+}
+function hideTip() { tipEl.classList.remove('visible'); }
+
+function showPrefTip(e, item) {
+  const share = ((item.count / starbucksData.source.uniqueStoreUrlCount) * 100).toFixed(1);
+  const zoomMsg = item.code === '13' ? 'Click to zoom into Tokyo wards and cities.' : 'Tokyo can be zoomed for municipality detail.';
+  tipEl.innerHTML = `
+    <div class="tt-name">${item.nameEn}</div>
+    <div class="tt-name-ja">${item.nameJa}</div>
+    <div class="tt-rank"><span class="num">#${prefRankLookup[item.code]}</span></div>
+    <div class="tt-row">
+      <span class="tt-label">Stores</span>
+      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
+    </div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${(item.count / overviewMax * 100).toFixed(0)}%"></div></div>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Share of Japan total</span>
+      <span class="tt-val-sm">${share}%</span>
+    </div>
+    <div class="tt-note">${zoomMsg}</div>`;
+  tipEl.classList.add('visible');
+  moveTip(e);
+}
+
+function showTokyoTip(e, item) {
+  const tokyoTotal = prefDataMap['13'].count;
+  const share = tokyoTotal ? ((item.count / tokyoTotal) * 100).toFixed(1) : '0.0';
+  tipEl.innerHTML = `
+    <div class="tt-name">${item.nameEn}</div>
+    <div class="tt-name-ja">${item.nameJa}</div>
+    <div class="tt-rank"><span class="num">#${tokyoRankLookup[item.code]}</span></div>
+    <div class="tt-row">
+      <span class="tt-label">Stores</span>
+      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
+    </div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${tokyoMax ? (item.count / tokyoMax * 100).toFixed(0) : 0}%"></div></div>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Share of Tokyo total</span>
+      <span class="tt-val-sm">${share}%</span>
+    </div>
+    <div class="tt-note">Tokyo zoom view includes the 23 wards, cities, towns, and villages in the prefectural GeoJSON.</div>`;
+  tipEl.classList.add('visible');
+  moveTip(e);
+}
+
+function setLegend(minVal, maxVal, label) {
+  document.getElementById('legend-label').textContent = label;
+  document.getElementById('minLabel').textContent = minVal.toLocaleString();
+  document.getElementById('maxLabel').textContent = maxVal.toLocaleString();
+}
+
+function clearOverviewHighlight() {
+  document.querySelectorAll('.pref-path').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#rk-list .rk-item').forEach(el => el.classList.remove('active'));
+}
+function highlightPrefecture(code, fromMap = false) {
+  clearOverviewHighlight();
+  const path = document.querySelector(`.pref-path[data-code="${code}"]`);
+  const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
+  if (path) path.classList.add('active');
+  if (item) {
+    item.classList.add('active');
+    if (fromMap) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function clearTokyoHighlight() {
+  document.querySelectorAll('.city-path').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.city-path').forEach(el => el.classList.remove('dimmed'));
+  document.querySelectorAll('#rk-list .rk-item').forEach(el => el.classList.remove('active'));
+}
+function highlightTokyo(code, fromMap = false) {
+  clearTokyoHighlight();
+  document.querySelectorAll('.city-path').forEach(el => {
+    el.classList.toggle('dimmed', el.dataset.code !== code);
+  });
+  const path = document.querySelector(`.city-path[data-code="${code}"]`);
+  const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
+  if (path) path.classList.add('active');
+  if (item) {
+    item.classList.add('active');
+    if (fromMap) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function renderRanking(items, mode) {
+  const list = document.getElementById('rk-list');
+  const title = document.getElementById('rk-title');
+  title.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Tokyo Municipality Ranking';
+  list.innerHTML = items.map((item, i) => {
+    const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
+    const maxVal = mode === 'pref' ? overviewMax : tokyoMax;
+    const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
+    return `<div class="rk-item" data-code="${item.code}">
+      <span class="${nc}">${i + 1}</span>
+      <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
+      <span class="rk-val">${item.count}</span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.rk-item').forEach(el => {
+    const code = el.dataset.code;
+    const item = items.find(entry => entry.code === code);
+    el.addEventListener('mouseenter', e => {
+      if (mode === 'pref') {
+        highlightPrefecture(code, false);
+        if (item) showPrefTip(e, item);
+      } else {
+        highlightTokyo(code, false);
+        if (item) showTokyoTip(e, item);
+      }
+    });
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', () => {
+      if (mode === 'pref') {
+        clearOverviewHighlight();
+      } else {
+        clearTokyoHighlight();
+      }
+      hideTip();
+    });
+    el.addEventListener('click', () => {
+      if (mode === 'pref' && code === '13') zoomInTokyo();
+    });
+  });
+}
+
+function getFeatureBounds(feat) {
+  const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
+  let lo = Infinity, hi = -Infinity, la = Infinity, lb = -Infinity;
+  polys.forEach(poly => poly.forEach(ring => ring.forEach(([lon, lat]) => {
+    if (lon < lo) lo = lon;
+    if (lon > hi) hi = lon;
+    if (lat < la) la = lat;
+    if (lat > lb) lb = lat;
+  })));
+  return { lo, hi, la, lb };
+}
+
+async function zoomInTokyo() {
+  if (zoomedTokyo) return;
+  zoomedTokyo = true;
+  hideTip();
+  clearOverviewHighlight();
+  document.getElementById('back-btn').classList.add('visible');
+  document.getElementById('zoom-label').classList.add('visible');
+  document.getElementById('hint').textContent = 'Hover Tokyo municipalities and ranking rows to cross-highlight';
+
+  document.querySelectorAll('.pref-path').forEach(p => {
+    p.classList.toggle('dimmed', p.dataset.code !== '13');
+  });
+
+  if (!tokyoGeo || !tokyoMeta) {
+    setStatus('Loading Tokyo municipality data…');
+    const [geoRes, metaRes] = await Promise.all([fetch(TOKYO_GEO_URL), fetch(TOKYO_META_URL)]);
+    if (!geoRes.ok || !metaRes.ok) {
+      showError('Could not load Tokyo zoom data.');
+      return;
+    }
+    tokyoGeo = await geoRes.json();
+    tokyoMeta = await metaRes.json();
+  }
+
+  const feat = prefFeatMap['13'];
+  const bounds = getFeatureBounds(feat);
+  const [x0, y0] = project(bounds.lo, bounds.lb);
+  const [x1, y1] = project(bounds.hi, bounds.la);
+  const pad = IS_TOUCH ? 40 : 80;
+  const availW = svgW - PANEL_W - pad * 2;
+  const availH = svgH - pad * 2;
+  const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * 1.18;
+  const targetScale = Math.min(fs, 80);
+  const targetX = (svgW - PANEL_W) / 2 - targetScale * (x0 + x1) / 2;
+  const targetY = svgH / 2 - targetScale * (y0 + y1) / 2;
+
+  await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
+  drawTokyoLayer();
+}
+
+function drawTokyoLayer() {
+  if (cityLayerG) cityLayerG.remove();
+  cityLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  cityLayerG.id = 'tokyo-city-layer';
+
+  const items = tokyoGeo.features
+    .filter(feat => feat.properties && feat.properties.code && feat.properties.code !== '13000')
+    .map(feat => {
+      const code = feat.properties.code;
+      const meta = tokyoMeta[code] || { nameJa: code, nameEn: code };
+      const count = tokyoDataMap[code]?.count || 0;
+      return { code, nameJa: meta.nameJa, nameEn: meta.nameEn, count, feature: feat };
+    })
+    .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+
+  tokyoRankLookup = {};
+  items.forEach((item, i) => { tokyoRankLookup[item.code] = i + 1; });
+  tokyoMin = items[items.length - 1]?.count || 0;
+  tokyoMax = items[0]?.count || 0;
+  setLegend(tokyoMin, tokyoMax, 'Store count by Tokyo municipality');
+
+  items.forEach(item => {
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathEl.setAttribute('d', featureToPath(item.feature));
+    pathEl.setAttribute('fill', getColor(item.count, tokyoMin, tokyoMax || 1));
+    pathEl.setAttribute('fill-rule', 'evenodd');
+    pathEl.setAttribute('class', 'city-path');
+    pathEl.setAttribute('data-code', item.code);
+    pathEl.addEventListener('mouseenter', e => {
+      highlightTokyo(item.code, true);
+      showTokyoTip(e, item);
+    });
+    pathEl.addEventListener('mousemove', moveTip);
+    pathEl.addEventListener('mouseleave', () => {
+      clearTokyoHighlight();
+      hideTip();
+    });
+    cityLayerG.appendChild(pathEl);
+  });
+
+  document.getElementById('map-g').appendChild(cityLayerG);
+  renderRanking(items, 'tokyo');
+}
+
+function zoomOut() {
+  if (!zoomedTokyo) return;
+  zoomedTokyo = false;
+  hideTip();
+  if (cityLayerG) {
+    cityLayerG.remove();
+    cityLayerG = null;
+  }
+  document.getElementById('back-btn').classList.remove('visible');
+  document.getElementById('zoom-label').classList.remove('visible');
+  document.getElementById('hint').textContent = 'Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in';
+  document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('dimmed', 'active'));
+  animateToView(0, 0, 1, () => {
+    renderOverviewRanking();
+    setLegend(overviewMin, overviewMax, 'Store count by prefecture');
+  });
+}
+
+function renderOverviewRanking() {
+  const items = Object.values(prefDataMap).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+  prefRankLookup = {};
+  items.forEach((item, i) => { prefRankLookup[item.code] = i + 1; });
+  renderRanking(items, 'pref');
+}
+
+async function init() {
+  try {
+    setStatus('Loading Starbucks store data…');
+    const dataRes = await fetch(OVERVIEW_DATA_URL);
+    if (!dataRes.ok) throw new Error(`HTTP ${dataRes.status}`);
+    starbucksData = await dataRes.json();
+    prefDataMap = starbucksData.prefectures;
+    tokyoDataMap = starbucksData.tokyo;
+
+    const prefItems = Object.values(prefDataMap);
+    overviewMin = Math.min(...prefItems.map(item => item.count));
+    overviewMax = Math.max(...prefItems.map(item => item.count));
+    setLegend(overviewMin, overviewMax, 'Store count by prefecture');
+
+    setStatus('Loading Japan map data…');
+    const geoRes = await fetch(JAPAN_GEO_URL);
+    if (!geoRes.ok) throw new Error(`HTTP ${geoRes.status}`);
+    const japanGeo = await geoRes.json();
+    const allFeats = japanGeo.features.filter(f => f && f.geometry);
+    fitProjection(allFeats, svgW, svgH, 18, 88, 18 + PANEL_W, 18);
+
+    const mapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    mapG.id = 'map-g';
+    svgEl.appendChild(mapG);
+
+    allFeats.forEach(feat => {
+      const code = feat.properties?.code || '';
+      const item = prefDataMap[code];
+      if (!item) return;
+      prefFeatMap[code] = feat;
+
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathEl.setAttribute('d', featureToPath(feat));
+      pathEl.setAttribute('fill', getColor(item.count, overviewMin, overviewMax));
+      pathEl.setAttribute('fill-rule', 'evenodd');
+      pathEl.setAttribute('class', `pref-path${code === '13' ? ' clickable' : ''}`);
+      pathEl.setAttribute('data-code', code);
+      pathEl.addEventListener('mouseenter', e => {
+        if (zoomedTokyo) return;
+        highlightPrefecture(code, true);
+        showPrefTip(e, item);
+      });
+      pathEl.addEventListener('mousemove', e => {
+        if (!zoomedTokyo) moveTip(e);
+      });
+      pathEl.addEventListener('mouseleave', () => {
+        if (zoomedTokyo) return;
+        clearOverviewHighlight();
+        hideTip();
+      });
+      pathEl.addEventListener('click', () => {
+        if (!didDrag && code === '13') zoomInTokyo();
+      });
+      mapG.appendChild(pathEl);
+    });
+
+    renderOverviewRanking();
+    document.getElementById('back-btn').addEventListener('click', zoomOut);
+    hideOverlay();
+  } catch (err) {
+    showError(`Could not initialize <b>Starbucks Japan Store Map</b><br>${err.message}`);
+  }
+}
+
+window.addEventListener('resize', () => {
+  svgW = window.innerWidth;
+  svgH = window.innerHeight;
+  svgEl.setAttribute('width', svgW);
+  svgEl.setAttribute('height', svgH);
+});
+
+init();
+</script>
+</body>
+</html>

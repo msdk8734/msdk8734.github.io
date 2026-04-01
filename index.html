@@ -109,6 +109,9 @@
   .card-preview.population-theme {
     background: linear-gradient(135deg, #eef7f0 0%, #e1f1e6 50%, #cfe6d7 100%);
   }
+  .card-preview.starbucks-theme {
+    background: linear-gradient(135deg, #edf7f1 0%, #d7eee2 44%, #b6dbc8 100%);
+  }
   .card-preview.pyramid-theme {
     background: linear-gradient(135deg, #eef3fb 0%, #dce8f8 50%, #c8d8f0 100%);
   }
@@ -212,6 +215,37 @@
 
   /* ── Ramen ── */
   .card-preview .preview-icon { font-size: 56px; opacity: 0.9; }
+  .starbucks-preview {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .sb-ring {
+    position: absolute;
+    border-radius: 999px;
+    border: 2px solid rgba(0, 117, 74, 0.16);
+  }
+  .sb-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #00754a;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.5);
+  }
+  .sb-dot.light { background: #3f9e78; }
+  .sb-dot.dark { background: #0d5e41; }
+  .sb-label {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    color: #1f6d4e;
+    opacity: 0.8;
+    text-transform: uppercase;
+  }
   .mini-bars { position: absolute; bottom: 28px; right: 28px; display: flex; align-items: flex-end; gap: 3px; }
   .mini-bars .mb { width: 4px; border-radius: 2px 2px 0 0; opacity: 0.55; background: #1a6fc4; }
 
@@ -320,6 +354,36 @@
         <span class="meta-tag">D3.js</span>
         <span class="meta-tag">Animation</span>
         <span class="meta-tag">Demographics</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 2b. Starbucks Store Map -->
+  <a class="card" href="starbucks-store-map.html">
+    <div class="card-preview starbucks-theme">
+      <div class="starbucks-preview">
+        <div class="sb-label">Starbucks Japan</div>
+        <div class="sb-ring" style="width:136px;height:136px;left:28px;top:24px;"></div>
+        <div class="sb-ring" style="width:92px;height:92px;right:34px;top:36px;"></div>
+        <div class="sb-ring" style="width:78px;height:78px;right:72px;bottom:24px;"></div>
+        <div class="sb-dot dark" style="left:64px;top:64px;"></div>
+        <div class="sb-dot" style="left:116px;top:48px;"></div>
+        <div class="sb-dot light" style="left:86px;top:106px;"></div>
+        <div class="sb-dot dark" style="right:62px;top:58px;"></div>
+        <div class="sb-dot" style="right:96px;bottom:48px;"></div>
+        <div class="sb-dot light" style="right:46px;bottom:34px;"></div>
+        <span class="preview-icon" style="position:absolute;left:18px;bottom:10px;font-size:42px;opacity:.72;">☕</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Interactive Map</div>
+      <div class="card-title">Starbucks Japan Store Map</div>
+      <div class="card-desc">A prefecture choropleth of Starbucks store counts with linked ranking hover states, plus a Tokyo zoom view by ward and municipality.</div>
+      <div class="card-meta">
+        <span class="meta-tag">Custom Data</span>
+        <span class="meta-tag">Choropleth</span>
+        <span class="meta-tag">Retail</span>
         <span class="card-arrow">→</span>
       </div>
     </div>
