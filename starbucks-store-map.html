@@ -8,6 +8,7 @@
 <meta property="og:image" content="https://msdk8734.github.io/data/datavizOGP.png">
 <meta property="og:url" content="https://msdk8734.github.io/starbucks-store-map.html">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Data Visualization Projects">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Starbucks Japan Store Map">
 <meta name="twitter:description" content="Interactive map of Starbucks store counts by prefecture, with a Tokyo municipality zoom view.">
@@ -121,6 +122,9 @@ body {
   opacity: 1;
   stroke: rgba(255,255,255,.92);
   stroke-width: .16px;
+}
+.pref-path.tokyo-muted {
+  opacity: .04 !important;
 }
 
 .tooltip {
@@ -257,6 +261,67 @@ body {
 }
 #zoom-label.visible { display: block; }
 
+#bottom-sheet {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -2px 20px rgba(0,0,0,.10), 0 -1px 4px rgba(0,0,0,.06);
+  will-change: transform;
+  touch-action: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+#bs-handle-area {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 6px;
+  user-select: none;
+}
+#bs-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d0d0d0;
+  transition: background .15s, width .15s;
+}
+#bottom-sheet.bs-dragging #bs-handle { background: #aaa; width: 48px; }
+#bs-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 16px 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+#bs-rk-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+#bs-list-wrap {
+  flex: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 10px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+  overscroll-behavior: contain;
+}
+#bs-list .rk-item {
+  padding: 7px 6px;
+}
+
 #status-overlay {
   position: fixed;
   inset: 0;
@@ -329,7 +394,7 @@ body {
     <div class="sub">Store counts as of April 2026 from the official Starbucks Japan store list, covering 2,108 locations nationwide, with a prefecture choropleth and a Tokyo municipality zoom view.</div>
   </div>
   <div class="header-right">
-    <button id="back-btn" type="button">← Back to Japan</button>
+    <button id="back-btn" type="button">← Back to Overview</button>
     <div class="legend-label" id="legend-label">Store count by prefecture</div>
     <div class="color-bar" id="color-bar"></div>
     <div class="color-minmax">
@@ -353,11 +418,21 @@ body {
 <div class="tooltip" id="tooltip"></div>
 <div id="hint">Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in</div>
 
+<div id="bottom-sheet" role="region" aria-label="Ranking">
+  <div id="bs-handle-area"><div id="bs-handle"></div></div>
+  <div id="bs-header"><span id="bs-rk-title">Prefecture Ranking</span></div>
+  <div id="bs-list-wrap"><div id="bs-list"></div></div>
+</div>
+
 <script>
 'use strict';
 
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 const PANEL_W = (window.innerWidth > 720 && !IS_TOUCH) ? 250 : 0;
+const BS_PEEK_H = 96;
+const BS_HALF_R = 0.45;
+const BS_FULL_R = 0.88;
+const BS_ANIM = 320;
 const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
 const JAPAN_GEO_URL = 'geo-json/japan.geojson';
 const TOKYO_GEO_URL = 'geo-json/pref_13.geojson';
@@ -392,6 +467,17 @@ let overviewMax = 0;
 let tokyoMin = 0;
 let tokyoMax = 0;
 let animRaf = null;
+let lastTouchDist = null;
+let touchStartX, touchStartY, touchStartVX, touchStartVY;
+let touchMoved = false;
+let bsState = 'peek';
+let bsMobile = false;
+let bsSafeB = 0;
+
+const bsEl = document.getElementById('bottom-sheet');
+const bsListWrap = document.getElementById('bs-list-wrap');
+const bsList = document.getElementById('bs-list');
+const bsTitleEl = document.getElementById('bs-rk-title');
 
 function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
 function hideOverlay() { document.getElementById('status-overlay').classList.add('hidden'); }
@@ -442,6 +528,125 @@ function getColor(v, lo, hi) {
   if (hi <= lo) return `rgb(${C_LO.join(',')})`;
   const t = Math.pow(Math.max(0, Math.min(1, (v - lo) / (hi - lo))), 0.58);
   return `rgb(${Math.round(C_LO[0] + (C_HI[0] - C_LO[0]) * t)},${Math.round(C_LO[1] + (C_HI[1] - C_LO[1]) * t)},${Math.round(C_LO[2] + (C_HI[2] - C_LO[2]) * t)})`;
+}
+
+function bsTY(state) {
+  const vh = window.innerHeight;
+  if (state === 'full') return vh * (1 - BS_FULL_R);
+  if (state === 'half') return vh * (1 - BS_HALF_R);
+  return vh - BS_PEEK_H;
+}
+function bsListHeight(ty) {
+  const vh = window.innerHeight;
+  const fixedH = 42 + 44;
+  return Math.max(40, vh - ty - fixedH - bsSafeB);
+}
+function bsApply(ty, animate) {
+  bsEl.style.transition = animate ? `transform ${BS_ANIM}ms cubic-bezier(.25,1,.5,1)` : 'none';
+  bsEl.style.transform = `translateY(${ty}px)`;
+  bsListWrap.style.height = bsListHeight(ty) + 'px';
+}
+function bsSetState(state, animate = true) {
+  bsState = state;
+  bsApply(bsTY(state), animate);
+}
+function bsRenderRanking(items, mode) {
+  if (!bsMobile) return;
+  bsTitleEl.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Tokyo Municipality Ranking';
+  const maxVal = mode === 'pref' ? overviewMax : tokyoMax;
+  bsList.innerHTML = items.map((item, i) => {
+    const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
+    const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
+    return `<div class="rk-item" data-code="${item.code}">
+      <span class="${nc}">${i + 1}</span>
+      <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
+      <span class="rk-val">${item.count}</span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
+    </div>`;
+  }).join('');
+  bsList.querySelectorAll('.rk-item').forEach(el => {
+    const code = el.dataset.code;
+    el.addEventListener('click', () => {
+      if (mode === 'pref' && code === '13') {
+        bsSetState('peek');
+        zoomInTokyo();
+      }
+    });
+  });
+}
+function bsInit() {
+  if (window.innerWidth > 720 && !IS_TOUCH) return;
+  bsMobile = true;
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;bottom:0;left:0;width:1px;height:env(safe-area-inset-bottom,0px);pointer-events:none';
+  document.body.appendChild(probe);
+  bsSafeB = probe.offsetHeight || 0;
+  probe.remove();
+  bsEl.style.height = '100dvh';
+  bsEl.style.display = 'flex';
+  requestAnimationFrame(() => bsSetState('peek', false));
+
+  let dragActive = false;
+  let dragStartY = 0;
+  let dragStartTY = 0;
+  let dragDeltaY = 0;
+
+  bsEl.addEventListener('touchstart', e => {
+    e.stopPropagation();
+    const t = e.changedTouches[0];
+    const sheetTop = bsTY(bsState);
+    const dragZoneH = bsState === 'peek' ? BS_PEEK_H : 42;
+    const inDragZone = t.clientY >= sheetTop && t.clientY <= sheetTop + dragZoneH;
+    if (!inDragZone) return;
+    dragActive = true;
+    dragDeltaY = 0;
+    dragStartY = t.clientY;
+    dragStartTY = bsTY(bsState);
+    bsEl.style.transition = 'none';
+    bsEl.classList.add('bs-dragging');
+  }, { passive: true });
+
+  bsEl.addEventListener('touchmove', e => {
+    e.stopPropagation();
+    if (!dragActive) return;
+    const t = e.changedTouches[0];
+    dragDeltaY = t.clientY - dragStartY;
+    const minTY = bsTY('full');
+    const maxTY = bsTY('peek');
+    const raw = Math.max(minTY, Math.min(maxTY, dragStartTY + dragDeltaY));
+    bsEl.style.transform = `translateY(${raw}px)`;
+    bsListWrap.style.height = bsListHeight(raw) + 'px';
+  }, { passive: true });
+
+  bsEl.addEventListener('touchend', e => {
+    e.stopPropagation();
+    if (!dragActive) return;
+    dragActive = false;
+    bsEl.classList.remove('bs-dragging');
+    const absDelta = Math.abs(dragDeltaY);
+    if (absDelta < 8) {
+      const next = bsState === 'peek' ? 'half' : bsState === 'half' ? 'full' : 'peek';
+      bsSetState(next);
+      return;
+    }
+    if (absDelta > 60) {
+      bsSetState(dragDeltaY > 0 ? (bsState === 'full' ? 'half' : 'peek') : (bsState === 'peek' ? 'half' : 'full'));
+      return;
+    }
+    const curTY = parseFloat(bsEl.style.transform.replace(/[^0-9.\-]/g, '')) || bsTY(bsState);
+    let best = 'peek';
+    let bestDist = Infinity;
+    ['peek', 'half', 'full'].forEach(state => {
+      const dist = Math.abs(curTY - bsTY(state));
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = state;
+      }
+    });
+    bsSetState(best);
+  }, { passive: true });
+
+  window.addEventListener('resize', () => bsSetState(bsState, false));
 }
 
 function clampView() {
@@ -528,6 +733,54 @@ window.addEventListener('mouseup', () => {
   isDragging = false;
   svgEl.style.cursor = '';
 });
+
+svgEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (animRaf) {
+    cancelAnimationFrame(animRaf);
+    animRaf = null;
+  }
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    isDragging = true;
+    touchMoved = false;
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchStartVX = viewX;
+    touchStartVY = viewY;
+    lastTouchDist = null;
+  } else if (e.touches.length === 2) {
+    isDragging = false;
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    lastTouchDist = Math.hypot(dx, dy);
+  }
+}, { passive: false });
+
+svgEl.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && isDragging) {
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) touchMoved = true;
+    viewX = touchStartVX + dx;
+    viewY = touchStartVY + dy;
+    applyView();
+  } else if (e.touches.length === 2 && lastTouchDist !== null) {
+    const dx = e.touches[1].clientX - e.touches[0].clientX;
+    const dy = e.touches[1].clientY - e.touches[0].clientY;
+    const dist = Math.hypot(dx, dy);
+    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    if (dist > 0) zoomAt(midX, midY, dist / lastTouchDist);
+    lastTouchDist = dist;
+  }
+}, { passive: false });
+
+svgEl.addEventListener('touchend', () => {
+  isDragging = false;
+}, { passive: false });
 
 const tipEl = document.getElementById('tooltip');
 function moveTip(e) {
@@ -677,6 +930,7 @@ function renderRanking(items, mode) {
       if (mode === 'pref' && code === '13') zoomInTokyo();
     });
   });
+  bsRenderRanking(items, mode);
 }
 
 function getFeatureBounds(feat) {
@@ -702,6 +956,7 @@ async function zoomInTokyo() {
 
   document.querySelectorAll('.pref-path').forEach(p => {
     p.classList.toggle('dimmed', p.dataset.code !== '13');
+    p.classList.toggle('tokyo-muted', p.dataset.code === '13');
   });
 
   if (!tokyoGeo || !tokyoMeta) {
@@ -755,6 +1010,7 @@ async function zoomInTokyo() {
 
   await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
   drawTokyoLayer();
+  if (bsMobile) bsSetState('peek');
 }
 
 function drawTokyoLayer() {
@@ -812,11 +1068,12 @@ function zoomOut() {
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('zoom-label').classList.remove('visible');
   document.getElementById('hint').textContent = 'Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in';
-  document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('dimmed', 'active'));
+  document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('dimmed', 'active', 'tokyo-muted'));
   animateToView(0, 0, 1, () => {
     renderOverviewRanking();
     setLegend(overviewMin, overviewMax, 'Store count by prefecture');
   });
+  if (bsMobile) bsSetState('peek');
 }
 
 function renderOverviewRanking() {
@@ -828,6 +1085,7 @@ function renderOverviewRanking() {
 
 async function init() {
   try {
+    bsInit();
     setStatus('Loading Starbucks store data…');
     const dataRes = await fetch(OVERVIEW_DATA_URL);
     if (!dataRes.ok) throw new Error(`HTTP ${dataRes.status}`);
