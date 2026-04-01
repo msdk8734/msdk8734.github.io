@@ -63,6 +63,13 @@ body {
   gap: 8px;
   padding-top: 2px;
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 .legend-label {
   font-size: 10px;
   color: #7b857f;
@@ -102,6 +109,25 @@ body {
 }
 #back-btn:hover { background: #f6faf8; }
 #back-btn.visible { display: flex; }
+
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid #d7ddd8;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e473a;
+  text-decoration: none;
+  box-shadow: 0 1px 5px rgba(0,0,0,.06);
+  white-space: nowrap;
+}
+.map-link:hover {
+  background: #f6faf8;
+}
 
 #map-container { width: 100vw; height: 100vh; overflow: hidden; }
 #map-svg { width: 100%; height: 100%; display: block; touch-action: none; }
@@ -374,6 +400,10 @@ body {
   #header { right: 0; padding: 12px 14px 8px; }
   .title-block h1 { font-size: 18px; }
   .title-block .sub { max-width: 300px; }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
   .tooltip { min-width: 0; max-width: calc(100vw - 24px); padding: 12px 14px; }
   #zoom-label { top: 108px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
   #hint { display: none; }
@@ -394,7 +424,15 @@ body {
     <div class="sub">Store counts as of April 2026 from the official Starbucks Japan store list, covering 2,108 locations nationwide, with a prefecture choropleth and a Tokyo municipality zoom view.</div>
   </div>
   <div class="header-right">
-    <button id="back-btn" type="button">← Back to Overview</button>
+    <div class="header-actions">
+      <button id="back-btn" type="button">← Back to Overview</button>
+      <a
+        class="map-link"
+        href="https://www.google.com/maps/d/edit?mid=1ZVpfhbg7CZI-pBFSBbv-qzA71NFpDVA&ll=35.92219040241311%2C138.96190771883374&z=7"
+        target="_blank"
+        rel="noopener noreferrer"
+      >↗ Google My Maps</a>
+    </div>
     <div class="legend-label" id="legend-label">Store count by prefecture</div>
     <div class="color-bar" id="color-bar"></div>
     <div class="color-minmax">
