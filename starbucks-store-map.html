@@ -270,7 +270,7 @@ body {
 #zoom-label {
   display: none;
   position: fixed;
-  top: 16px;
+  top: 88px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 150;
@@ -405,7 +405,7 @@ body {
     justify-content: flex-start;
   }
   .tooltip { min-width: 0; max-width: calc(100vw - 24px); padding: 12px 14px; }
-  #zoom-label { top: 108px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+  #zoom-label { top: 132px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
   #hint { display: none; }
 }
 </style>
@@ -508,6 +508,8 @@ let animRaf = null;
 let lastTouchDist = null;
 let touchStartX, touchStartY, touchStartVX, touchStartVY;
 let touchMoved = false;
+let lastTapTime = 0;
+let lastTapTarget = null;
 let bsState = 'peek';
 let bsMobile = false;
 let bsSafeB = 0;
@@ -818,6 +820,60 @@ svgEl.addEventListener('touchmove', e => {
 
 svgEl.addEventListener('touchend', () => {
   isDragging = false;
+}, { passive: false });
+
+svgEl.addEventListener('touchend', e => {
+  if (e.changedTouches.length !== 1) return;
+  const t = e.changedTouches[0];
+  if (touchMoved) return;
+
+  const target = document.elementFromPoint(t.clientX, t.clientY);
+  const pathEl = target?.closest('path');
+  const now = Date.now();
+
+  if (!pathEl) {
+    clearOverviewHighlight();
+    clearTokyoHighlight();
+    hideTip();
+    lastTapTime = 0;
+    lastTapTarget = null;
+    return;
+  }
+
+  if (!zoomedTokyo && pathEl.classList.contains('pref-path')) {
+    const code = pathEl.dataset.code;
+    const item = prefDataMap[code];
+    if (!item) return;
+
+    if (now - lastTapTime < 400 && pathEl === lastTapTarget && code === '13') {
+      hideTip();
+      zoomInTokyo();
+      lastTapTime = 0;
+      lastTapTarget = null;
+      return;
+    }
+
+    highlightPrefecture(code, true);
+    showPrefTip({ clientX: t.clientX, clientY: t.clientY }, item);
+    lastTapTime = now;
+    lastTapTarget = pathEl;
+    return;
+  }
+
+  if (zoomedTokyo && pathEl.classList.contains('city-path')) {
+    const code = pathEl.dataset.code;
+    const item = tokyoDataMap[code] || (tokyoMeta && tokyoMeta[code] ? {
+      code,
+      nameJa: tokyoMeta[code].nameJa,
+      nameEn: tokyoMeta[code].nameEn,
+      count: 0
+    } : null);
+    if (!item) return;
+    highlightTokyo(code, true);
+    showTokyoTip({ clientX: t.clientX, clientY: t.clientY }, item);
+    lastTapTime = now;
+    lastTapTarget = pathEl;
+  }
 }, { passive: false });
 
 const tipEl = document.getElementById('tooltip');
