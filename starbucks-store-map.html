@@ -113,9 +113,14 @@ body {
 .pref-path { stroke-width: .28px; cursor: pointer; }
 .city-path { stroke-width: .08px; cursor: pointer; }
 .pref-path.clickable { cursor: zoom-in; }
-.pref-path.dimmed, .city-path.dimmed { opacity: .16; }
+.pref-path.dimmed, .city-path.dimmed { opacity: .08; }
 .pref-path.active, .city-path.active {
   filter: brightness(1.08) drop-shadow(0 2px 10px rgba(0,0,0,.2));
+}
+.city-path.active {
+  opacity: 1;
+  stroke: rgba(255,255,255,.92);
+  stroke-width: .16px;
 }
 
 .tooltip {
@@ -321,7 +326,7 @@ body {
 <div id="header">
   <div class="title-block">
     <h1>☕ Starbucks <span class="accent">Japan</span> Store Map</h1>
-    <div class="sub">One dot-free choropleth for all 47 prefectures, plus a Tokyo municipality zoom view built from the official Starbucks Japan store list.</div>
+    <div class="sub">Store counts as of April 2026 from the official Starbucks Japan store list, covering 2,108 locations nationwide, with a prefecture choropleth and a Tokyo municipality zoom view.</div>
   </div>
   <div class="header-right">
     <button id="back-btn" type="button">← Back to Japan</button>
@@ -604,8 +609,13 @@ function highlightPrefecture(code, fromMap = false) {
 }
 
 function clearTokyoHighlight() {
-  document.querySelectorAll('.city-path').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.city-path').forEach(el => el.classList.remove('dimmed'));
+  document.querySelectorAll('.city-path').forEach(el => {
+    el.classList.remove('active', 'dimmed');
+    if (el.dataset.origFill) {
+      el.setAttribute('fill', el.dataset.origFill);
+      delete el.dataset.origFill;
+    }
+  });
   document.querySelectorAll('#rk-list .rk-item').forEach(el => el.classList.remove('active'));
 }
 function highlightTokyo(code, fromMap = false) {
@@ -615,7 +625,11 @@ function highlightTokyo(code, fromMap = false) {
   });
   const path = document.querySelector(`.city-path[data-code="${code}"]`);
   const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
-  if (path) path.classList.add('active');
+  if (path) {
+    if (!path.dataset.origFill) path.dataset.origFill = path.getAttribute('fill');
+    path.setAttribute('fill', HOVER_FILL);
+    path.classList.add('active');
+  }
   if (item) {
     item.classList.add('active');
     if (fromMap) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -702,9 +716,35 @@ async function zoomInTokyo() {
   }
 
   const feat = prefFeatMap['13'];
-  const bounds = getFeatureBounds(feat);
-  const [x0, y0] = project(bounds.lo, bounds.lb);
-  const [x1, y1] = project(bounds.hi, bounds.la);
+  const mcf = { minCy: 35.0, maxCx: 141.0 };
+  const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
+  let lo = Infinity, hi = -Infinity, la = Infinity, lb = -Infinity;
+  let hasMainland = false;
+
+  polys.forEach(poly => {
+    const ring = poly[0];
+    const cx = ring.reduce((sum, point) => sum + point[0], 0) / ring.length;
+    const cy = ring.reduce((sum, point) => sum + point[1], 0) / ring.length;
+    if (mcf.minCy !== undefined && cy < mcf.minCy) return;
+    if (mcf.maxCx !== undefined && cx > mcf.maxCx) return;
+    hasMainland = true;
+    poly.forEach(innerRing => innerRing.forEach(([lon, lat]) => {
+      if (lon < lo) lo = lon;
+      if (lon > hi) hi = lon;
+      if (lat < la) la = lat;
+      if (lat > lb) lb = lat;
+    }));
+  });
+
+  if (!hasMainland) {
+    const bounds = getFeatureBounds(feat);
+    lo = bounds.lo;
+    hi = bounds.hi;
+    la = bounds.la;
+    lb = bounds.lb;
+  }
+  const [x0, y0] = project(lo, lb);
+  const [x1, y1] = project(hi, la);
   const pad = IS_TOUCH ? 40 : 80;
   const availW = svgW - PANEL_W - pad * 2;
   const availH = svgH - pad * 2;
