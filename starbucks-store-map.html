@@ -405,8 +405,13 @@ body {
     width: 100%;
     justify-content: flex-start;
   }
-  .tooltip { min-width: 0; max-width: calc(100vw - 24px); padding: 12px 14px; }
-  #zoom-label { top: 132px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+  .tooltip {
+    min-width: 220px;
+    max-width: min(280px, calc(100vw - 32px));
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+  #zoom-label { top: 168px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
   #hint { display: none; }
 }
 </style>
@@ -942,14 +947,27 @@ function setLegend(minVal, maxVal, label) {
 }
 
 function clearOverviewHighlight() {
-  document.querySelectorAll('.pref-path').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.pref-path').forEach(el => {
+    el.classList.remove('active', 'dimmed');
+    if (el.dataset.origFill) {
+      el.setAttribute('fill', el.dataset.origFill);
+      delete el.dataset.origFill;
+    }
+  });
   document.querySelectorAll('#rk-list .rk-item').forEach(el => el.classList.remove('active'));
 }
 function highlightPrefecture(code, fromMap = false) {
   clearOverviewHighlight();
+  document.querySelectorAll('.pref-path').forEach(el => {
+    el.classList.toggle('dimmed', el.dataset.code !== code);
+  });
   const path = document.querySelector(`.pref-path[data-code="${code}"]`);
   const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
-  if (path) path.classList.add('active');
+  if (path) {
+    if (!path.dataset.origFill) path.dataset.origFill = path.getAttribute('fill');
+    path.setAttribute('fill', HOVER_FILL);
+    path.classList.add('active');
+  }
   if (item) {
     item.classList.add('active');
     if (fromMap) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
