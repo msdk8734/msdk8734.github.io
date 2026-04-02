@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta property="og:title" content="Starbucks Japan Store Map">
-<meta property="og:description" content="Interactive map of Starbucks store counts by prefecture, with a Tokyo municipality zoom view.">
+<meta property="og:description" content="Interactive map of Starbucks store counts by prefecture, with municipality zoom views across Japan.">
 <meta property="og:image" content="https://msdk8734.github.io/data/datavizOGP.png">
 <meta property="og:url" content="https://msdk8734.github.io/starbucks-store-map.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Data Visualization Projects">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Starbucks Japan Store Map">
-<meta name="twitter:description" content="Interactive map of Starbucks store counts by prefecture, with a Tokyo municipality zoom view.">
+<meta name="twitter:description" content="Interactive map of Starbucks store counts by prefecture, with municipality zoom views across Japan.">
 <meta name="twitter:image" content="https://msdk8734.github.io/data/datavizOGP.png">
 <title>Starbucks Japan Store Map</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>☕</text></svg>">
@@ -142,8 +142,8 @@ body {
 .pref-path { stroke-width: .18px; cursor: pointer; }
 .city-path { stroke-width: .04px; cursor: pointer; }
 .pref-path.clickable { cursor: zoom-in; }
-.pref-path.dimmed { opacity: .24; }
-.city-path.dimmed { opacity: .24; }
+.pref-path.dimmed { opacity: .34; }
+.city-path.dimmed { opacity: .30; }
 .pref-path.active, .city-path.active {
   filter: brightness(1.08) drop-shadow(0 2px 10px rgba(0,0,0,.2));
 }
@@ -153,7 +153,7 @@ body {
   stroke-width: .08px;
 }
 .pref-path.tokyo-muted {
-  opacity: .2 !important;
+  opacity: .12 !important;
 }
 
 .tooltip {
@@ -190,6 +190,35 @@ body {
 .tt-bar-bg { height: 5px; background: #eef3ef; border-radius: 3px; overflow: hidden; margin-top: 4px; }
 .tt-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgb(239,248,242), rgb(0,98,65)); }
 .tt-note { font-size: 9.5px; color: #9ca8a1; margin-top: 10px; line-height: 1.45; }
+.tt-divider {
+  border: 0;
+  border-top: 1px solid #edf1ee;
+  margin: 10px 0 8px;
+}
+.tt-section-label {
+  font-size: 10px;
+  color: #7a867f;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.tt-ward-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.tt-ward-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: #3d4f45;
+}
+.tt-ward-val {
+  font-family: 'JetBrains Mono', monospace;
+  color: #1f3b2c;
+}
 
 #ranking {
   position: fixed;
@@ -414,7 +443,7 @@ body {
     padding: 12px 14px;
     border-radius: 12px;
   }
-  #zoom-label { top: 168px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+  #zoom-label { top: 196px; font-size: 13px; padding: 5px 14px; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
   #hint { display: none; }
 }
 </style>
@@ -430,7 +459,7 @@ body {
 <div id="header">
   <div class="title-block">
     <h1>☕ Starbucks <span class="accent">Japan</span> Store Map</h1>
-    <div class="sub">Store counts as of April 2026 from the official Starbucks Japan store list, covering 2,108 locations nationwide, with a prefecture choropleth and a Tokyo municipality zoom view.</div>
+    <div class="sub">Store counts as of April 2026 from the official Starbucks Japan store list, covering 2,108 locations nationwide, with a prefecture choropleth and municipality zoom views.</div>
   </div>
   <div class="header-right">
     <div class="header-actions">
@@ -440,7 +469,7 @@ body {
         href="https://www.google.com/maps/d/edit?mid=1ZVpfhbg7CZI-pBFSBbv-qzA71NFpDVA&ll=35.92219040241311%2C138.96190771883374&z=7"
         target="_blank"
         rel="noopener noreferrer"
-      >↗ Starbucks Locations<span class="map-link-mobile-break"></span>on Google My Maps</a>
+      >↗ Starbucks Locations <span class="map-link-mobile-break"></span>on Google My Maps</a>
     </div>
     <div class="legend-label" id="legend-label">Store count by prefecture</div>
     <div class="color-bar" id="color-bar"></div>
@@ -463,7 +492,7 @@ body {
 </div>
 
 <div class="tooltip" id="tooltip"></div>
-<div id="hint">Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in</div>
+<div id="hint">Hover prefectures and ranking rows to cross-highlight · Click a prefecture to zoom in</div>
 
 <div id="bottom-sheet" role="region" aria-label="Ranking">
   <div id="bs-handle-area"><div id="bs-handle"></div></div>
@@ -481,9 +510,8 @@ const BS_HALF_R = 0.45;
 const BS_FULL_R = 0.88;
 const BS_ANIM = 320;
 const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
+const MUNICIPALITY_DATA_URL = 'data/starbucks-municipality-counts.json';
 const JAPAN_GEO_URL = 'geo-json/japan-simple.geojson';
-const TOKYO_GEO_URL = 'geo-json/pref_13.geojson';
-const TOKYO_META_URL = 'population-json/municipalities/muni-pop-13.json';
 
 const C_LO = [239, 248, 242];
 const C_HI = [0, 98, 65];
@@ -499,20 +527,22 @@ let projScale, projTx, projTy;
 let viewX = 0, viewY = 0, viewScale = 1;
 let isDragging = false, didDrag = false;
 let dragSX, dragSY, dragVX, dragVY;
-let zoomedTokyo = false;
+let zoomedPrefCode = null;
 let cityLayerG = null;
-let tokyoGeo = null;
-let tokyoMeta = null;
 let starbucksData = null;
+let municipalityData = null;
 let prefFeatMap = {};
 let prefDataMap = {};
-let tokyoDataMap = {};
 let prefRankLookup = {};
-let tokyoRankLookup = {};
+let municipalityRankLookup = {};
 let overviewMin = 0;
 let overviewMax = 0;
-let tokyoMin = 0;
-let tokyoMax = 0;
+let municipalityMin = 0;
+let municipalityMax = 0;
+let currentRankItems = [];
+let currentWardMap = {};
+let currentMuniEntries = {};
+let currentPrefTotal = 0;
 let animRaf = null;
 let lastTouchDist = null;
 let touchStartX, touchStartY, touchStartVX, touchStartVY;
@@ -522,6 +552,8 @@ let lastTapTarget = null;
 let bsState = 'peek';
 let bsMobile = false;
 let bsSafeB = 0;
+const muniGeoCache = {};
+const muniMetaCache = {};
 
 const bsEl = document.getElementById('bottom-sheet');
 const bsListWrap = document.getElementById('bs-list-wrap');
@@ -601,8 +633,8 @@ function bsSetState(state, animate = true) {
 }
 function bsRenderRanking(items, mode) {
   if (!bsMobile) return;
-  bsTitleEl.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Tokyo Municipality Ranking';
-  const maxVal = mode === 'pref' ? overviewMax : tokyoMax;
+  bsTitleEl.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
+  const maxVal = mode === 'pref' ? overviewMax : municipalityMax;
   bsList.innerHTML = items.map((item, i) => {
     const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
     const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
@@ -622,13 +654,11 @@ function bsRenderRanking(items, mode) {
       if (mode === 'pref') {
         highlightPrefecture(code, true);
         showPrefTip(fakePoint, item);
-        if (code === '13') {
-          bsSetState('peek');
-          zoomInTokyo();
-        }
+        bsSetState('peek');
+        zoomInPrefecture(code);
       } else {
-        highlightTokyo(code, true);
-        showTokyoTip(fakePoint, item);
+        highlightMunicipality(code, true);
+        showMunicipalityTip(fakePoint, item, currentWardMap[item.code] || null);
       }
     });
   });
@@ -851,12 +881,9 @@ svgEl.addEventListener('touchend', e => {
   const now = Date.now();
 
   if (!pathEl) {
-    if (zoomedTokyo) {
-      clearTokyoHighlight();
-      document.querySelectorAll('.pref-path').forEach(p => {
-        p.classList.toggle('dimmed', p.dataset.code !== '13');
-        p.classList.toggle('tokyo-muted', p.dataset.code === '13');
-      });
+    if (zoomedPrefCode) {
+      clearMunicipalityHighlight();
+      applyPrefZoomState(zoomedPrefCode);
     } else {
       clearOverviewHighlight();
     }
@@ -866,14 +893,23 @@ svgEl.addEventListener('touchend', e => {
     return;
   }
 
-  if (!zoomedTokyo && pathEl.classList.contains('pref-path')) {
+  if (zoomedPrefCode && !pathEl.classList.contains('city-path')) {
+    clearMunicipalityHighlight();
+    applyPrefZoomState(zoomedPrefCode);
+    hideTip();
+    lastTapTime = 0;
+    lastTapTarget = null;
+    return;
+  }
+
+  if (!zoomedPrefCode && pathEl.classList.contains('pref-path')) {
     const code = pathEl.dataset.code;
     const item = prefDataMap[code];
     if (!item) return;
 
-    if (now - lastTapTime < 400 && pathEl === lastTapTarget && code === '13') {
+    if (now - lastTapTime < 400 && pathEl === lastTapTarget) {
       hideTip();
-      zoomInTokyo();
+      zoomInPrefecture(code);
       lastTapTime = 0;
       lastTapTarget = null;
       return;
@@ -886,17 +922,15 @@ svgEl.addEventListener('touchend', e => {
     return;
   }
 
-  if (zoomedTokyo && pathEl.classList.contains('city-path')) {
-    const code = pathEl.dataset.code;
-    const item = tokyoDataMap[code] || (tokyoMeta && tokyoMeta[code] ? {
-      code,
-      nameJa: tokyoMeta[code].nameJa,
-      nameEn: tokyoMeta[code].nameEn,
-      count: 0
-    } : null);
+  if (zoomedPrefCode && pathEl.classList.contains('city-path')) {
+    const rankKey = pathEl.dataset.rankkey;
+    const item = currentRankItems.find(entry => entry.code === rankKey);
     if (!item) return;
-    highlightTokyo(code, true);
-    showTokyoTip({ clientX: t.clientX, clientY: t.clientY }, item);
+    highlightMunicipality(rankKey, true);
+    const wardRows = currentWardMap[rankKey] || null;
+    const wardCode = pathEl.dataset.code;
+    const wardItem = pathEl.dataset.isward === '1' ? (currentMuniEntries[wardCode] || null) : null;
+    showMunicipalityTip({ clientX: t.clientX, clientY: t.clientY }, item, wardRows, wardItem);
     lastTapTime = now;
     lastTapTarget = pathEl;
   }
@@ -920,7 +954,7 @@ function hideTip() { tipEl.classList.remove('visible'); }
 
 function showPrefTip(e, item) {
   const share = ((item.count / starbucksData.source.uniqueStoreUrlCount) * 100).toFixed(1);
-  const zoomMsg = item.code === '13' ? 'Click to zoom into Tokyo wards and cities.' : 'Tokyo can be zoomed for municipality detail.';
+  const zoomMsg = 'Double-tap or click to zoom into municipality view.';
   tipEl.innerHTML = `
     <div class="tt-name">${item.nameEn}</div>
     <div class="tt-name-ja">${item.nameJa}</div>
@@ -935,27 +969,6 @@ function showPrefTip(e, item) {
       <span class="tt-val-sm">${share}%</span>
     </div>
     <div class="tt-note">${zoomMsg}</div>`;
-  tipEl.classList.add('visible');
-  moveTip(e);
-}
-
-function showTokyoTip(e, item) {
-  const tokyoTotal = prefDataMap['13'].count;
-  const share = tokyoTotal ? ((item.count / tokyoTotal) * 100).toFixed(1) : '0.0';
-  tipEl.innerHTML = `
-    <div class="tt-name">${item.nameEn}</div>
-    <div class="tt-name-ja">${item.nameJa}</div>
-    <div class="tt-rank"><span class="num">#${tokyoRankLookup[item.code]}</span></div>
-    <div class="tt-row">
-      <span class="tt-label">Stores</span>
-      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
-    </div>
-    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${tokyoMax ? (item.count / tokyoMax * 100).toFixed(0) : 0}%"></div></div>
-    <div class="tt-row" style="margin-top:10px;">
-      <span class="tt-label">Share of Tokyo total</span>
-      <span class="tt-val-sm">${share}%</span>
-    </div>
-    <div class="tt-note">Tokyo zoom view includes the 23 wards, cities, towns, and villages in the prefectural GeoJSON.</div>`;
   tipEl.classList.add('visible');
   moveTip(e);
 }
@@ -994,7 +1007,7 @@ function highlightPrefecture(code, fromMap = false) {
   }
 }
 
-function clearTokyoHighlight() {
+function clearMunicipalityHighlight() {
   document.querySelectorAll('.city-path').forEach(el => {
     el.classList.remove('active', 'dimmed');
     if (el.dataset.origFill) {
@@ -1004,12 +1017,12 @@ function clearTokyoHighlight() {
   });
   document.querySelectorAll('#rk-list .rk-item').forEach(el => el.classList.remove('active'));
 }
-function highlightTokyo(code, fromMap = false) {
-  clearTokyoHighlight();
+function highlightMunicipality(code, fromMap = false) {
+  clearMunicipalityHighlight();
   document.querySelectorAll('.city-path').forEach(el => {
-    el.classList.toggle('dimmed', el.dataset.code !== code);
+    el.classList.toggle('dimmed', el.dataset.rankkey !== code);
   });
-  const path = document.querySelector(`.city-path[data-code="${code}"]`);
+  const path = document.querySelector(`.city-path[data-rankkey="${code}"]`);
   const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
   if (path) {
     if (!path.dataset.origFill) path.dataset.origFill = path.getAttribute('fill');
@@ -1022,13 +1035,64 @@ function highlightTokyo(code, fromMap = false) {
   }
 }
 
+function showMunicipalityTip(e, item, wardRows, wardItem) {
+  const share = currentPrefTotal ? ((item.count / currentPrefTotal) * 100).toFixed(1) : '0.0';
+  let html = `
+    <div class="tt-name">${item.nameEn}</div>
+    <div class="tt-name-ja">${item.nameJa}</div>
+    <div class="tt-rank"><span class="num">#${municipalityRankLookup[item.code]}</span></div>
+    <div class="tt-row">
+      <span class="tt-label">Stores</span>
+      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
+    </div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${municipalityMax ? (item.count / municipalityMax * 100).toFixed(0) : 0}%"></div></div>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Share of prefecture</span>
+      <span class="tt-val-sm">${share}%</span>
+    </div>`;
+
+  if (wardItem && item.count > 0) {
+    const wardShare = ((wardItem.count / item.count) * 100).toFixed(1);
+    html = `
+      <div class="tt-name">${wardItem.nameEn}</div>
+      <div class="tt-name-ja">${wardItem.nameJa}</div>
+      <div class="tt-row">
+        <span class="tt-label">Ward stores</span>
+        <span class="tt-val">${wardItem.count.toLocaleString()}<span class="unit"> stores</span></span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Share of city</span>
+        <span class="tt-val-sm">${wardShare}%</span>
+      </div>
+      <hr class="tt-divider">
+      <div class="tt-section-label">Parent City</div>
+      <div class="tt-row">
+        <span class="tt-label">${item.nameEn}</span>
+        <span class="tt-val-sm">${item.count.toLocaleString()}</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Share of prefecture</span>
+        <span class="tt-val-sm">${share}%</span>
+      </div>`;
+  } else if (wardRows && wardRows.length > 0) {
+    html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
+    wardRows.slice(0, 8).forEach(row => {
+      html += `<div class="tt-ward-row"><span>${row.nameJa}</span><span class="tt-ward-val">${row.count.toLocaleString()}</span></div>`;
+    });
+    html += `</div>`;
+  }
+  tipEl.innerHTML = html;
+  tipEl.classList.add('visible');
+  moveTip(e);
+}
+
 function renderRanking(items, mode) {
   const list = document.getElementById('rk-list');
   const title = document.getElementById('rk-title');
-  title.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Tokyo Municipality Ranking';
+  title.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
   list.innerHTML = items.map((item, i) => {
     const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
-    const maxVal = mode === 'pref' ? overviewMax : tokyoMax;
+    const maxVal = mode === 'pref' ? overviewMax : municipalityMax;
     const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
     return `<div class="rk-item" data-code="${item.code}">
       <span class="${nc}">${i + 1}</span>
@@ -1046,8 +1110,8 @@ function renderRanking(items, mode) {
         highlightPrefecture(code, false);
         if (item) showPrefTip(e, item);
       } else {
-        highlightTokyo(code, false);
-        if (item) showTokyoTip(e, item);
+        highlightMunicipality(code, false);
+        if (item) showMunicipalityTip(e, item, currentWardMap[code] || null);
       }
     });
     el.addEventListener('mousemove', moveTip);
@@ -1055,12 +1119,12 @@ function renderRanking(items, mode) {
       if (mode === 'pref') {
         clearOverviewHighlight();
       } else {
-        clearTokyoHighlight();
+        clearMunicipalityHighlight();
       }
       hideTip();
     });
     el.addEventListener('click', () => {
-      if (mode === 'pref' && code === '13') zoomInTokyo();
+      if (mode === 'pref') zoomInPrefecture(code);
     });
   });
   bsRenderRanking(items, mode);
@@ -1078,33 +1142,69 @@ function getFeatureBounds(feat) {
   return { lo, hi, la, lb };
 }
 
-async function zoomInTokyo() {
-  if (zoomedTokyo) return;
-  zoomedTokyo = true;
+function buildWardToCityMap(prefCode, muniMeta) {
+  const cityByName = {};
+  Object.entries(muniMeta).forEach(([code, d]) => {
+    const name = d.nameJa || '';
+    if (name.endsWith('市') && !name.includes('区') && !name.includes('郡')) cityByName[name] = code;
+  });
+  const wardToCity = {};
+  Object.entries(muniMeta).forEach(([code, d]) => {
+    const name = d.nameJa || '';
+    if (!name.includes('区')) return;
+    const num = parseInt(code.slice(2), 10);
+    if (prefCode === '13' && num >= 101 && num <= 123) return;
+    for (const [cityName, cityCode] of Object.entries(cityByName)) {
+      if (name.startsWith(cityName)) {
+        wardToCity[code] = cityCode;
+        break;
+      }
+    }
+  });
+  return wardToCity;
+}
+
+function applyPrefZoomState(prefCode) {
+  document.querySelectorAll('.pref-path').forEach(p => {
+    p.classList.toggle('dimmed', p.dataset.code !== prefCode);
+    p.classList.toggle('tokyo-muted', p.dataset.code === prefCode);
+  });
+}
+
+async function zoomInPrefecture(prefCode) {
+  if (zoomedPrefCode === prefCode) return;
+  zoomedPrefCode = prefCode;
   hideTip();
   clearOverviewHighlight();
   document.getElementById('back-btn').classList.add('visible');
   document.getElementById('zoom-label').classList.add('visible');
-  document.getElementById('hint').textContent = 'Hover Tokyo municipalities and ranking rows to cross-highlight';
+  const prefInfo = prefDataMap[prefCode];
+  document.getElementById('zoom-label').textContent = `${prefInfo.nameEn} / ${prefInfo.nameJa}`;
+  document.getElementById('hint').textContent = 'Hover municipalities and ranking rows to cross-highlight';
+  applyPrefZoomState(prefCode);
 
-  document.querySelectorAll('.pref-path').forEach(p => {
-    p.classList.toggle('dimmed', p.dataset.code !== '13');
-    p.classList.toggle('tokyo-muted', p.dataset.code === '13');
-  });
-
-  if (!tokyoGeo || !tokyoMeta) {
-    setStatus('Loading Tokyo municipality data…');
-    const [geoRes, metaRes] = await Promise.all([fetch(TOKYO_GEO_URL), fetch(TOKYO_META_URL)]);
+  if (!muniGeoCache[prefCode]) {
+    setStatus('Loading municipality data…');
+    const [geoRes, metaRes] = await Promise.all([
+      fetch(`geo-json/pref_${prefCode}.geojson`),
+      fetch(`population-json/municipalities/muni-pop-${prefCode}.json`),
+    ]);
     if (!geoRes.ok || !metaRes.ok) {
-      showError('Could not load Tokyo zoom data.');
+      showError('Could not load municipality zoom data.');
       return;
     }
-    tokyoGeo = await geoRes.json();
-    tokyoMeta = await metaRes.json();
+    muniGeoCache[prefCode] = await geoRes.json();
+    muniMetaCache[prefCode] = await metaRes.json();
   }
 
-  const feat = prefFeatMap['13'];
-  const mcf = { minCy: 35.0, maxCx: 141.0 };
+  const feat = prefFeatMap[prefCode];
+  const MAINLAND_CENTROID_FILTER = {
+    '13': { minCy: 35.0, maxCx: 141.0 },
+    '46': { minCy: 30.0 },
+    '47': { minCx: 127.0 },
+    '01': { maxCx: 145.5 }
+  };
+  const mcf = MAINLAND_CENTROID_FILTER[prefCode];
   const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
   let lo = Infinity, hi = -Infinity, la = Infinity, lb = -Infinity;
   let hasMainland = false;
@@ -1142,57 +1242,87 @@ async function zoomInTokyo() {
   const targetY = svgH / 2 - targetScale * (y0 + y1) / 2;
 
   await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
-  drawTokyoLayer();
+  drawPrefectureMunicipalities(prefCode);
   if (bsMobile) bsSetState('peek');
 }
 
-function drawTokyoLayer() {
+function drawPrefectureMunicipalities(prefCode) {
   if (cityLayerG) cityLayerG.remove();
   cityLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  cityLayerG.id = 'tokyo-city-layer';
+  cityLayerG.id = 'municipality-layer';
 
-  const items = tokyoGeo.features
+  const geo = muniGeoCache[prefCode];
+  const meta = muniMetaCache[prefCode];
+  const entries = municipalityData.municipalities[prefCode]?.entries || {};
+  currentMuniEntries = entries;
+  currentPrefTotal = prefDataMap[prefCode]?.count || 0;
+
+  const wardToCity = buildWardToCityMap(prefCode, meta);
+  const rankItemMap = {};
+  const wardMap = {};
+
+  const features = geo.features
     .filter(feat => feat.properties && feat.properties.code && feat.properties.code !== '13000')
     .map(feat => {
       const code = feat.properties.code;
-      const meta = tokyoMeta[code] || { nameJa: code, nameEn: code };
-      const count = tokyoDataMap[code]?.count || 0;
-      return { code, nameJa: meta.nameJa, nameEn: meta.nameEn, count, feature: feat };
-    })
-    .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+      const md = meta[code] || { nameJa: code, nameEn: code };
+      const count = entries[code]?.count || 0;
+      const rankKey = wardToCity[code] || code;
+      const isWard = rankKey !== code;
+      if (isWard) {
+        if (!rankItemMap[rankKey]) {
+          const parent = meta[rankKey] || { nameJa: rankKey, nameEn: rankKey };
+          rankItemMap[rankKey] = { code: rankKey, nameJa: parent.nameJa, nameEn: parent.nameEn, count: 0 };
+        }
+        rankItemMap[rankKey].count += count;
+        if (!wardMap[rankKey]) wardMap[rankKey] = [];
+        wardMap[rankKey].push({ code, nameJa: md.nameJa, nameEn: md.nameEn, count });
+      } else if (!rankItemMap[code]) {
+        rankItemMap[code] = { code, nameJa: md.nameJa, nameEn: md.nameEn, count };
+      }
+      return { code, rankKey, isWard, nameJa: md.nameJa, nameEn: md.nameEn, count, feature: feat };
+    });
 
-  tokyoRankLookup = {};
-  items.forEach((item, i) => { tokyoRankLookup[item.code] = i + 1; });
-  tokyoMin = items[items.length - 1]?.count || 0;
-  tokyoMax = items[0]?.count || 0;
-  setLegend(tokyoMin, tokyoMax, 'Store count by Tokyo municipality');
+  const rankItems = Object.values(rankItemMap).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+  currentRankItems = rankItems;
+  currentWardMap = wardMap;
+  municipalityRankLookup = {};
+  rankItems.forEach((item, i) => { municipalityRankLookup[item.code] = i + 1; });
+  municipalityMin = rankItems[rankItems.length - 1]?.count || 0;
+  municipalityMax = rankItems[0]?.count || 0;
+  setLegend(municipalityMin, municipalityMax, 'Store count by municipality');
 
-  items.forEach(item => {
+  features.forEach(item => {
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', featureToPath(item.feature));
-    pathEl.setAttribute('fill', getColor(item.count, tokyoMin, tokyoMax || 1));
+    pathEl.setAttribute('fill', getColor(item.count, municipalityMin, municipalityMax || 1));
     pathEl.setAttribute('fill-rule', 'evenodd');
     pathEl.setAttribute('class', 'city-path');
     pathEl.setAttribute('data-code', item.code);
+    pathEl.setAttribute('data-rankkey', item.rankKey);
+    pathEl.setAttribute('data-isward', item.isWard ? '1' : '0');
     pathEl.addEventListener('mouseenter', e => {
-      highlightTokyo(item.code, true);
-      showTokyoTip(e, item);
+      highlightMunicipality(item.rankKey, true);
+      const rankItem = rankItems.find(row => row.code === item.rankKey);
+      const wardRows = wardMap[item.rankKey] || null;
+      const wardItem = item.isWard ? (entries[item.code] || { code: item.code, nameJa: item.nameJa, nameEn: item.nameEn, count: item.count }) : null;
+      if (rankItem) showMunicipalityTip(e, rankItem, wardRows, wardItem);
     });
     pathEl.addEventListener('mousemove', moveTip);
     pathEl.addEventListener('mouseleave', () => {
-      clearTokyoHighlight();
+      clearMunicipalityHighlight();
       hideTip();
     });
     cityLayerG.appendChild(pathEl);
   });
 
   document.getElementById('map-g').appendChild(cityLayerG);
-  renderRanking(items, 'tokyo');
+  renderRanking(rankItems, 'muni');
 }
 
 function zoomOut() {
-  if (!zoomedTokyo) return;
-  zoomedTokyo = false;
+  if (!zoomedPrefCode) return;
+  zoomedPrefCode = null;
   hideTip();
   if (cityLayerG) {
     cityLayerG.remove();
@@ -1200,7 +1330,7 @@ function zoomOut() {
   }
   document.getElementById('back-btn').classList.remove('visible');
   document.getElementById('zoom-label').classList.remove('visible');
-  document.getElementById('hint').textContent = 'Hover prefectures and ranking rows to cross-highlight · Click Tokyo to zoom in';
+  document.getElementById('hint').textContent = 'Hover prefectures and ranking rows to cross-highlight · Click a prefecture to zoom in';
   document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('dimmed', 'active', 'tokyo-muted'));
   animateToView(0, 0, 1, () => {
     renderOverviewRanking();
@@ -1220,11 +1350,11 @@ async function init() {
   try {
     bsInit();
     setStatus('Loading Starbucks store data…');
-    const dataRes = await fetch(OVERVIEW_DATA_URL);
-    if (!dataRes.ok) throw new Error(`HTTP ${dataRes.status}`);
+    const [dataRes, muniRes] = await Promise.all([fetch(OVERVIEW_DATA_URL), fetch(MUNICIPALITY_DATA_URL)]);
+    if (!dataRes.ok || !muniRes.ok) throw new Error(`HTTP ${dataRes.status}/${muniRes.status}`);
     starbucksData = await dataRes.json();
+    municipalityData = await muniRes.json();
     prefDataMap = starbucksData.prefectures;
-    tokyoDataMap = starbucksData.tokyo;
 
     const prefItems = Object.values(prefDataMap);
     overviewMin = Math.min(...prefItems.map(item => item.count));
@@ -1252,23 +1382,23 @@ async function init() {
       pathEl.setAttribute('d', featureToPath(feat));
       pathEl.setAttribute('fill', getColor(item.count, overviewMin, overviewMax));
       pathEl.setAttribute('fill-rule', 'evenodd');
-      pathEl.setAttribute('class', `pref-path${code === '13' ? ' clickable' : ''}`);
+      pathEl.setAttribute('class', 'pref-path clickable');
       pathEl.setAttribute('data-code', code);
       pathEl.addEventListener('mouseenter', e => {
-        if (zoomedTokyo) return;
+        if (zoomedPrefCode) return;
         highlightPrefecture(code, true);
         showPrefTip(e, item);
       });
       pathEl.addEventListener('mousemove', e => {
-        if (!zoomedTokyo) moveTip(e);
+        if (!zoomedPrefCode) moveTip(e);
       });
       pathEl.addEventListener('mouseleave', () => {
-        if (zoomedTokyo) return;
+        if (zoomedPrefCode) return;
         clearOverviewHighlight();
         hideTip();
       });
       pathEl.addEventListener('click', () => {
-        if (!didDrag && code === '13') zoomInTokyo();
+        if (!didDrag) zoomInPrefecture(code);
       });
       mapG.appendChild(pathEl);
     });
