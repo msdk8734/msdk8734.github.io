@@ -264,21 +264,32 @@
       margin-top: 10px;
     }
     .popup-link,
-    .popup-link:visited {
+    .popup-link:link,
+    .popup-link:visited,
+    .leaflet-popup-content .popup-link,
+    .leaflet-popup-content .popup-link:link,
+    .leaflet-popup-content .popup-link:visited,
+    #info-panel .popup-link,
+    #info-panel .popup-link:link,
+    #info-panel .popup-link:visited {
       display: inline-block;
       margin-top: 10px;
       font-size: 9px; font-weight: 400;
       letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--text-primary);
+      color: var(--text-primary) !important;
       text-decoration: none;
       border-bottom: 1px solid rgba(238,238,236,0.28);
       padding-bottom: 1px;
       transition: color 0.15s, border-color 0.15s;
     }
     .popup-link:hover,
-    .popup-link:focus-visible {
-      color: #cfe0e7;
-      border-color: rgba(168,200,216,0.7);
+    .popup-link:focus-visible,
+    .leaflet-popup-content .popup-link:hover,
+    .leaflet-popup-content .popup-link:focus-visible,
+    #info-panel .popup-link:hover,
+    #info-panel .popup-link:focus-visible {
+      color: #cfe0e7 !important;
+      border-color: rgba(168,200,216,0.7) !important;
     }
 
     /* ── DETAIL PANEL ────────────────────────────────── */
