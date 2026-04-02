@@ -138,8 +138,8 @@ body {
   stroke-linejoin: round;
   transition: opacity .16s, filter .16s;
 }
-.pref-path { stroke-width: .28px; cursor: pointer; }
-.city-path { stroke-width: .08px; cursor: pointer; }
+.pref-path { stroke-width: .18px; cursor: pointer; }
+.city-path { stroke-width: .04px; cursor: pointer; }
 .pref-path.clickable { cursor: zoom-in; }
 .pref-path.dimmed, .city-path.dimmed { opacity: .08; }
 .pref-path.active, .city-path.active {
@@ -148,7 +148,7 @@ body {
 .city-path.active {
   opacity: 1;
   stroke: rgba(255,255,255,.92);
-  stroke-width: .16px;
+  stroke-width: .08px;
 }
 .pref-path.tokyo-muted {
   opacity: .04 !important;
@@ -478,7 +478,7 @@ const BS_HALF_R = 0.45;
 const BS_FULL_R = 0.88;
 const BS_ANIM = 320;
 const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
-const JAPAN_GEO_URL = 'geo-json/japan.geojson';
+const JAPAN_GEO_URL = 'geo-json/japan-simple.geojson';
 const TOKYO_GEO_URL = 'geo-json/pref_13.geojson';
 const TOKYO_META_URL = 'population-json/municipalities/muni-pop-13.json';
 
@@ -563,8 +563,8 @@ function featureToPath(feat) {
   let d = '';
   polys.forEach(poly => poly.forEach(ring => {
     const pts = ring.map(([lon, lat]) => project(lon, lat));
-    d += `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)} `;
-    for (let i = 1; i < pts.length; i++) d += `L ${pts[i][0].toFixed(2)} ${pts[i][1].toFixed(2)} `;
+    d += `M ${pts[0][0].toFixed(3)} ${pts[0][1].toFixed(3)} `;
+    for (let i = 1; i < pts.length; i++) d += `L ${pts[i][0].toFixed(3)} ${pts[i][1].toFixed(3)} `;
     d += 'Z ';
   }));
   return d.trim();
