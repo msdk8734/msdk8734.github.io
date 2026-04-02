@@ -110,6 +110,35 @@ body {
 #back-btn:hover { background: #f6faf8; }
 #back-btn.visible { display: flex; }
 
+.metric-toggle {
+  display: inline-flex;
+  border: 1px solid #d7ddd8;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 1px 5px rgba(0,0,0,.06);
+}
+.metric-btn {
+  border: 0;
+  background: transparent;
+  color: #516359;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+  line-height: 1.1;
+}
+.metric-btn + .metric-btn {
+  border-left: 1px solid #e1e6e2;
+}
+.metric-btn.active {
+  background: #00754a;
+  color: #f4faf7;
+}
+.metric-btn:hover:not(.active) {
+  background: #f4f8f6;
+}
+
 .map-link {
   display: inline-block;
   background: rgba(255,255,255,.96);
@@ -434,7 +463,9 @@ body {
   .header-actions {
     width: 100%;
     justify-content: flex-start;
+    gap: 6px;
   }
+  .metric-btn { font-size: 10px; padding: 6px 8px; }
   .tooltip {
     min-width: 220px;
     max-width: min(280px, calc(100vw - 32px));
@@ -462,6 +493,10 @@ body {
   <div class="header-right">
     <div class="header-actions">
       <button id="back-btn" type="button">← Back to Overview</button>
+      <div class="metric-toggle" id="metric-toggle" role="group" aria-label="Metric toggle">
+        <button class="metric-btn active" id="metric-total-btn" type="button" data-metric="total">Total Stores</button>
+        <button class="metric-btn" id="metric-per100k-btn" type="button" data-metric="per100k">Stores per 100k</button>
+      </div>
       <a
         class="map-link"
         href="https://www.google.com/maps/d/edit?mid=1ZVpfhbg7CZI-pBFSBbv-qzA71NFpDVA&ll=35.92219040241311%2C138.96190771883374&z=7"
@@ -509,7 +544,10 @@ const BS_FULL_R = 0.88;
 const BS_ANIM = 320;
 const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
 const MUNICIPALITY_DATA_URL = 'data/starbucks-municipality-counts.json';
+const PREF_POP_URL = 'population-json/pref-pop.json';
 const JAPAN_GEO_URL = 'geo-json/japan-simple.geojson';
+const METRIC_TOTAL = 'total';
+const METRIC_PER100K = 'per100k';
 
 const C_LO = [239, 248, 242];
 const C_HI = [0, 98, 65];
@@ -529,6 +567,7 @@ let zoomedPrefCode = null;
 let cityLayerG = null;
 let starbucksData = null;
 let municipalityData = null;
+let prefPopulationMap = {};
 let prefFeatMap = {};
 let prefDataMap = {};
 let prefRankLookup = {};
@@ -537,9 +576,12 @@ let overviewMin = 0;
 let overviewMax = 0;
 let municipalityMin = 0;
 let municipalityMax = 0;
+let currentMetric = METRIC_TOTAL;
+let currentOverviewItems = [];
 let currentRankItems = [];
 let currentWardMap = {};
 let currentMuniEntries = {};
+let currentMuniFeatureByCode = {};
 let currentPrefTotal = 0;
 let animRaf = null;
 let lastTouchDist = null;
@@ -608,6 +650,31 @@ function getColor(v, lo, hi) {
   const t = Math.pow(Math.max(0, Math.min(1, (v - lo) / (hi - lo))), 0.58);
   return `rgb(${Math.round(C_LO[0] + (C_HI[0] - C_LO[0]) * t)},${Math.round(C_LO[1] + (C_HI[1] - C_LO[1]) * t)},${Math.round(C_LO[2] + (C_HI[2] - C_LO[2]) * t)})`;
 }
+function getMetricValue(item) {
+  return currentMetric === METRIC_PER100K ? (item.per100k || 0) : (item.count || 0);
+}
+function formatMetricValue(value) {
+  if (currentMetric === METRIC_PER100K) return value.toFixed(2);
+  return Math.round(value).toLocaleString();
+}
+function formatCount(value) {
+  return Math.round(value || 0).toLocaleString();
+}
+function metricTitle() {
+  return currentMetric === METRIC_PER100K ? 'Stores per 100k' : 'Stores';
+}
+function metricUnit() {
+  return currentMetric === METRIC_PER100K ? ' /100k' : ' stores';
+}
+function metricLegendLabel(scope) {
+  if (currentMetric === METRIC_PER100K) return `Stores per 100k by ${scope}`;
+  return `Store count by ${scope}`;
+}
+function calcMetricRange(items) {
+  if (!items || items.length === 0) return { min: 0, max: 0 };
+  const values = items.map(item => getMetricValue(item));
+  return { min: Math.min(...values), max: Math.max(...values) };
+}
 
 function bsTY(state) {
   const vh = window.innerHeight;
@@ -632,14 +699,15 @@ function bsSetState(state, animate = true) {
 function bsRenderRanking(items, mode) {
   if (!bsMobile) return;
   bsTitleEl.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
-  const maxVal = mode === 'pref' ? overviewMax : municipalityMax;
+  const { max: maxVal } = calcMetricRange(items);
   bsList.innerHTML = items.map((item, i) => {
     const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
-    const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
+    const v = getMetricValue(item);
+    const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
     return `<div class="rk-item" data-code="${item.code}">
       <span class="${nc}">${i + 1}</span>
       <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
-      <span class="rk-val">${item.count}</span>
+      <span class="rk-val">${formatMetricValue(v)}</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
     </div>`;
   }).join('');
@@ -927,7 +995,7 @@ svgEl.addEventListener('touchend', e => {
     highlightMunicipality(rankKey, true);
     const wardRows = currentWardMap[rankKey] || null;
     const wardCode = pathEl.dataset.code;
-    const wardItem = pathEl.dataset.isward === '1' ? (currentMuniEntries[wardCode] || null) : null;
+    const wardItem = pathEl.dataset.isward === '1' ? (currentMuniFeatureByCode[wardCode] || null) : null;
     showMunicipalityTip({ clientX: t.clientX, clientY: t.clientY }, item, wardRows, wardItem);
     lastTapTime = now;
     lastTapTarget = pathEl;
@@ -953,15 +1021,21 @@ function hideTip() { tipEl.classList.remove('visible'); }
 function showPrefTip(e, item) {
   const share = ((item.count / starbucksData.source.uniqueStoreUrlCount) * 100).toFixed(1);
   const zoomMsg = 'Double-tap or click to zoom into municipality view.';
+  const metricValue = getMetricValue(item);
+  const barMax = overviewMax || 1;
   tipEl.innerHTML = `
     <div class="tt-name">${item.nameEn}</div>
     <div class="tt-name-ja">${item.nameJa}</div>
     <div class="tt-rank"><span class="num">#${prefRankLookup[item.code]}</span></div>
     <div class="tt-row">
-      <span class="tt-label">Stores</span>
-      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
+      <span class="tt-label">${metricTitle()}</span>
+      <span class="tt-val">${formatMetricValue(metricValue)}<span class="unit">${metricUnit()}</span></span>
     </div>
-    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${(item.count / overviewMax * 100).toFixed(0)}%"></div></div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${(metricValue / barMax * 100).toFixed(0)}%"></div></div>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Stores (total)</span>
+      <span class="tt-val-sm">${formatCount(item.count)}</span>
+    </div>
     <div class="tt-row" style="margin-top:10px;">
       <span class="tt-label">Share of Japan total</span>
       <span class="tt-val-sm">${share}%</span>
@@ -973,8 +1047,8 @@ function showPrefTip(e, item) {
 
 function setLegend(minVal, maxVal, label) {
   document.getElementById('legend-label').textContent = label;
-  document.getElementById('minLabel').textContent = minVal.toLocaleString();
-  document.getElementById('maxLabel').textContent = maxVal.toLocaleString();
+  document.getElementById('minLabel').textContent = formatMetricValue(minVal);
+  document.getElementById('maxLabel').textContent = formatMetricValue(maxVal);
 }
 
 function clearOverviewHighlight() {
@@ -1035,28 +1109,39 @@ function highlightMunicipality(code, fromMap = false) {
 
 function showMunicipalityTip(e, item, wardRows, wardItem) {
   const share = currentPrefTotal ? ((item.count / currentPrefTotal) * 100).toFixed(1) : '0.0';
+  const metricValue = getMetricValue(item);
+  const barMax = municipalityMax || 1;
   let html = `
     <div class="tt-name">${item.nameEn}</div>
     <div class="tt-name-ja">${item.nameJa}</div>
     <div class="tt-rank"><span class="num">#${municipalityRankLookup[item.code]}</span></div>
     <div class="tt-row">
-      <span class="tt-label">Stores</span>
-      <span class="tt-val">${item.count.toLocaleString()}<span class="unit"> stores</span></span>
+      <span class="tt-label">${metricTitle()}</span>
+      <span class="tt-val">${formatMetricValue(metricValue)}<span class="unit">${metricUnit()}</span></span>
     </div>
-    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${municipalityMax ? (item.count / municipalityMax * 100).toFixed(0) : 0}%"></div></div>
+    <div class="tt-bar-bg"><div class="tt-bar-fill" style="width:${(metricValue / barMax * 100).toFixed(0)}%"></div></div>
+    <div class="tt-row" style="margin-top:10px;">
+      <span class="tt-label">Stores (total)</span>
+      <span class="tt-val-sm">${formatCount(item.count)}</span>
+    </div>
     <div class="tt-row" style="margin-top:10px;">
       <span class="tt-label">Share of prefecture</span>
       <span class="tt-val-sm">${share}%</span>
     </div>`;
 
   if (wardItem && item.count > 0) {
+    const wardMetric = getMetricValue(wardItem);
     const wardShare = ((wardItem.count / item.count) * 100).toFixed(1);
     html = `
       <div class="tt-name">${wardItem.nameEn}</div>
       <div class="tt-name-ja">${wardItem.nameJa}</div>
       <div class="tt-row">
-        <span class="tt-label">Ward stores</span>
-        <span class="tt-val">${wardItem.count.toLocaleString()}<span class="unit"> stores</span></span>
+        <span class="tt-label">${metricTitle()}</span>
+        <span class="tt-val">${formatMetricValue(wardMetric)}<span class="unit">${metricUnit()}</span></span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Ward stores (total)</span>
+        <span class="tt-val-sm">${formatCount(wardItem.count)}</span>
       </div>
       <div class="tt-row">
         <span class="tt-label">Share of city</span>
@@ -1066,7 +1151,11 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
       <div class="tt-section-label">Parent City</div>
       <div class="tt-row">
         <span class="tt-label">${item.nameEn}</span>
-        <span class="tt-val-sm">${item.count.toLocaleString()}</span>
+        <span class="tt-val-sm">${formatMetricValue(metricValue)}${metricUnit()}</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Parent city stores</span>
+        <span class="tt-val-sm">${formatCount(item.count)}</span>
       </div>
       <div class="tt-row">
         <span class="tt-label">Share of prefecture</span>
@@ -1075,7 +1164,8 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
   } else if (wardRows && wardRows.length > 0) {
     html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
     wardRows.slice(0, 8).forEach(row => {
-      html += `<div class="tt-ward-row"><span>${row.nameJa}</span><span class="tt-ward-val">${row.count.toLocaleString()}</span></div>`;
+      const rowMetric = getMetricValue(row);
+      html += `<div class="tt-ward-row"><span>${row.nameJa}</span><span class="tt-ward-val">${formatMetricValue(rowMetric)}${currentMetric === METRIC_PER100K ? '/100k' : ''}</span></div>`;
     });
     html += `</div>`;
   }
@@ -1088,14 +1178,15 @@ function renderRanking(items, mode) {
   const list = document.getElementById('rk-list');
   const title = document.getElementById('rk-title');
   title.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
+  const { max: maxVal } = calcMetricRange(items);
   list.innerHTML = items.map((item, i) => {
     const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
-    const maxVal = mode === 'pref' ? overviewMax : municipalityMax;
-    const width = maxVal ? (item.count / maxVal * 100).toFixed(0) : 0;
+    const v = getMetricValue(item);
+    const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
     return `<div class="rk-item" data-code="${item.code}">
       <span class="${nc}">${i + 1}</span>
       <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
-      <span class="rk-val">${item.count}</span>
+      <span class="rk-val">${formatMetricValue(v)}</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
     </div>`;
   }).join('');
@@ -1254,6 +1345,7 @@ function drawPrefectureMunicipalities(prefCode) {
   const meta = muniMetaCache[prefCode];
   const entries = municipalityData.municipalities[prefCode]?.entries || {};
   currentMuniEntries = entries;
+  currentMuniFeatureByCode = {};
   currentPrefTotal = prefDataMap[prefCode]?.count || 0;
 
   const wardToCity = buildWardToCityMap(prefCode, meta);
@@ -1266,35 +1358,58 @@ function drawPrefectureMunicipalities(prefCode) {
       const code = feat.properties.code;
       const md = meta[code] || { nameJa: code, nameEn: code };
       const count = entries[code]?.count || 0;
+      const population = meta[code]?.total || 0;
+      const per100k = population > 0 ? (count / population) * 100000 : 0;
       const rankKey = wardToCity[code] || code;
       const isWard = rankKey !== code;
       if (isWard) {
         if (!rankItemMap[rankKey]) {
           const parent = meta[rankKey] || { nameJa: rankKey, nameEn: rankKey };
-          rankItemMap[rankKey] = { code: rankKey, nameJa: parent.nameJa, nameEn: parent.nameEn, count: 0 };
+          rankItemMap[rankKey] = {
+            code: rankKey,
+            nameJa: parent.nameJa,
+            nameEn: parent.nameEn,
+            count: 0,
+            population: parent.total || 0,
+            wardPopulation: 0,
+            per100k: 0
+          };
         }
         rankItemMap[rankKey].count += count;
+        rankItemMap[rankKey].wardPopulation += population;
         if (!wardMap[rankKey]) wardMap[rankKey] = [];
-        wardMap[rankKey].push({ code, nameJa: md.nameJa, nameEn: md.nameEn, count });
+        wardMap[rankKey].push({ code, nameJa: md.nameJa, nameEn: md.nameEn, count, population, per100k });
       } else if (!rankItemMap[code]) {
-        rankItemMap[code] = { code, nameJa: md.nameJa, nameEn: md.nameEn, count };
+        rankItemMap[code] = { code, nameJa: md.nameJa, nameEn: md.nameEn, count, population, per100k };
       }
-      return { code, rankKey, isWard, nameJa: md.nameJa, nameEn: md.nameEn, count, feature: feat };
+      const featureItem = { code, rankKey, isWard, nameJa: md.nameJa, nameEn: md.nameEn, count, population, per100k, feature: feat };
+      currentMuniFeatureByCode[code] = featureItem;
+      return featureItem;
     });
 
+  Object.values(rankItemMap).forEach(item => {
+    const pop = item.population || item.wardPopulation || 0;
+    item.population = pop;
+    item.per100k = pop > 0 ? (item.count / pop) * 100000 : 0;
+    delete item.wardPopulation;
+  });
   const rankItems = Object.values(rankItemMap).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
   currentRankItems = rankItems;
   currentWardMap = wardMap;
   municipalityRankLookup = {};
-  rankItems.forEach((item, i) => { municipalityRankLookup[item.code] = i + 1; });
-  municipalityMin = rankItems[rankItems.length - 1]?.count || 0;
-  municipalityMax = rankItems[0]?.count || 0;
-  setLegend(municipalityMin, municipalityMax, 'Store count by municipality');
+  rankItems
+    .slice()
+    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code))
+    .forEach((item, i) => { municipalityRankLookup[item.code] = i + 1; });
+  const muniRange = calcMetricRange(rankItems);
+  municipalityMin = muniRange.min;
+  municipalityMax = muniRange.max;
+  setLegend(municipalityMin, municipalityMax, metricLegendLabel('municipality'));
 
   features.forEach(item => {
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', featureToPath(item.feature));
-    pathEl.setAttribute('fill', getColor(item.count, municipalityMin, municipalityMax || 1));
+    pathEl.setAttribute('fill', getColor(getMetricValue(item), municipalityMin, municipalityMax || 1));
     pathEl.setAttribute('fill-rule', 'evenodd');
     pathEl.setAttribute('class', 'city-path');
     pathEl.setAttribute('data-code', item.code);
@@ -1304,7 +1419,7 @@ function drawPrefectureMunicipalities(prefCode) {
       highlightMunicipality(item.rankKey, true);
       const rankItem = rankItems.find(row => row.code === item.rankKey);
       const wardRows = wardMap[item.rankKey] || null;
-      const wardItem = item.isWard ? (entries[item.code] || { code: item.code, nameJa: item.nameJa, nameEn: item.nameEn, count: item.count }) : null;
+      const wardItem = item.isWard ? item : null;
       if (rankItem) showMunicipalityTip(e, rankItem, wardRows, wardItem);
     });
     pathEl.addEventListener('mousemove', moveTip);
@@ -1316,7 +1431,10 @@ function drawPrefectureMunicipalities(prefCode) {
   });
 
   document.getElementById('map-g').appendChild(cityLayerG);
-  renderRanking(rankItems, 'muni');
+  const sortedItems = rankItems
+    .slice()
+    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code));
+  renderRanking(sortedItems, 'muni');
 }
 
 function zoomOut() {
@@ -1333,32 +1451,75 @@ function zoomOut() {
   document.querySelectorAll('.pref-path').forEach(p => p.classList.remove('dimmed', 'active', 'tokyo-muted'));
   animateToView(0, 0, 1, () => {
     renderOverviewRanking();
-    setLegend(overviewMin, overviewMax, 'Store count by prefecture');
+    setLegend(overviewMin, overviewMax, metricLegendLabel('prefecture'));
   });
   if (bsMobile) bsSetState('peek');
 }
 
 function renderOverviewRanking() {
-  const items = Object.values(prefDataMap).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+  const items = Object.values(prefDataMap)
+    .slice()
+    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code));
+  currentOverviewItems = items;
   prefRankLookup = {};
   items.forEach((item, i) => { prefRankLookup[item.code] = i + 1; });
+  const prefRange = calcMetricRange(items);
+  overviewMin = prefRange.min;
+  overviewMax = prefRange.max;
+  setLegend(overviewMin, overviewMax, metricLegendLabel('prefecture'));
+  document.querySelectorAll('.pref-path').forEach(el => {
+    const code = el.dataset.code;
+    const row = prefDataMap[code];
+    if (!row) return;
+    el.setAttribute('fill', getColor(getMetricValue(row), overviewMin, overviewMax || 1));
+  });
   renderRanking(items, 'pref');
+}
+
+function applyMetricToggleUI() {
+  document.querySelectorAll('.metric-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.metric === currentMetric);
+  });
+}
+
+function applyMetric(metric) {
+  if (!metric || (metric !== METRIC_TOTAL && metric !== METRIC_PER100K)) return;
+  if (currentMetric === metric) return;
+  currentMetric = metric;
+  applyMetricToggleUI();
+  hideTip();
+  if (zoomedPrefCode) {
+    drawPrefectureMunicipalities(zoomedPrefCode);
+    applyPrefZoomState(zoomedPrefCode);
+  } else {
+    clearOverviewHighlight();
+    renderOverviewRanking();
+  }
+}
+
+function initMetricToggle() {
+  applyMetricToggleUI();
+  document.querySelectorAll('.metric-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyMetric(btn.dataset.metric));
+  });
 }
 
 async function init() {
   try {
     bsInit();
     setStatus('Loading Starbucks store data…');
-    const [dataRes, muniRes] = await Promise.all([fetch(OVERVIEW_DATA_URL), fetch(MUNICIPALITY_DATA_URL)]);
-    if (!dataRes.ok || !muniRes.ok) throw new Error(`HTTP ${dataRes.status}/${muniRes.status}`);
+    const [dataRes, muniRes, prefPopRes] = await Promise.all([fetch(OVERVIEW_DATA_URL), fetch(MUNICIPALITY_DATA_URL), fetch(PREF_POP_URL)]);
+    if (!dataRes.ok || !muniRes.ok || !prefPopRes.ok) throw new Error(`HTTP ${dataRes.status}/${muniRes.status}/${prefPopRes.status}`);
     starbucksData = await dataRes.json();
     municipalityData = await muniRes.json();
+    prefPopulationMap = await prefPopRes.json();
     prefDataMap = starbucksData.prefectures;
 
-    const prefItems = Object.values(prefDataMap);
-    overviewMin = Math.min(...prefItems.map(item => item.count));
-    overviewMax = Math.max(...prefItems.map(item => item.count));
-    setLegend(overviewMin, overviewMax, 'Store count by prefecture');
+    Object.values(prefDataMap).forEach(item => {
+      const population = prefPopulationMap[item.code]?.total || 0;
+      item.population = population;
+      item.per100k = population > 0 ? (item.count / population) * 100000 : 0;
+    });
 
     setStatus('Loading Japan map data…');
     const geoRes = await fetch(JAPAN_GEO_URL);
@@ -1379,7 +1540,7 @@ async function init() {
 
       const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       pathEl.setAttribute('d', featureToPath(feat));
-      pathEl.setAttribute('fill', getColor(item.count, overviewMin, overviewMax));
+      pathEl.setAttribute('fill', getColor(getMetricValue(item), 0, 1));
       pathEl.setAttribute('fill-rule', 'evenodd');
       pathEl.setAttribute('class', 'pref-path clickable');
       pathEl.setAttribute('data-code', code);
@@ -1403,6 +1564,7 @@ async function init() {
     });
 
     renderOverviewRanking();
+    initMetricToggle();
     document.getElementById('back-btn').addEventListener('click', zoomOut);
     hideOverlay();
   } catch (err) {
