@@ -675,6 +675,21 @@ function calcMetricRange(items) {
   const values = items.map(item => getMetricValue(item));
   return { min: Math.min(...values), max: Math.max(...values) };
 }
+function compareMetricDesc(a, b) {
+  const dv = getMetricValue(b) - getMetricValue(a);
+  if (Math.abs(dv) > 1e-9) return dv;
+  return a.code.localeCompare(b.code);
+}
+function assignCompetitionRanks(items) {
+  let prev = null;
+  let rank = 0;
+  items.forEach((item, i) => {
+    const v = getMetricValue(item);
+    if (prev === null || Math.abs(v - prev) > 1e-9) rank = i + 1;
+    item.rank = rank;
+    prev = v;
+  });
+}
 
 function bsTY(state) {
   const vh = window.innerHeight;
@@ -705,7 +720,7 @@ function bsRenderRanking(items, mode) {
     const v = getMetricValue(item);
     const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
     return `<div class="rk-item" data-code="${item.code}">
-      <span class="${nc}">${i + 1}</span>
+      <span class="${nc}">${item.rank || (i + 1)}</span>
       <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
       <span class="rk-val">${formatMetricValue(v)}</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
@@ -1163,10 +1178,14 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
       </div>`;
   } else if (wardRows && wardRows.length > 0) {
     html += `<hr class="tt-divider"><div class="tt-section-label">Wards</div><div class="tt-ward-list">`;
-    wardRows.slice(0, 8).forEach(row => {
+    wardRows
+      .slice()
+      .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
+      .slice(0, 8)
+      .forEach(row => {
       const rowMetric = getMetricValue(row);
-      html += `<div class="tt-ward-row"><span>${row.nameJa}</span><span class="tt-ward-val">${formatMetricValue(rowMetric)}${currentMetric === METRIC_PER100K ? '/100k' : ''}</span></div>`;
-    });
+      html += `<div class="tt-ward-row"><span>${row.nameEn}</span><span class="tt-ward-val">${formatMetricValue(rowMetric)}${currentMetric === METRIC_PER100K ? '/100k' : ''}</span></div>`;
+      });
     html += `</div>`;
   }
   tipEl.innerHTML = html;
@@ -1184,7 +1203,7 @@ function renderRanking(items, mode) {
     const v = getMetricValue(item);
     const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
     return `<div class="rk-item" data-code="${item.code}">
-      <span class="${nc}">${i + 1}</span>
+      <span class="${nc}">${item.rank || (i + 1)}</span>
       <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
       <span class="rk-val">${formatMetricValue(v)}</span>
       <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
@@ -1349,11 +1368,17 @@ function drawPrefectureMunicipalities(prefCode) {
   currentPrefTotal = prefDataMap[prefCode]?.count || 0;
 
   const wardToCity = buildWardToCityMap(prefCode, meta);
+  const wardParentCodes = new Set(Object.values(wardToCity));
   const rankItemMap = {};
   const wardMap = {};
 
   const features = geo.features
-    .filter(feat => feat.properties && feat.properties.code && feat.properties.code !== '13000')
+    .filter(feat => {
+      const code = feat.properties?.code;
+      if (!code || code === '13000') return false;
+      if (wardParentCodes.has(code)) return false;
+      return true;
+    })
     .map(feat => {
       const code = feat.properties.code;
       const md = meta[code] || { nameJa: code, nameEn: code };
@@ -1393,14 +1418,13 @@ function drawPrefectureMunicipalities(prefCode) {
     item.per100k = pop > 0 ? (item.count / pop) * 100000 : 0;
     delete item.wardPopulation;
   });
-  const rankItems = Object.values(rankItemMap).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
-  currentRankItems = rankItems;
+  const rankItems = Object.values(rankItemMap);
+  const sortedItems = rankItems.slice().sort(compareMetricDesc);
+  assignCompetitionRanks(sortedItems);
+  currentRankItems = sortedItems;
   currentWardMap = wardMap;
   municipalityRankLookup = {};
-  rankItems
-    .slice()
-    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code))
-    .forEach((item, i) => { municipalityRankLookup[item.code] = i + 1; });
+  sortedItems.forEach(item => { municipalityRankLookup[item.code] = item.rank; });
   const muniRange = calcMetricRange(rankItems);
   municipalityMin = muniRange.min;
   municipalityMax = muniRange.max;
@@ -1417,7 +1441,7 @@ function drawPrefectureMunicipalities(prefCode) {
     pathEl.setAttribute('data-isward', item.isWard ? '1' : '0');
     pathEl.addEventListener('mouseenter', e => {
       highlightMunicipality(item.rankKey, true);
-      const rankItem = rankItems.find(row => row.code === item.rankKey);
+      const rankItem = sortedItems.find(row => row.code === item.rankKey);
       const wardRows = wardMap[item.rankKey] || null;
       const wardItem = item.isWard ? item : null;
       if (rankItem) showMunicipalityTip(e, rankItem, wardRows, wardItem);
@@ -1431,9 +1455,6 @@ function drawPrefectureMunicipalities(prefCode) {
   });
 
   document.getElementById('map-g').appendChild(cityLayerG);
-  const sortedItems = rankItems
-    .slice()
-    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code));
   renderRanking(sortedItems, 'muni');
 }
 
@@ -1459,10 +1480,11 @@ function zoomOut() {
 function renderOverviewRanking() {
   const items = Object.values(prefDataMap)
     .slice()
-    .sort((a, b) => getMetricValue(b) - getMetricValue(a) || a.code.localeCompare(b.code));
+    .sort(compareMetricDesc);
+  assignCompetitionRanks(items);
   currentOverviewItems = items;
   prefRankLookup = {};
-  items.forEach((item, i) => { prefRankLookup[item.code] = i + 1; });
+  items.forEach(item => { prefRankLookup[item.code] = item.rank; });
   const prefRange = calcMetricRange(items);
   overviewMin = prefRange.min;
   overviewMax = prefRange.max;
