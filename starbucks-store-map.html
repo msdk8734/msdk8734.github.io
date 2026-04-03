@@ -156,9 +156,11 @@ body {
   color: #516359;
   font-size: 11px;
   font-weight: 600;
-  padding: 6px 10px;
+  padding: 8px 12px;
+  min-height: 38px;
   cursor: pointer;
   line-height: 1.1;
+  touch-action: manipulation;
 }
 .panel-btn + .panel-btn {
   border-left: 1px solid #e1e6e2;
@@ -316,9 +318,11 @@ body {
   color: #64736a;
   font-size: 10px;
   font-weight: 600;
-  padding: 5px 10px;
+  padding: 7px 12px;
+  min-height: 34px;
   border-radius: 999px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .sub-btn.active {
   background: rgba(0, 117, 74, .14);
@@ -551,7 +555,7 @@ body {
     gap: 6px;
   }
   .metric-btn { font-size: 10px; padding: 6px 8px; }
-  .panel-btn { font-size: 10px; padding: 6px 8px; }
+  .panel-btn { font-size: 10px; padding: 9px 10px; min-height: 40px; }
   .tooltip {
     min-width: 220px;
     max-width: min(280px, calc(100vw - 32px));
@@ -971,10 +975,9 @@ function bsInit() {
   bsEl.addEventListener('touchstart', e => {
     e.stopPropagation();
     const t = e.changedTouches[0];
-    const sheetTop = bsTY(bsState);
-    const dragZoneH = bsState === 'peek' ? BS_PEEK_H : 42;
-    const inDragZone = t.clientY >= sheetTop && t.clientY <= sheetTop + dragZoneH;
-    if (!inDragZone) return;
+    const target = e.target;
+    const inHandleArea = target instanceof Element && !!target.closest('#bs-handle-area');
+    if (!inHandleArea) return;
     dragActive = true;
     dragDeltaY = 0;
     dragStartY = t.clientY;
