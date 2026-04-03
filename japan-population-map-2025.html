@@ -1363,15 +1363,15 @@ async function init() {
   setStatus('Loading map data…');
   let japanGeo;
   try {
-    const r = await fetch('geo-json/japan.geojson');
+    const r = await fetch('geo-json/japan-simple.geojson');
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     japanGeo = await r.json();
   } catch (e) {
-    showError(`Could not load <b>geo-json/japan.geojson</b><br>${e.message}`); return;
+    showError(`Could not load <b>geo-json/japan-simple.geojson</b><br>${e.message}`); return;
   }
 
   const allFeats = japanGeo.features.filter(f => f?.geometry);
-  if (!allFeats.length) { showError('No features in japan.geojson'); return; }
+  if (!allFeats.length) { showError('No features in japan-simple.geojson'); return; }
 
   fitProjection(allFeats, svgW, svgH, 18, 88, 18 + PANEL_W, 18);
 
