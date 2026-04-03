@@ -26,6 +26,10 @@ body {
   height: 100vh;
   width: 100vw;
 }
+:root {
+  --sb-green: #00754a;
+  --sb-brown: #8b5e3c;
+}
 
 #header {
   position: fixed;
@@ -136,6 +140,37 @@ body {
   color: #f4faf7;
 }
 .metric-btn:hover:not(.active) {
+  background: #f4f8f6;
+}
+.panel-toggle {
+  display: inline-flex;
+  border: 1px solid #d7ddd8;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 1px 5px rgba(0,0,0,.06);
+}
+.panel-btn {
+  border: 0;
+  background: transparent;
+  color: #516359;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+  line-height: 1.1;
+}
+.panel-btn + .panel-btn {
+  border-left: 1px solid #e1e6e2;
+}
+.panel-btn.active {
+  background: var(--sb-green);
+  color: #f4faf7;
+}
+.panel-btn[data-view="national"].active {
+  background: var(--sb-brown);
+}
+.panel-btn:hover:not(.active) {
   background: #f4f8f6;
 }
 
@@ -261,6 +296,49 @@ body {
   padding: 16px 10px 12px;
   overflow-y: auto;
 }
+.ranking-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sub-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid #e3e8e4;
+  border-radius: 999px;
+  background: #f7faf8;
+  padding: 2px;
+}
+.sub-toggle.hidden {
+  display: none;
+}
+.sub-btn {
+  border: 0;
+  background: transparent;
+  color: #64736a;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.sub-btn.active {
+  background: rgba(139, 94, 60, .14);
+  color: var(--sb-brown);
+}
+.rk-note {
+  font-size: 9.5px;
+  color: #8e9992;
+  line-height: 1.45;
+  margin: -4px 0 10px;
+}
+.rk-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
 .rk-title {
   font-size: 11px;
   font-weight: 700;
@@ -301,7 +379,13 @@ body {
 .rk-name {
   font-size: 11px;
   color: #3c4e44;
-  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rk-sub {
+  font-size: 9px;
+  color: #91a099;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -466,6 +550,7 @@ body {
     gap: 6px;
   }
   .metric-btn { font-size: 10px; padding: 6px 8px; }
+  .panel-btn { font-size: 10px; padding: 6px 8px; }
   .tooltip {
     min-width: 220px;
     max-width: min(280px, calc(100vw - 32px));
@@ -520,7 +605,18 @@ body {
 <div id="zoom-label">Tokyo Metropolis / 東京都</div>
 
 <div id="ranking">
+  <div class="ranking-controls">
+    <div class="panel-toggle" id="panel-toggle" role="group" aria-label="Ranking view toggle">
+      <button class="panel-btn active" type="button" data-view="overview">Overview</button>
+      <button class="panel-btn" type="button" data-view="national">National Municipalities</button>
+    </div>
+    <div class="sub-toggle hidden" id="national-mode-toggle" role="group" aria-label="National ranking mode">
+      <button class="sub-btn active" type="button" data-national-mode="city">City Mode</button>
+      <button class="sub-btn" type="button" data-national-mode="ward">Ward Mode</button>
+    </div>
+  </div>
   <div class="rk-title" id="rk-title">Prefecture Ranking</div>
+  <div class="rk-note" id="rk-note"></div>
   <div id="rk-list"></div>
 </div>
 
@@ -529,7 +625,20 @@ body {
 
 <div id="bottom-sheet" role="region" aria-label="Ranking">
   <div id="bs-handle-area"><div id="bs-handle"></div></div>
-  <div id="bs-header"><span id="bs-rk-title">Prefecture Ranking</span></div>
+  <div id="bs-header">
+    <div class="ranking-controls" style="width:100%;">
+      <div class="panel-toggle" id="bs-panel-toggle" role="group" aria-label="Ranking view toggle">
+        <button class="panel-btn active" type="button" data-view="overview">Overview</button>
+        <button class="panel-btn" type="button" data-view="national">National Municipalities</button>
+      </div>
+      <div class="sub-toggle hidden" id="bs-national-mode-toggle" role="group" aria-label="National ranking mode">
+        <button class="sub-btn active" type="button" data-national-mode="city">City Mode</button>
+        <button class="sub-btn" type="button" data-national-mode="ward">Ward Mode</button>
+      </div>
+      <span id="bs-rk-title">Prefecture Ranking</span>
+      <div class="rk-note" id="bs-rk-note"></div>
+    </div>
+  </div>
   <div id="bs-list-wrap"><div id="bs-list"></div></div>
 </div>
 
@@ -544,10 +653,15 @@ const BS_FULL_R = 0.88;
 const BS_ANIM = 320;
 const OVERVIEW_DATA_URL = 'data/starbucks-store-counts.json';
 const MUNICIPALITY_DATA_URL = 'data/starbucks-municipality-counts.json';
+const NATIONAL_MUNI_DATA_URL = 'data/starbucks-national-municipality-ranking.json';
 const PREF_POP_URL = 'population-json/pref-pop.json';
 const JAPAN_GEO_URL = 'geo-json/japan-simple.geojson';
 const METRIC_TOTAL = 'total';
 const METRIC_PER100K = 'per100k';
+const PANEL_OVERVIEW = 'overview';
+const PANEL_NATIONAL = 'national';
+const NATIONAL_MODE_CITY = 'city';
+const NATIONAL_MODE_WARD = 'ward';
 
 const C_LO = [239, 248, 242];
 const C_HI = [0, 98, 65];
@@ -567,6 +681,7 @@ let zoomedPrefCode = null;
 let cityLayerG = null;
 let starbucksData = null;
 let municipalityData = null;
+let nationalMunicipalityData = null;
 let prefPopulationMap = {};
 let prefFeatMap = {};
 let prefDataMap = {};
@@ -577,12 +692,16 @@ let overviewMax = 0;
 let municipalityMin = 0;
 let municipalityMax = 0;
 let currentMetric = METRIC_TOTAL;
+let currentPanelMode = PANEL_OVERVIEW;
+let currentNationalMode = NATIONAL_MODE_CITY;
 let currentOverviewItems = [];
 let currentRankItems = [];
+let currentNationalItems = [];
 let currentWardMap = {};
 let currentMuniEntries = {};
 let currentMuniFeatureByCode = {};
 let currentPrefTotal = 0;
+let currentNationalSelection = null;
 let animRaf = null;
 let lastTouchDist = null;
 let touchStartX, touchStartY, touchStartVX, touchStartVY;
@@ -599,6 +718,8 @@ const bsEl = document.getElementById('bottom-sheet');
 const bsListWrap = document.getElementById('bs-list-wrap');
 const bsList = document.getElementById('bs-list');
 const bsTitleEl = document.getElementById('bs-rk-title');
+const rkNoteEl = document.getElementById('rk-note');
+const bsNoteEl = document.getElementById('bs-rk-note');
 
 function setStatus(msg) { document.getElementById('status-msg').textContent = msg; }
 function hideOverlay() { document.getElementById('status-overlay').classList.add('hidden'); }
@@ -695,6 +816,54 @@ function assignCompetitionRanks(items) {
     prev = v;
   });
 }
+function getNationalItems() {
+  return nationalMunicipalityData?.modes?.[currentNationalMode] || [];
+}
+function rankingTitleForState() {
+  if (currentPanelMode === PANEL_NATIONAL) return 'National Municipality Ranking';
+  return zoomedPrefCode ? 'Municipality Ranking' : 'Prefecture Ranking';
+}
+function rankingNoteForState() {
+  if (currentPanelMode === PANEL_NATIONAL) {
+    return `${currentNationalMode === NATIONAL_MODE_CITY ? 'City mode' : 'Ward mode'} · Click a row to zoom to its prefecture`;
+  }
+  return zoomedPrefCode ? 'Cross-highlight on hover · Click another prefecture on the map to jump there' : 'Hover rows and prefectures to compare · Click a prefecture to zoom in';
+}
+function updateRankingHeader(title) {
+  document.getElementById('rk-title').textContent = title;
+  rkNoteEl.textContent = rankingNoteForState();
+  bsTitleEl.textContent = title;
+  bsNoteEl.textContent = rankingNoteForState();
+}
+function applyPanelToggleUI() {
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === currentPanelMode);
+  });
+  document.querySelectorAll('[data-national-mode]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.nationalMode === currentNationalMode);
+  });
+  document.querySelectorAll('#national-mode-toggle, #bs-national-mode-toggle').forEach(el => {
+    el.classList.toggle('hidden', currentPanelMode !== PANEL_NATIONAL);
+  });
+}
+function buildListRow(item, value, width, subtitle, index = 0) {
+  const nc = index === 0 ? 'rk-num gold' : index === 1 ? 'rk-num silver' : index === 2 ? 'rk-num bronze' : 'rk-num';
+  return `<div class="rk-item" data-code="${item.code}">
+      <span class="${nc}">${item.rank || ''}</span>
+      <span class="rk-text">
+        <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
+        ${subtitle ? `<span class="rk-sub">${subtitle}</span>` : ''}
+      </span>
+      <span class="rk-val">${formatMetricValue(value)}</span>
+      <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
+    </div>`;
+}
+function getFocusPoint() {
+  return {
+    clientX: Math.max(36, window.innerWidth * 0.56),
+    clientY: Math.max(120, window.innerHeight * (bsMobile ? 0.23 : 0.25))
+  };
+}
 
 function bsTY(state) {
   const vh = window.innerHeight;
@@ -704,7 +873,9 @@ function bsTY(state) {
 }
 function bsListHeight(ty) {
   const vh = window.innerHeight;
-  const fixedH = 42 + 44;
+  const handleH = document.getElementById('bs-handle-area').offsetHeight || 18;
+  const headerH = document.getElementById('bs-header').offsetHeight || 88;
+  const fixedH = handleH + headerH;
   return Math.max(40, vh - ty - fixedH - bsSafeB);
 }
 function bsApply(ty, animate) {
@@ -718,18 +889,11 @@ function bsSetState(state, animate = true) {
 }
 function bsRenderRanking(items, mode) {
   if (!bsMobile) return;
-  bsTitleEl.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
   const { max: maxVal } = calcMetricRange(items);
   bsList.innerHTML = items.map((item, i) => {
-    const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
     const v = getMetricValue(item);
     const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
-    return `<div class="rk-item" data-code="${item.code}">
-      <span class="${nc}">${item.rank || (i + 1)}</span>
-      <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
-      <span class="rk-val">${formatMetricValue(v)}</span>
-      <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
-    </div>`;
+    return buildListRow(item, v, width, '', i);
   }).join('');
   bsList.querySelectorAll('.rk-item').forEach(el => {
     const code = el.dataset.code;
@@ -1133,16 +1297,16 @@ function clearMunicipalityHighlight() {
 }
 function highlightMunicipality(code, fromMap = false) {
   clearMunicipalityHighlight();
+  const paths = Array.from(document.querySelectorAll(`.city-path[data-rankkey="${code}"]`));
   document.querySelectorAll('.city-path').forEach(el => {
     el.classList.toggle('dimmed', el.dataset.rankkey !== code);
   });
-  const path = document.querySelector(`.city-path[data-rankkey="${code}"]`);
   const item = document.querySelector(`#rk-list .rk-item[data-code="${code}"]`);
-  if (path) {
+  paths.forEach(path => {
     if (!path.dataset.origFill) path.dataset.origFill = path.getAttribute('fill');
     path.setAttribute('fill', HOVER_FILL);
     path.classList.add('active');
-  }
+  });
   if (item) {
     item.classList.add('active');
     if (fromMap) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1234,19 +1398,11 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
 
 function renderRanking(items, mode) {
   const list = document.getElementById('rk-list');
-  const title = document.getElementById('rk-title');
-  title.textContent = mode === 'pref' ? 'Prefecture Ranking' : 'Municipality Ranking';
   const { max: maxVal } = calcMetricRange(items);
   list.innerHTML = items.map((item, i) => {
-    const nc = i === 0 ? 'rk-num gold' : i === 1 ? 'rk-num silver' : i === 2 ? 'rk-num bronze' : 'rk-num';
     const v = getMetricValue(item);
     const width = maxVal ? (v / maxVal * 100).toFixed(0) : 0;
-    return `<div class="rk-item" data-code="${item.code}">
-      <span class="${nc}">${item.rank || (i + 1)}</span>
-      <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
-      <span class="rk-val">${formatMetricValue(v)}</span>
-      <span class="rk-bar"><span class="rk-bar-fill" style="width:${width}%"></span></span>
-    </div>`;
+    return buildListRow(item, v, width, '', i);
   }).join('');
 
   list.querySelectorAll('.rk-item').forEach(el => {
@@ -1391,6 +1547,7 @@ async function zoomInPrefecture(prefCode) {
 
   await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
   drawPrefectureMunicipalities(prefCode);
+  renderCurrentPanel();
   if (bsMobile) bsSetState('peek');
 }
 
@@ -1496,7 +1653,6 @@ function drawPrefectureMunicipalities(prefCode) {
   });
 
   document.getElementById('map-g').appendChild(cityLayerG);
-  renderRanking(sortedItems, 'muni');
 }
 
 function zoomOut() {
@@ -1514,6 +1670,7 @@ function zoomOut() {
   animateToView(0, 0, 1, () => {
     renderOverviewRanking();
     setLegend(overviewMin, overviewMax, metricLegendLabel('prefecture'));
+    renderCurrentPanel();
   });
   if (bsMobile) bsSetState('peek');
 }
@@ -1536,7 +1693,91 @@ function renderOverviewRanking() {
     if (!row) return;
     el.setAttribute('fill', getColor(getMetricValue(row), overviewMin, overviewMax || 1));
   });
-  renderRanking(items, 'pref');
+}
+
+function applyNationalSelection(item) {
+  if (!item || !zoomedPrefCode || zoomedPrefCode !== item.prefCode) return;
+  const point = getFocusPoint();
+  if (currentNationalMode === NATIONAL_MODE_WARD && currentMuniFeatureByCode[item.code]) {
+    const featureItem = currentMuniFeatureByCode[item.code];
+    clearMunicipalityHighlight();
+    document.querySelectorAll('.city-path').forEach(el => {
+      const isActive = el.dataset.code === item.code;
+      el.classList.toggle('dimmed', !isActive);
+      if (isActive) {
+        if (!el.dataset.origFill) el.dataset.origFill = el.getAttribute('fill');
+        el.setAttribute('fill', HOVER_FILL);
+        el.classList.add('active');
+      }
+    });
+    const rankItem = currentRankItems.find(entry => entry.code === featureItem.rankKey) || featureItem;
+    showMunicipalityTip(point, rankItem, currentWardMap[featureItem.rankKey] || null, featureItem);
+    return;
+  }
+  const rankKey = item.zoomTargetCode;
+  highlightMunicipality(rankKey, false);
+  const rankItem = currentRankItems.find(entry => entry.code === rankKey) || item;
+  showMunicipalityTip(point, rankItem, currentWardMap[rankKey] || null);
+}
+
+async function focusNationalItem(item) {
+  currentNationalSelection = item;
+  await zoomInPrefecture(item.prefCode);
+  applyNationalSelection(item);
+}
+
+function renderNationalRanking() {
+  const list = document.getElementById('rk-list');
+  const items = getNationalItems().slice().sort(compareMetricDesc);
+  assignCompetitionRanks(items);
+  currentNationalItems = items;
+  updateRankingHeader(rankingTitleForState());
+  const { max: maxVal } = calcMetricRange(items);
+  list.innerHTML = items.map((item, i) => {
+    const value = getMetricValue(item);
+    const width = maxVal ? (value / maxVal * 100).toFixed(0) : 0;
+    const subtitle = `${item.prefNameEn} · ${item.kind === 'ward' || item.kind === 'special_ward' ? 'ward-level' : 'municipality-level'}`;
+    return buildListRow(item, value, width, subtitle, i);
+  }).join('');
+  list.querySelectorAll('.rk-item').forEach(el => {
+    const item = items.find(entry => entry.code === el.dataset.code);
+    if (!item) return;
+    el.addEventListener('click', async () => {
+      await focusNationalItem(item);
+    });
+  });
+  if (bsMobile) {
+    bsTitleEl.textContent = rankingTitleForState();
+    bsNoteEl.textContent = rankingNoteForState();
+    bsList.innerHTML = items.map((item, i) => {
+      const value = getMetricValue(item);
+      const width = maxVal ? (value / maxVal * 100).toFixed(0) : 0;
+      const subtitle = `${item.prefNameEn} · ${item.kind === 'ward' || item.kind === 'special_ward' ? 'ward-level' : 'municipality-level'}`;
+      return buildListRow(item, value, width, subtitle, i);
+    }).join('');
+    bsList.querySelectorAll('.rk-item').forEach(el => {
+      const item = items.find(entry => entry.code === el.dataset.code);
+      if (!item) return;
+      el.addEventListener('click', async () => {
+        bsSetState('peek');
+        await focusNationalItem(item);
+      });
+    });
+  }
+}
+
+function renderCurrentPanel() {
+  applyPanelToggleUI();
+  updateRankingHeader(rankingTitleForState());
+  if (currentPanelMode === PANEL_NATIONAL) {
+    renderNationalRanking();
+    return;
+  }
+  if (zoomedPrefCode) {
+    renderRanking(currentRankItems, 'muni');
+  } else {
+    renderRanking(currentOverviewItems, 'pref');
+  }
 }
 
 function applyMetricToggleUI() {
@@ -1558,6 +1799,10 @@ function applyMetric(metric) {
     clearOverviewHighlight();
     renderOverviewRanking();
   }
+  renderCurrentPanel();
+  if (currentPanelMode === PANEL_NATIONAL && currentNationalSelection && zoomedPrefCode === currentNationalSelection.prefCode) {
+    applyNationalSelection(currentNationalSelection);
+  }
 }
 
 function initMetricToggle() {
@@ -1567,14 +1812,42 @@ function initMetricToggle() {
   });
 }
 
+function initPanelToggles() {
+  applyPanelToggleUI();
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentPanelMode = btn.dataset.view;
+      hideTip();
+      if (zoomedPrefCode) {
+        clearMunicipalityHighlight();
+        applyPrefZoomState(zoomedPrefCode);
+      } else {
+        clearOverviewHighlight();
+      }
+      renderCurrentPanel();
+      if (currentPanelMode === PANEL_NATIONAL && currentNationalSelection && zoomedPrefCode === currentNationalSelection.prefCode) {
+        applyNationalSelection(currentNationalSelection);
+      }
+    });
+  });
+  document.querySelectorAll('[data-national-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentNationalMode = btn.dataset.nationalMode;
+      hideTip();
+      renderCurrentPanel();
+    });
+  });
+}
+
 async function init() {
   try {
     bsInit();
     setStatus('Loading Starbucks store data…');
-    const [dataRes, muniRes, prefPopRes] = await Promise.all([fetch(OVERVIEW_DATA_URL), fetch(MUNICIPALITY_DATA_URL), fetch(PREF_POP_URL)]);
-    if (!dataRes.ok || !muniRes.ok || !prefPopRes.ok) throw new Error(`HTTP ${dataRes.status}/${muniRes.status}/${prefPopRes.status}`);
+    const [dataRes, muniRes, nationalRes, prefPopRes] = await Promise.all([fetch(OVERVIEW_DATA_URL), fetch(MUNICIPALITY_DATA_URL), fetch(NATIONAL_MUNI_DATA_URL), fetch(PREF_POP_URL)]);
+    if (!dataRes.ok || !muniRes.ok || !nationalRes.ok || !prefPopRes.ok) throw new Error(`HTTP ${dataRes.status}/${muniRes.status}/${nationalRes.status}/${prefPopRes.status}`);
     starbucksData = await dataRes.json();
     municipalityData = await muniRes.json();
+    nationalMunicipalityData = await nationalRes.json();
     prefPopulationMap = await prefPopRes.json();
     prefDataMap = starbucksData.prefectures;
 
@@ -1627,7 +1900,9 @@ async function init() {
     });
 
     renderOverviewRanking();
+    renderCurrentPanel();
     initMetricToggle();
+    initPanelToggles();
     document.getElementById('back-btn').addEventListener('click', zoomOut);
     hideOverlay();
   } catch (err) {
