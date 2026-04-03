@@ -1375,7 +1375,9 @@ function drawPrefectureMunicipalities(prefCode) {
   const features = geo.features
     .filter(feat => {
       const code = feat.properties?.code;
+      const city = feat.properties?.city;
       if (!code || code === '13000') return false;
+      if (String(code).endsWith('000') || city === '所属未定地') return false;
       if (wardParentCodes.has(code)) return false;
       return true;
     })
@@ -1548,7 +1550,7 @@ async function init() {
     if (!geoRes.ok) throw new Error(`HTTP ${geoRes.status}`);
     const japanGeo = await geoRes.json();
     const allFeats = japanGeo.features.filter(f => f && f.geometry);
-    fitProjection(allFeats, svgW, svgH, 18, 88, 18 + PANEL_W, 18);
+    fitProjection(allFeats, svgW, svgH, 24, 116, 24 + PANEL_W, 40);
 
     const mapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     mapG.id = 'map-g';
