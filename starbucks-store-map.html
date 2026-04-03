@@ -880,8 +880,19 @@ function getTooltipPointForPaths(paths) {
   const centerX = (left + right) / 2;
   const centerY = (top + bottom) / 2;
   const point = { clientX: centerX, clientY: centerY };
-  if (centerX > window.innerWidth * 0.58) point.clientX = left - 24;
-  else point.clientX = right + 24;
+  const estimatedTooltipWidth = Math.min(320, Math.max(250, window.innerWidth * 0.28));
+  const gap = 24;
+  const rightSpace = window.innerWidth - right;
+  const leftSpace = left;
+  if (rightSpace < estimatedTooltipWidth + gap && leftSpace > estimatedTooltipWidth + gap) {
+    point.clientX = left - gap;
+  } else if (leftSpace < estimatedTooltipWidth + gap && rightSpace > estimatedTooltipWidth + gap) {
+    point.clientX = right + gap;
+  } else if (centerX > window.innerWidth * 0.58) {
+    point.clientX = left - gap;
+  } else {
+    point.clientX = right + gap;
+  }
   point.clientY = Math.max(96, Math.min(window.innerHeight - 96, centerY));
   if (point.clientY < 170) point.clientY = bottom + 18;
   return point;
