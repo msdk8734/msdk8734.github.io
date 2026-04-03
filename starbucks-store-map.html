@@ -662,6 +662,9 @@ function formatMetricValue(value) {
 function formatCount(value) {
   return Math.round(value || 0).toLocaleString();
 }
+function formatPopulation(value) {
+  return Math.round(value || 0).toLocaleString();
+}
 function metricTitle() {
   return currentMetric === METRIC_PER100K ? 'Stores per 100k' : 'Stores';
 }
@@ -1053,6 +1056,10 @@ function showPrefTip(e, item) {
       <span class="tt-label">Stores (total)</span>
       <span class="tt-val-sm">${formatCount(item.count)}</span>
     </div>
+    <div class="tt-row">
+      <span class="tt-label">Population</span>
+      <span class="tt-val-sm">${formatPopulation(item.population)}</span>
+    </div>
     <div class="tt-row" style="margin-top:10px;">
       <span class="tt-label">Share of Japan total</span>
       <span class="tt-val-sm">${share}%</span>
@@ -1141,6 +1148,10 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
       <span class="tt-label">Stores (total)</span>
       <span class="tt-val-sm">${formatCount(item.count)}</span>
     </div>
+    <div class="tt-row">
+      <span class="tt-label">Population</span>
+      <span class="tt-val-sm">${formatPopulation(item.population)}</span>
+    </div>
     <div class="tt-row" style="margin-top:10px;">
       <span class="tt-label">Share of prefecture</span>
       <span class="tt-val-sm">${share}%</span>
@@ -1161,6 +1172,10 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
         <span class="tt-val-sm">${formatCount(wardItem.count)}</span>
       </div>
       <div class="tt-row">
+        <span class="tt-label">Ward population</span>
+        <span class="tt-val-sm">${formatPopulation(wardItem.population)}</span>
+      </div>
+      <div class="tt-row">
         <span class="tt-label">Share of city</span>
         <span class="tt-val-sm">${wardShare}%</span>
       </div>
@@ -1173,6 +1188,10 @@ function showMunicipalityTip(e, item, wardRows, wardItem) {
       <div class="tt-row">
         <span class="tt-label">Parent city stores</span>
         <span class="tt-val-sm">${formatCount(item.count)}</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Parent city population</span>
+        <span class="tt-val-sm">${formatPopulation(item.population)}</span>
       </div>
       <div class="tt-row">
         <span class="tt-label">Share of prefecture</span>
