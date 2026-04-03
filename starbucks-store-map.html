@@ -979,6 +979,24 @@ svgEl.addEventListener('touchend', e => {
     return;
   }
 
+  if (zoomedPrefCode && pathEl.classList.contains('pref-path')) {
+    const code = pathEl.dataset.code;
+    if (!code) return;
+    if (code === zoomedPrefCode) {
+      clearMunicipalityHighlight();
+      applyPrefZoomState(zoomedPrefCode);
+      hideTip();
+      lastTapTime = 0;
+      lastTapTarget = null;
+      return;
+    }
+    hideTip();
+    lastTapTime = 0;
+    lastTapTarget = null;
+    zoomInPrefecture(code);
+    return;
+  }
+
   if (zoomedPrefCode && !pathEl.classList.contains('city-path')) {
     clearMunicipalityHighlight();
     applyPrefZoomState(zoomedPrefCode);
