@@ -964,10 +964,6 @@ function renderMuniRanking(ranked, maxVal, prefTotal, wardMap) {
 let zoomedId = null, cityLayerG = null;
 const cityCache = {};
 
-const NAME_OVERRIDES = {
-  '22429': { nameEn: 'Kawanehoncho Town' }
-};
-
 const HOVER_FILL = 'rgb(90, 160, 110)';
 
 // [NEW] Index: rankKey → NodeList built once after drawCities
@@ -1163,10 +1159,6 @@ async function zoomIn(id) {
 function drawCities(id, code, pop) {
   const cityGeo = cityCache[`geo_${code}`];
   const muniPop = { ...cityCache[`muni_${code}`] };
-
-  Object.entries(NAME_OVERRIDES).forEach(([c, ov]) => {
-    if (muniPop[c]) muniPop[c] = { ...muniPop[c], ...ov };
-  });
 
   const prefTotal = pop.total || 0;
   const wardToCity = buildWardToCityMap(muniPop);
