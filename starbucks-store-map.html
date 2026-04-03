@@ -883,22 +883,54 @@ function getTooltipPointForPaths(paths) {
   });
   const centerX = (left + right) / 2;
   const centerY = (top + bottom) / 2;
-  const point = { clientX: centerX, clientY: centerY };
+  const point = {
+    clientX: centerX,
+    clientY: centerY,
+    preferLeft: false,
+    preferAbove: false,
+    preferMiddle: false,
+    targetTop: top,
+    targetBottom: bottom
+  };
   const estimatedTooltipWidth = Math.min(320, Math.max(250, window.innerWidth * 0.28));
+  const estimatedTooltipHeight = 230;
   const gap = 24;
-  const rightSpace = window.innerWidth - right;
+  const rightLimit = window.innerWidth - (bsMobile ? 12 : PANEL_W + 12);
+  const rightSpace = rightLimit - right;
   const leftSpace = left;
+  const topSafe = Math.max(92, document.getElementById('header').getBoundingClientRect().bottom + 12);
+  const topSpace = top - topSafe;
+  const bottomSpace = window.innerHeight - bottom - 24;
   if (rightSpace < estimatedTooltipWidth + gap && leftSpace > estimatedTooltipWidth + gap) {
-    point.clientX = left - gap;
+    point.clientX = left;
+    point.preferLeft = true;
+    point.preferMiddle = true;
   } else if (leftSpace < estimatedTooltipWidth + gap && rightSpace > estimatedTooltipWidth + gap) {
-    point.clientX = right + gap;
+    point.clientX = right;
+    point.preferLeft = false;
+    point.preferMiddle = true;
   } else if (centerX > window.innerWidth * 0.58) {
-    point.clientX = left - gap;
+    point.clientX = left;
+    point.preferLeft = true;
+    point.preferMiddle = true;
   } else {
-    point.clientX = right + gap;
+    point.clientX = right;
+    point.preferLeft = false;
+    point.preferMiddle = true;
   }
-  point.clientY = Math.max(96, Math.min(window.innerHeight - 96, centerY));
-  if (point.clientY < 170) point.clientY = bottom + 18;
+  if (topSpace < estimatedTooltipHeight && bottomSpace > estimatedTooltipHeight) {
+    point.clientY = bottom;
+    point.preferAbove = false;
+  } else if (bottomSpace < estimatedTooltipHeight && topSpace > estimatedTooltipHeight) {
+    point.clientY = top;
+    point.preferAbove = true;
+  } else if (centerY < window.innerHeight * 0.4) {
+    point.clientY = bottom;
+    point.preferAbove = false;
+  } else {
+    point.clientY = top;
+    point.preferAbove = true;
+  }
   return point;
 }
 function markNationalSelection(code) {
@@ -1252,10 +1284,17 @@ function moveTip(e) {
   const tw = tipEl.offsetWidth;
   const th = tipEl.offsetHeight;
   const gap = 20;
-  let x = (e.clientX || 0) + gap;
-  let y = (e.clientY || 0) + gap;
+  let x = e.preferLeft ? (e.clientX || 0) - gap - tw : (e.clientX || 0) + gap;
+  let y;
+  if (e.preferMiddle && Number.isFinite(e.targetTop) && Number.isFinite(e.targetBottom)) {
+    y = ((e.targetTop + e.targetBottom) / 2) - th / 2;
+  } else {
+    y = e.preferAbove ? (e.clientY || 0) - gap - th : (e.clientY || 0) + gap;
+  }
   if (x + tw > svgW - 12) x = (e.clientX || 0) - gap - tw;
+  if (x < 12) x = (e.clientX || 0) + gap;
   if (y + th > svgH - 12) y = (e.clientY || 0) - gap - th;
+  if (y < 12) y = (e.clientY || 0) + gap;
   tipEl.style.left = Math.max(12, x) + 'px';
   tipEl.style.top = Math.max(12, y) + 'px';
 }
