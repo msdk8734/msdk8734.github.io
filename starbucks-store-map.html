@@ -629,9 +629,11 @@ function fitProjection(features, W, H, padL, padT, padR, padB) {
       if (-my > maxY) maxY = -my;
     })));
   });
-  projScale = 0.95 * Math.min((W - padL - padR) / (maxX - minX), (H - padT - padB) / (maxY - minY));
-  projTx = W / 2 - projScale * (minX + maxX) / 2;
-  projTy = H / 2 - projScale * (minY + maxY) / 2;
+  const availW = W - padL - padR;
+  const availH = H - padT - padB;
+  projScale = 0.95 * Math.min(availW / (maxX - minX), availH / (maxY - minY));
+  projTx = padL + (availW - projScale * (maxX - minX)) / 2 - projScale * minX;
+  projTy = padT + (availH - projScale * (maxY - minY)) / 2 - projScale * minY;
 }
 function featureToPath(feat) {
   const polys = feat.geometry.type === 'Polygon' ? [feat.geometry.coordinates] : feat.geometry.coordinates;
