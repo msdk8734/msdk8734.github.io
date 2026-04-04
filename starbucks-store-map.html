@@ -546,16 +546,41 @@ body {
 
 @media (max-width: 720px) {
   #ranking { display: none; }
-  #header { right: 0; padding: 12px 14px 8px; }
+  #header {
+    right: 0;
+    padding: 12px 14px 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+  }
+  .title-block {
+    min-width: 0;
+  }
   .title-block h1 { font-size: 18px; }
-  .title-block .sub { max-width: 300px; }
+  .title-block .sub { max-width: none; padding-right: 4px; }
+  .header-right {
+    align-items: flex-end;
+    justify-self: end;
+    min-width: 0;
+    max-width: 46vw;
+  }
   .header-actions {
-    width: 100%;
-    justify-content: flex-start;
+    width: auto;
+    justify-content: flex-end;
     gap: 6px;
   }
   .metric-btn { font-size: 10px; padding: 6px 8px; }
   .panel-btn { font-size: 10px; padding: 9px 10px; min-height: 40px; }
+  .map-link {
+    max-width: min(42vw, 220px);
+    font-size: 11px;
+  }
+  .legend-label,
+  .color-bar,
+  .color-minmax {
+    align-self: flex-end;
+  }
   .tooltip {
     min-width: 220px;
     max-width: min(280px, calc(100vw - 32px));
@@ -831,7 +856,9 @@ function rankingTitleForState() {
 }
 function rankingNoteForState() {
   if (currentPanelMode === PANEL_NATIONAL) {
-    return `${currentNationalMode === NATIONAL_MODE_CITY ? 'City mode' : 'Ward mode'} · Click a row to zoom to its prefecture`;
+    return currentNationalMode === NATIONAL_MODE_CITY
+      ? 'Counts designated cities as a single municipality'
+      : 'Counts designated-city wards as separate municipalities';
   }
   return zoomedPrefCode ? 'Cross-highlight on hover · Click another prefecture on the map to jump there' : 'Hover rows and prefectures to compare · Click a prefecture to zoom in';
 }
@@ -1779,7 +1806,7 @@ function renderOverviewRanking() {
 function applyNationalSelection(item) {
   if (!item || !zoomedPrefCode || zoomedPrefCode !== item.prefCode) return;
   markNationalSelection(item.code);
-  if (currentNationalMode === NATIONAL_MODE_WARD && currentMuniFeatureByCode[item.code]) {
+  if (currentNationalMode === NATIONAL_MODE_WARD && currentMuniFeatureByCode[item.code]?.isWard) {
     const featureItem = currentMuniFeatureByCode[item.code];
     clearMunicipalityHighlight();
     const selectedPaths = [];
