@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Corporate X-Ray of Japan — msdk8734</title>
+<meta name="description" content="2,108 Starbucks stores are spread across Japan. The map of where they sit tells a story that has nothing to do with coffee.">
+<meta property="og:title" content="The Corporate X-Ray of Japan">
+<meta property="og:description" content="2,108 Starbucks stores, one map, and what it reveals about Japan's economic geography.">
+<meta property="og:url" content="https://msdk8734.github.io/stories/starbucks-japan/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://msdk8734.github.io/data/japan-map-ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px%22>☕</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #f8f7f4;
+  color: #1c1c1a;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   STORY NAV
+   ============================================================ */
+.story-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  background: rgba(248, 247, 244, 0.90);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  pointer-events: none;
+}
+.story-nav > * { pointer-events: auto; }
+.nav-back {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: #006241; }
+.nav-title {
+  margin-left: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1c1c1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.3s;
+  flex: 1;
+}
+.nav-title.visible { opacity: 1; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.story-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 24px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.story-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 80%, rgba(0,98,65,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+.hero-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #006241;
+  margin-bottom: 20px;
+}
+.hero-headline {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(44px, 8vw, 80px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #0d1f14;
+  margin-bottom: 28px;
+}
+.hero-deck {
+  font-size: clamp(17px, 2.2vw, 21px);
+  font-weight: 300;
+  line-height: 1.6;
+  color: #4b5563;
+  max-width: 580px;
+  margin-bottom: 36px;
+}
+.hero-byline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+.byline-sep { color: #d1d5db; }
+.hero-scroll-cue {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  animation: bounce 2s ease-in-out infinite;
+}
+.scroll-arrow {
+  font-size: 20px;
+  line-height: 1;
+  color: #006241;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ============================================================
+   PROSE COLUMN
+   ============================================================ */
+.prose {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+.prose p {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #2d2d2b;
+  margin-bottom: 24px;
+}
+.prose p:last-child { margin-bottom: 0; }
+.prose p.dropcap::first-letter {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 3.6em;
+  line-height: 0.82;
+  float: left;
+  margin-right: 8px;
+  margin-top: 6px;
+  color: #006241;
+}
+.prose strong { color: #1c1c1a; font-weight: 600; }
+.prose em { font-style: italic; }
+.prose h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.2;
+  color: #0d1f14;
+  margin-bottom: 20px;
+  margin-top: 8px;
+}
+.prose .data-callout {
+  display: block;
+  border-left: 3px solid #006241;
+  padding: 16px 20px;
+  background: #f0f9f4;
+  border-radius: 0 8px 8px 0;
+  font-size: 16px;
+  color: #2d4d3a;
+  line-height: 1.6;
+  margin: 32px 0;
+}
+.section-divider {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.section-divider hr {
+  border: none;
+  border-top: 1px solid #e5e3de;
+}
+
+/* ============================================================
+   SCROLLYTELLING
+   ============================================================ */
+.scrolly {
+  position: relative;
+}
+
+/* Sticky map — full viewport height, sits behind text */
+.sticky-map {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  background: #1a2820;
+  overflow: hidden;
+  z-index: 0;
+}
+#map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Map UI overlay (caption + legend) */
+#map-ui {
+  position: absolute;
+  bottom: 28px;
+  left: 28px;
+  z-index: 10;
+  pointer-events: none;
+}
+#map-caption {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 8px;
+}
+#map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.legend-bar {
+  width: 140px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2a5040, #00e87a);
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 140px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* Tooltip */
+.map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(10, 22, 16, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 50;
+  min-width: 180px;
+}
+.map-tooltip.visible { opacity: 1; }
+.tt-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.tt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+.tt-label { font-size: 11px; color: rgba(255,255,255,0.45); }
+.tt-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+}
+.tt-val .unit { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+/* Annotation labels on the map (prefecture names) */
+.map-annotation {
+  position: absolute;
+  pointer-events: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  background: rgba(0,0,0,0.3);
+  padding: 3px 7px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.map-annotation.visible { opacity: 1; }
+
+/* Scroll steps container — overlaps sticky map */
+.steps {
+  position: relative;
+  z-index: 10;
+  margin-top: -100vh; /* pull up to overlap the sticky map */
+  padding-bottom: 20vh;
+}
+
+.step {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  padding: 20px 40px;
+}
+.step:first-child {
+  margin-top: 100vh; /* first step starts at bottom of first viewport */
+}
+.step-card {
+  background: rgba(248, 247, 244, 0.93);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 360px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.step-card.is-active {
+  /* optional: subtle pulse when active */
+}
+.step-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #006241;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+.step-card h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 22px;
+  line-height: 1.25;
+  color: #0d1f14;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #4b5563;
+}
+.step-card p strong { color: #1c1c1a; }
+.step-card .stat-big {
+  display: block;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 42px;
+  color: #006241;
+  line-height: 1;
+  margin: 12px 0 4px;
+}
+.step-card .stat-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Loading overlay */
+#map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #1a2820;
+  z-index: 20;
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  transition: opacity 0.5s;
+}
+#map-loading.hidden { opacity: 0; pointer-events: none; }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: #00a86b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   BRIDGE PROSE + SECTION HEADER
+   ============================================================ */
+.section-header {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 64px 24px 32px;
+}
+.section-header .eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #006241;
+  margin-bottom: 12px;
+}
+.section-header h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(28px, 4.5vw, 40px);
+  line-height: 1.2;
+  color: #0d1f14;
+  margin-bottom: 16px;
+}
+.section-header p {
+  font-size: 18px;
+  color: #4b5563;
+  line-height: 1.75;
+}
+
+/* ============================================================
+   COMPARISON CHART
+   ============================================================ */
+.chart-section {
+  background: #fff;
+  border-top: 1px solid #e5e3de;
+  border-bottom: 1px solid #e5e3de;
+  padding: 64px 24px;
+  margin: 32px 0;
+}
+.chart-container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.chart-header {
+  margin-bottom: 40px;
+}
+.chart-header h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.2;
+  color: #0d1f14;
+  margin-bottom: 10px;
+}
+.chart-header p {
+  font-size: 15px;
+  color: #6b7280;
+}
+#comparison-chart {
+  /* D3 will render here */
+  min-height: 220px;
+}
+
+/* ============================================================
+   OUTRO + FOOTER
+   ============================================================ */
+.outro {
+  padding-top: 32px;
+  padding-bottom: 64px;
+}
+.outro p { margin-bottom: 28px; }
+
+.story-footer {
+  background: #0d1f14;
+  color: rgba(255,255,255,0.7);
+  padding: 56px 24px;
+}
+.story-footer-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: start;
+}
+.methodology h3 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 14px;
+}
+.methodology p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 10px;
+}
+.methodology a {
+  color: #00a86b;
+  text-decoration: none;
+}
+.methodology a:hover { text-decoration: underline; }
+.footer-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.footer-nav a:hover { color: #00a86b; }
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+  .sticky-map {
+    height: 52vh;
+  }
+  .steps {
+    margin-top: -52vh;
+  }
+  .step:first-child {
+    margin-top: 52vh;
+  }
+  .step {
+    min-height: 60vh;
+    padding: 16px 16px;
+    align-items: flex-end;
+  }
+  .step-card {
+    max-width: 100%;
+    padding: 20px 20px;
+  }
+  .story-hero {
+    padding-top: 96px;
+    padding-bottom: 60px;
+  }
+  .story-footer-inner {
+    grid-template-columns: 1fr;
+  }
+  #map-ui {
+    bottom: 16px;
+    left: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-card h3 { font-size: 19px; }
+  .step-card p { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="story-nav">
+  <a href="../../" class="nav-back">← All Stories</a>
+  <span class="nav-title" id="nav-title">The Corporate X-Ray of Japan</span>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<header class="story-hero" id="story-hero">
+  <div class="hero-content">
+    <p class="hero-kicker">Data Journalism · Japan</p>
+    <h1 class="hero-headline">The Corporate<br>X-Ray of Japan</h1>
+    <p class="hero-deck">2,108 Starbucks stores are spread across this country. The map of where they sit tells a story that has nothing to do with coffee.</p>
+    <div class="hero-byline">
+      <span>By Kohei</span>
+      <span class="byline-sep">·</span>
+      <span>April 2026</span>
+    </div>
+  </div>
+  <div class="hero-scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</header>
+
+<!-- ============================================================
+     INTRO PROSE
+     ============================================================ -->
+<section class="prose">
+  <p class="dropcap">Starbucks doesn't open stores on instinct. The company runs demographic models, foot-traffic analyses, and competitive assessments before signing a lease. Each green logo pinned to a shopping strip or station concourse is, in a sense, a corporate vote of economic confidence — a bet that the surrounding population has the income, the habits, and the density to sustain it.</p>
+  <p>Japan was one of Starbucks' earliest international expansions. The first Tokyo store opened in 1996. Three decades later, there are 2,108 locations spread across all 47 prefectures. That's more than the United Kingdom, more than South Korea, and roughly half the number you'd find in China.</p>
+  <p>But the map of where those stores sit is more than a consumer preference survey. It's a fine-grained snapshot of where economic energy flows in Japan — which cities are growing, which are contracting, and which surprising pockets of prosperity exist where you'd least expect them. Scroll to explore it.</p>
+</section>
+
+<!-- ============================================================
+     SCROLLYTELLING
+     ============================================================ -->
+<section class="scrolly" id="scrolly">
+
+  <!-- Sticky map -->
+  <figure class="sticky-map" id="sticky-map" aria-label="Interactive map of Japan">
+    <svg id="map-svg" preserveAspectRatio="xMidYMid meet"></svg>
+    <div id="map-ui">
+      <div id="map-caption">Store count by prefecture</div>
+      <div id="map-legend">
+        <div id="legend-bar" class="legend-bar"></div>
+        <div class="legend-labels">
+          <span id="legend-low">0</span>
+          <span id="legend-high">432</span>
+        </div>
+      </div>
+    </div>
+    <div id="map-tooltip" class="map-tooltip"></div>
+    <div id="map-loading">
+      <div class="spinner"></div>
+      <span>Loading map…</span>
+    </div>
+  </figure>
+
+  <!-- Scroll steps -->
+  <div class="steps" id="steps">
+
+    <!-- Step 0: All stores -->
+    <div class="step" data-step="0">
+      <div class="step-card">
+        <p class="step-eyebrow">01 / Overview</p>
+        <h3>Every store, mapped.</h3>
+        <span class="stat-big">2,108</span>
+        <span class="stat-label">Starbucks locations across Japan</span>
+        <p style="margin-top:14px">Japan's 47 prefectures, colored by total store count. Darker means more. The biggest cities light up — but is that the whole story?</p>
+      </div>
+    </div>
+
+    <!-- Step 1: Tokyo -->
+    <div class="step" data-step="1">
+      <div class="step-card">
+        <p class="step-eyebrow">02 / Tokyo</p>
+        <h3>One city, one in five stores.</h3>
+        <p>Tokyo Metropolis holds <strong>432 stores</strong> — 20% of all Starbucks in Japan, in a prefecture with one in nine Japanese residents. The capital dominates by sheer mass.</p>
+        <p style="margin-top:12px">But raw totals flatter population centers. There's a better question: stores <em>per person</em>.</p>
+      </div>
+    </div>
+
+    <!-- Step 2: Per-capita transition -->
+    <div class="step" data-step="2">
+      <div class="step-card">
+        <p class="step-eyebrow">03 / Adjust</p>
+        <h3>Now divide by population.</h3>
+        <p>Stores per 100,000 residents. The national average is <strong>1.70</strong>. Watch the map rearrange.</p>
+      </div>
+    </div>
+
+    <!-- Step 3: Per-capita view -->
+    <div class="step" data-step="3">
+      <div class="step-card">
+        <p class="step-eyebrow">04 / Per Capita</p>
+        <h3>The outliers emerge.</h3>
+        <p><strong>Okinawa ranks 2nd</strong> at 2.36 per 100k — a legacy of decades of American cultural influence from US military presence. <strong>Aichi</strong> (Toyota country) edges past Osaka. Northeastern prefectures fall toward the bottom.</p>
+        <p style="margin-top:12px">The industrial northwest recedes. A different Japan takes shape.</p>
+      </div>
+    </div>
+
+    <!-- Step 4: Zoom Fukuoka -->
+    <div class="step" data-step="4">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Focus</p>
+        <h3>Zoom into Fukuoka.</h3>
+        <p>The gateway to Kyushu, Japan's southernmost main island. Prefecture-wide, Fukuoka ranks 8th by per-capita density — unremarkable on the national stage. But zoom in to the municipality level, and a striking contrast appears.</p>
+      </div>
+    </div>
+
+    <!-- Step 5: Fukuoka municipalities -->
+    <div class="step" data-step="5">
+      <div class="step-card">
+        <p class="step-eyebrow">06 / Contrast</p>
+        <h3>Two cities. One diverging story.</h3>
+        <p>In southern Fukuoka: <strong>Fukuoka City</strong> — 52 stores, 1.6M residents, <strong>3.23 per 100k</strong>.</p>
+        <p style="margin-top:10px">In northern Fukuoka: <strong>Kitakyushu</strong> — 13 stores, 913k residents, <strong>1.42 per 100k</strong>. Below the national average. The same prefecture; a very different economic trajectory.</p>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+</section><!-- /scrolly -->
+
+<!-- ============================================================
+     BRIDGE PROSE
+     ============================================================ -->
+<div class="section-divider"><hr></div>
+<div class="section-header">
+  <p class="eyebrow">The Fukuoka Divide</p>
+  <h2>A rivalry that was, and what remains</h2>
+  <p>Fifty years ago, these two cities were near-equals in ambition and economic weight. Today, the Starbucks map traces the outline of their diverging fates.</p>
+</div>
+
+<section class="prose">
+  <p>Kitakyushu once anchored Japan's postwar industrial recovery. Its steel mills, chemical plants, and port facilities made it a symbol of national resurgence — at its peak in the 1960s, it was producing more steel than the entire United Kingdom. The city was designated Japan's first "environmental model city" after its legendary battle to clean up its own toxic air.</p>
+  <p>Fukuoka City, its neighbor 60 kilometers to the south, was historically quieter — a commercial port, a gateway to Korea and China, a university town. But something shifted. As heavy industry declined globally, Fukuoka leaned into what it had: geography, young population, and an urban core dense enough to generate its own momentum.</p>
+  <blockquote class="data-callout">
+    Fukuoka City is now Japan's fastest-growing major city by population. Kitakyushu has lost roughly 200,000 residents since its 1979 peak. The Starbucks map didn't create this story — it just renders it visible.
+  </blockquote>
+  <p>Fukuoka's startup ecosystem now rivals Tokyo's in energy, if not in scale. The city has attracted international tech companies, young migrants from across Kyushu, and a thriving food and creative culture. Starbucks followed: 52 locations, including a flagship Reserve Roastery. Corporate site selection isn't charity — it goes where the spending power is.</p>
+</section>
+
+<!-- ============================================================
+     COMPARISON CHART
+     ============================================================ -->
+<section class="chart-section">
+  <div class="chart-container">
+    <div class="chart-header">
+      <h2>The gap, measured</h2>
+      <p>Starbucks stores per 100,000 residents — Fukuoka City vs. Kitakyushu vs. the national average</p>
+    </div>
+    <div id="comparison-chart"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     OUTRO PROSE
+     ============================================================ -->
+<section class="prose outro">
+  <h2>What Starbucks knows</h2>
+  <p>Starbucks' site selection methodology is, at its core, a bet on where the middle class will be in five to ten years. The company isn't just measuring today's foot traffic; it's modeling demographic trajectories, income distributions, and the subtle urban qualities — walkability, young-adult density, international character — that predict consumer behavior.</p>
+  <p>In this sense, the Japan Starbucks map is a kind of revealed preference study of a major corporation's read on Japanese urban vitality. It won't always be right. Outliers exist — single highway-exit locations that serve a regional population but sit within a small municipality, inflating its per-capita figure. Small towns in Shiga, Tottori, and Yamanashi appear disproportionately high in the rankings for exactly this reason.</p>
+  <p>But at scale, the pattern holds. The prefectures and cities that score high on Starbucks density are, almost without exception, places that demographers and economists already identify as winners in Japan's ongoing urbanization: Tokyo's core wards, Fukuoka City, Okinawa's tourist corridors, Aichi's manufacturing belt.</p>
+  <p>The green logos aren't just cafés. They're data points in a decades-long story about which Japanese cities are gaining, and which are quietly being left behind.</p>
+</section>
+
+<!-- ============================================================
+     FOOTER / METHODOLOGY
+     ============================================================ -->
+<footer class="story-footer">
+  <div class="story-footer-inner">
+    <div class="methodology">
+      <h3>Data &amp; Methodology</h3>
+      <p>Store data was collected from the official <a href="https://www.starbucks.co.jp/store/search/" target="_blank" rel="noopener">Starbucks Japan store locator</a> in April 2026. The dataset covers 2,108 unique store URLs across all 47 prefectures. Stores were geocoded to the municipality level using Japanese administrative codes (N03_007).</p>
+      <p>Population figures are from Japan's 2020 National Census as published by the <a href="https://www.e-stat.go.jp" target="_blank" rel="noopener">Statistics Bureau of Japan (e-Stat)</a>. Per-capita figures use total registered population.</p>
+      <p>Municipality boundaries are derived from the Geospatial Information Authority of Japan (国土地理院) administrative boundary data, 2025 edition. Boundaries were dissolved to the municipality level and simplified for web rendering.</p>
+    </div>
+    <div class="footer-nav">
+      <a href="../../">← All Stories</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+<script>
+// ============================================================
+// DATA PATHS (relative to stories/starbucks-japan/)
+// ============================================================
+const URL_JAPAN_GEO      = '../../geo-json/japan.geojson';
+const URL_STORE_COUNTS   = '../../data/starbucks-store-counts.json';
+const URL_PREF_POP       = '../../population-json/pref-pop.json';
+const URL_FUKUOKA_GEO    = '../../geo-json/pref_40.geojson';
+const URL_MUNI_COUNTS    = '../../data/starbucks-municipality-counts.json';
+const URL_MUNI_POP_40    = '../../population-json/municipalities/muni-pop-40.json';
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  step: -1,
+  metric: 'total',     // 'total' | 'per100k'
+  view: 'national',    // 'national' | 'fukuoka'
+  loaded: false,
+  fukuokaLoaded: false,
+};
+
+let japanGeo, storeByPref;
+let fukuokaGeo, muniData = {};
+// Pre-fetch Fukuoka data in background immediately (don't await here)
+const fukuokaGeoPromise   = d3.json(URL_FUKUOKA_GEO);
+const fukuokaMuniCountsP  = d3.json(URL_MUNI_COUNTS);
+const fukuokaMuniPopP     = d3.json(URL_MUNI_POP_40);
+
+// D3 elements
+let svg, g, path, projection, zoomBehavior;
+let prefLayer, muniLayer;
+
+// Color scales (set after data loads)
+let colorTotal, colorPer100k, colorMuniPer100k;
+
+// Map dimensions
+let W, H;
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  setupSVG();
+
+  try {
+    const [geo, storeCounts, prefPop] = await Promise.all([
+      d3.json(URL_JAPAN_GEO),
+      d3.json(URL_STORE_COUNTS),
+      d3.json(URL_PREF_POP),
+    ]);
+
+    japanGeo = geo;
+
+    // Build per-prefecture lookup
+    storeByPref = {};
+    for (const [code, pref] of Object.entries(storeCounts.prefectures)) {
+      const pop = prefPop[code]?.total || 1;
+      storeByPref[code] = {
+        count:    pref.count,
+        nameEn:   pref.nameEn,
+        per100k:  pref.count / pop * 100000,
+        pop,
+      };
+    }
+
+    // Color scales
+    const maxCount   = d3.max(Object.values(storeByPref), d => d.count);
+    const maxPer100k = d3.max(Object.values(storeByPref), d => d.per100k);
+
+    colorTotal = d3.scaleSequential()
+      .domain([0, maxCount])
+      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+
+    colorPer100k = d3.scaleSequential()
+      .domain([0.5, maxPer100k])
+      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+
+    colorMuniPer100k = d3.scaleSequential()
+      .domain([0, 6])
+      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+
+    drawPrefectures();
+    updateLegend('total');
+    state.loaded = true;
+
+    // Hide loading overlay
+    document.getElementById('map-loading').classList.add('hidden');
+
+  } catch (err) {
+    console.error('Map load error:', err);
+    document.querySelector('#map-loading span').textContent = 'Failed to load map data.';
+  }
+
+  setupScrollama();
+  setupComparisonChart();
+  setupNavTitleObserver();
+  setupResizeHandler();
+}
+
+// ============================================================
+// SVG SETUP
+// ============================================================
+function setupSVG() {
+  const container = document.getElementById('sticky-map');
+  W = container.clientWidth;
+  H = container.clientHeight;
+
+  svg = d3.select('#map-svg')
+    .attr('width', W)
+    .attr('height', H);
+
+  g = svg.append('g').attr('class', 'map-g');
+
+  zoomBehavior = d3.zoom()
+    .scaleExtent([1, 14])
+    .on('zoom', e => g.attr('transform', e.transform));
+
+  svg.call(zoomBehavior);
+}
+
+// ============================================================
+// DRAW PREFECTURES
+// ============================================================
+function drawPrefectures() {
+  projection = d3.geoMercator().fitSize([W, H], japanGeo);
+  path = d3.geoPath().projection(projection);
+
+  prefLayer = g.append('g').attr('class', 'pref-layer');
+
+  prefLayer.selectAll('path')
+    .data(japanGeo.features)
+    .enter().append('path')
+    .attr('class', 'pref-path')
+    .attr('d', path)
+    .attr('fill', d => {
+      const d2 = storeByPref[d.properties.code];
+      return d2 ? colorTotal(d2.count) : '#2a3d32';
+    })
+    .attr('stroke', 'rgba(0,0,0,0.35)')
+    .attr('stroke-width', 0.5)
+    .style('cursor', 'default')
+    .on('mousemove', onPrefHover)
+    .on('mouseleave', onPrefLeave);
+}
+
+// ============================================================
+// MAP TRANSITIONS
+// ============================================================
+function updateMapMetric(metric, dur = 800) {
+  if (!state.loaded) return;
+  state.metric = metric;
+
+  const colorFn   = metric === 'total' ? colorTotal : colorPer100k;
+  const dataKey   = metric === 'total' ? 'count' : 'per100k';
+
+  prefLayer.selectAll('path')
+    .transition().duration(dur).ease(d3.easeQuadInOut)
+    .attr('fill', d => {
+      const d2 = storeByPref[d.properties.code];
+      return d2 ? colorFn(d2[dataKey]) : '#2a3d32';
+    });
+
+  updateLegend(metric);
+}
+
+function highlightPref(code, dur = 400) {
+  prefLayer.selectAll('path')
+    .transition().duration(dur)
+    .attr('opacity', d => d.properties.code === code ? 1 : 0.28)
+    .attr('stroke-width', d => d.properties.code === code ? 1.5 : 0.5);
+}
+
+function highlightOutliers(dur = 400) {
+  // Highlight top-5 prefectures by per100k
+  const top5 = Object.entries(storeByPref)
+    .sort((a, b) => b[1].per100k - a[1].per100k)
+    .slice(0, 5)
+    .map(([code]) => code);
+
+  prefLayer.selectAll('path')
+    .transition().duration(dur)
+    .attr('opacity', d => top5.includes(d.properties.code) ? 1 : 0.4)
+    .attr('stroke-width', d => top5.includes(d.properties.code) ? 1 : 0.5);
+}
+
+function clearHighlights(dur = 400) {
+  prefLayer.selectAll('path')
+    .transition().duration(dur)
+    .attr('opacity', 1)
+    .attr('stroke-width', 0.5);
+  if (muniLayer) {
+    muniLayer.selectAll('path')
+      .transition().duration(dur)
+      .attr('opacity', 1);
+  }
+}
+
+function resetZoom(dur = 900) {
+  svg.transition().duration(dur).ease(d3.easeCubicInOut)
+    .call(zoomBehavior.transform, d3.zoomIdentity);
+}
+
+function zoomToPref(code, dur = 1000) {
+  const feature = japanGeo.features.find(f => f.properties.code === code);
+  if (!feature) return;
+  const [[x0, y0], [x1, y1]] = path.bounds(feature);
+  const padding = 80;
+  const k = Math.min(12, 0.85 / Math.max(
+    (x1 - x0) / (W - padding * 2),
+    (y1 - y0) / (H - padding * 2)
+  ));
+  const tx = W / 2 - k * (x0 + x1) / 2;
+  const ty = H / 2 - k * (y0 + y1) / 2;
+  svg.transition().duration(dur).ease(d3.easeCubicInOut)
+    .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(k));
+}
+
+// ============================================================
+// FUKUOKA MUNICIPALITY LAYER
+// ============================================================
+async function loadAndShowFukuokaMunicipalities() {
+  if (state.fukuokaLoaded && muniLayer) {
+    muniLayer.attr('display', null);
+    return;
+  }
+
+  try {
+    const [geo, muniCounts, muniPop] = await Promise.all([
+      fukuokaGeoPromise,
+      fukuokaMuniCountsP,
+      fukuokaMuniPopP,
+    ]);
+
+    fukuokaGeo = geo;
+    const fukuokaEntries = muniCounts.municipalities?.['40']?.entries || {};
+
+    // Build municipality data lookup
+    muniData = {};
+    for (const feature of fukuokaGeo.features) {
+      const code = feature.properties.code;
+      const count = fukuokaEntries[code]?.count || 0;
+      const pop   = muniPop[code]?.total || null;
+      const nameEn = fukuokaEntries[code]?.nameEn || feature.properties.city || '';
+      muniData[code] = {
+        count,
+        pop,
+        nameEn,
+        per100k: pop ? count / pop * 100000 : null,
+      };
+    }
+
+    // Dim prefecture layer
+    prefLayer.selectAll('path')
+      .transition().duration(500)
+      .attr('opacity', d => d.properties.code === '40' ? 0 : 0.20);
+
+    // Add municipality layer
+    muniLayer = g.append('g').attr('class', 'muni-layer');
+
+    muniLayer.selectAll('path')
+      .data(fukuokaGeo.features)
+      .enter().append('path')
+      .attr('class', d => {
+        const code = d.properties.code;
+        // Tag Fukuoka City wards (40131-40137) and Kitakyushu wards (40101-40109)
+        if (['40131','40132','40133','40134','40135','40136','40137'].includes(code))
+          return 'muni-path is-fukuoka-city';
+        if (['40101','40103','40105','40106','40107','40108','40109'].includes(code))
+          return 'muni-path is-kitakyushu';
+        return 'muni-path';
+      })
+      .attr('d', path)
+      .attr('fill', d => {
+        const md = muniData[d.properties.code];
+        if (!md || md.per100k === null) return '#2e4838';
+        return colorMuniPer100k(md.per100k);
+      })
+      .attr('stroke', 'rgba(0,0,0,0.25)')
+      .attr('stroke-width', 0.15)
+      .attr('opacity', 0)
+      .on('mousemove', onMuniHover)
+      .on('mouseleave', onMuniLeave);
+
+    muniLayer.selectAll('path')
+      .transition().duration(600).delay((_, i) => i * 3)
+      .attr('opacity', 1);
+
+    state.fukuokaLoaded = true;
+
+  } catch (err) {
+    console.error('Fukuoka data load error:', err);
+  }
+}
+
+function highlightCityComparison() {
+  if (!muniLayer) return;
+  const fukuokaCityCodes = ['40131','40132','40133','40134','40135','40136','40137'];
+  const kitakyushuCodes  = ['40101','40103','40105','40106','40107','40108','40109'];
+  muniLayer.selectAll('path')
+    .transition().duration(600)
+    .attr('opacity', d => {
+      const code = d.properties.code;
+      if (fukuokaCityCodes.includes(code)) return 1;
+      if (kitakyushuCodes.includes(code))  return 0.75;
+      return 0.25;
+    })
+    .attr('stroke-width', d => {
+      const code = d.properties.code;
+      if (fukuokaCityCodes.includes(code) || kitakyushuCodes.includes(code)) return 0.3;
+      return 0.15;
+    });
+}
+
+// ============================================================
+// SCROLLAMA
+// ============================================================
+function setupScrollama() {
+  const scroller = scrollama();
+  scroller
+    .setup({
+      step: '#steps .step',
+      offset: 0.52,
+      debug: false,
+    })
+    .onStepEnter(({ index }) => enterStep(index))
+    .onStepExit(({ index, direction }) => exitStep(index, direction));
+
+  window.addEventListener('resize', scroller.resize);
+}
+
+function enterStep(step) {
+  if (!state.loaded) return;
+  state.step = step;
+
+  // Highlight active card
+  document.querySelectorAll('#steps .step').forEach((el, i) => {
+    const card = el.querySelector('.step-card');
+    if (card) card.style.transform = i === step ? 'translateY(0)' : '';
+  });
+
+  switch (step) {
+    case 0:
+      resetZoom();
+      updateMapMetric('total');
+      clearHighlights();
+      updateCaption('Store count by prefecture');
+      updateLegend('total');
+      break;
+
+    case 1:
+      resetZoom();
+      updateMapMetric('total');
+      highlightPref('13'); // Tokyo
+      updateCaption('Store count by prefecture · Tokyo highlighted');
+      break;
+
+    case 2:
+      resetZoom();
+      updateMapMetric('per100k');
+      clearHighlights();
+      updateCaption('Stores per 100,000 residents');
+      break;
+
+    case 3:
+      resetZoom();
+      updateMapMetric('per100k');
+      highlightOutliers();
+      updateCaption('Stores per 100,000 residents · Top prefectures');
+      break;
+
+    case 4:
+      clearHighlights();
+      updateMapMetric('per100k', 400);
+      zoomToPref('40');
+      updateCaption('Fukuoka Prefecture');
+      break;
+
+    case 5:
+      zoomToPref('40', 300);
+      loadAndShowFukuokaMunicipalities().then(() => {
+        highlightCityComparison();
+      });
+      updateCaption('Fukuoka Prefecture · Municipality level');
+      break;
+  }
+}
+
+function exitStep(step, direction) {
+  // When scrolling back up, restore national view
+  if (step === 4 && direction === 'up') {
+    if (muniLayer) {
+      muniLayer.attr('display', 'none');
+      prefLayer.selectAll('path').attr('opacity', 1);
+    }
+    resetZoom(600);
+  }
+}
+
+// ============================================================
+// LEGEND & CAPTION
+// ============================================================
+function updateLegend(metric) {
+  const bar = document.getElementById('legend-bar');
+  const low = document.getElementById('legend-low');
+  const high = document.getElementById('legend-high');
+
+  if (metric === 'total') {
+    bar.style.background = 'linear-gradient(90deg, #253d30, #00d472)';
+    low.textContent  = '0';
+    high.textContent = '432';
+  } else {
+    bar.style.background = 'linear-gradient(90deg, #253d30, #00d472)';
+    low.textContent  = '0.7';
+    high.textContent = '3.1/100k';
+  }
+}
+
+function updateCaption(text) {
+  document.getElementById('map-caption').textContent = text;
+}
+
+// ============================================================
+// TOOLTIP (PREFECTURE)
+// ============================================================
+function onPrefHover(event, d) {
+  const code  = d.properties.code;
+  const nameEn = d.properties.nameEn || code;
+  const data  = storeByPref[code];
+  if (!data) return;
+
+  const tip = document.getElementById('map-tooltip');
+  const metric = state.metric;
+
+  const valStr = metric === 'total'
+    ? `<span class="tt-val">${data.count} <span class="unit">stores</span></span>`
+    : `<span class="tt-val">${data.per100k.toFixed(2)} <span class="unit">per 100k</span></span>`;
+
+  const secondLabel = metric === 'total' ? 'Per 100k' : 'Total stores';
+  const secondVal   = metric === 'total'
+    ? `<span class="tt-val">${data.per100k.toFixed(2)} <span class="unit">per 100k</span></span>`
+    : `<span class="tt-val">${data.count} <span class="unit">stores</span></span>`;
+
+  tip.innerHTML = `
+    <div class="tt-name">${nameEn}</div>
+    <div class="tt-row">
+      <span class="tt-label">${metric === 'total' ? 'Total stores' : 'Per 100k residents'}</span>
+      ${valStr}
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">${secondLabel}</span>
+      ${secondVal}
+    </div>
+    <div class="tt-row">
+      <span class="tt-label">Population</span>
+      <span class="tt-val">${(data.pop / 1_000_000).toFixed(2)} <span class="unit">M</span></span>
+    </div>
+  `;
+
+  positionTooltip(tip, event);
+  tip.classList.add('visible');
+}
+
+function onPrefLeave() {
+  document.getElementById('map-tooltip').classList.remove('visible');
+}
+
+// ============================================================
+// TOOLTIP (MUNICIPALITY)
+// ============================================================
+function onMuniHover(event, d) {
+  const code = d.properties.code;
+  const md   = muniData[code];
+  if (!md) return;
+
+  const tip = document.getElementById('map-tooltip');
+  tip.innerHTML = `
+    <div class="tt-name">${md.nameEn || code}</div>
+    <div class="tt-row">
+      <span class="tt-label">Stores</span>
+      <span class="tt-val">${md.count}</span>
+    </div>
+    ${md.per100k !== null ? `
+    <div class="tt-row">
+      <span class="tt-label">Per 100k</span>
+      <span class="tt-val">${md.per100k.toFixed(2)} <span class="unit">per 100k</span></span>
+    </div>` : ''}
+    ${md.pop ? `
+    <div class="tt-row">
+      <span class="tt-label">Population</span>
+      <span class="tt-val">${md.pop.toLocaleString()}</span>
+    </div>` : ''}
+  `;
+  positionTooltip(tip, event);
+  tip.classList.add('visible');
+}
+
+function onMuniLeave() {
+  document.getElementById('map-tooltip').classList.remove('visible');
+}
+
+function positionTooltip(tip, event) {
+  const container = document.getElementById('sticky-map');
+  const rect = container.getBoundingClientRect();
+  let x = event.clientX - rect.left + 14;
+  let y = event.clientY - rect.top  - 10;
+  const tw = 200, th = 120;
+  if (x + tw > W - 10) x = event.clientX - rect.left - tw - 14;
+  if (y + th > H - 10) y = event.clientY - rect.top  - th - 14;
+  tip.style.left = x + 'px';
+  tip.style.top  = y + 'px';
+}
+
+// ============================================================
+// COMPARISON CHART
+// ============================================================
+function setupComparisonChart() {
+  const el = document.getElementById('comparison-chart');
+  const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      drawComparisonChart();
+      observer.disconnect();
+    }
+  }, { threshold: 0.3 });
+  observer.observe(el);
+}
+
+function drawComparisonChart() {
+  const data = [
+    {
+      label: 'Fukuoka City',
+      sub: '福岡市 · Fukuoka Prefecture',
+      value: 3.23,
+      stores: 52,
+      pop: '1.61M',
+      color: '#00b86a',
+      note: '2.3× national average',
+    },
+    {
+      label: 'National average',
+      sub: 'All Japan (2,108 stores / 124.3M residents)',
+      value: 1.70,
+      stores: 2108,
+      pop: '124.3M',
+      color: '#7b9e8a',
+      isRef: true,
+    },
+    {
+      label: 'Kitakyushu City',
+      sub: '北九州市 · Fukuoka Prefecture',
+      value: 1.42,
+      stores: 13,
+      pop: '914K',
+      color: '#5a7d6a',
+      note: '16% below national average',
+    },
+  ];
+
+  const container = document.getElementById('comparison-chart');
+  const cw = container.clientWidth || 600;
+
+  const margin = { top: 8, right: 120, bottom: 20, left: 0 };
+  const rowH   = 64;
+  const barH   = 22;
+  const chartH = data.length * rowH + margin.top + margin.bottom;
+  const innerW = cw - margin.left - margin.right;
+
+  const xMax = 4.0;
+  const x = d3.scaleLinear().domain([0, xMax]).range([0, innerW]);
+
+  const svg2 = d3.select('#comparison-chart').append('svg')
+    .attr('width', cw)
+    .attr('height', chartH)
+    .attr('viewBox', `0 0 ${cw} ${chartH}`)
+    .attr('style', 'overflow: visible;');
+
+  const g2 = svg2.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // National average reference line (drawn behind bars)
+  const refX = x(1.70);
+  g2.append('line')
+    .attr('x1', refX).attr('x2', refX)
+    .attr('y1', 0).attr('y2', chartH - margin.top - margin.bottom)
+    .attr('stroke', '#d1d5db')
+    .attr('stroke-width', 1)
+    .attr('stroke-dasharray', '4 3');
+
+  // Draw rows
+  data.forEach((d, i) => {
+    const y0 = i * rowH;
+    const row = g2.append('g').attr('transform', `translate(0,${y0})`);
+
+    // Label
+    row.append('text')
+      .attr('x', 0).attr('y', 14)
+      .attr('font-family', 'Inter, sans-serif')
+      .attr('font-size', 14)
+      .attr('font-weight', d.isRef ? 400 : 600)
+      .attr('fill', d.isRef ? '#9ca3af' : '#1c1c1a')
+      .text(d.label);
+
+    row.append('text')
+      .attr('x', 0).attr('y', 30)
+      .attr('font-family', 'Inter, sans-serif')
+      .attr('font-size', 11)
+      .attr('fill', '#9ca3af')
+      .text(d.sub);
+
+    if (!d.isRef) {
+      // Bar track
+      row.append('rect')
+        .attr('x', 0).attr('y', rowH * 0.55)
+        .attr('width', innerW).attr('height', barH)
+        .attr('fill', '#f0ede8')
+        .attr('rx', 3);
+
+      // Bar fill (animated)
+      row.append('rect')
+        .attr('x', 0).attr('y', rowH * 0.55)
+        .attr('width', 0).attr('height', barH)
+        .attr('fill', d.color)
+        .attr('rx', 3)
+        .transition().duration(1000).delay(i * 200).ease(d3.easeCubicOut)
+        .attr('width', x(d.value));
+
+      // Value label
+      row.append('text')
+        .attr('x', x(d.value) + 8)
+        .attr('y', rowH * 0.55 + barH / 2 + 5)
+        .attr('font-family', 'IBM Plex Mono, monospace')
+        .attr('font-size', 13)
+        .attr('font-weight', 500)
+        .attr('fill', '#2d2d2b')
+        .attr('opacity', 0)
+        .text(`${d.value}`)
+        .transition().duration(400).delay(i * 200 + 800)
+        .attr('opacity', 1);
+
+      // Note
+      if (d.note) {
+        row.append('text')
+          .attr('x', Math.min(x(d.value), innerW) + 50)
+          .attr('y', rowH * 0.55 + barH / 2 + 5)
+          .attr('font-family', 'Inter, sans-serif')
+          .attr('font-size', 11)
+          .attr('fill', '#9ca3af')
+          .attr('opacity', 0)
+          .text(d.note)
+          .transition().duration(400).delay(i * 200 + 1000)
+          .attr('opacity', 1);
+      }
+    } else {
+      // Reference line label (national average)
+      row.append('text')
+        .attr('x', refX + 6)
+        .attr('y', rowH * 0.65 + 5)
+        .attr('font-family', 'IBM Plex Mono, monospace')
+        .attr('font-size', 12)
+        .attr('fill', '#9ca3af')
+        .text('1.70 ← national avg.');
+    }
+  });
+
+  // X-axis ticks
+  const tickVals = [0, 1, 2, 3, 4];
+  const xAxisG = g2.append('g')
+    .attr('transform', `translate(0,${chartH - margin.top - margin.bottom - 4})`);
+
+  tickVals.forEach(v => {
+    xAxisG.append('text')
+      .attr('x', x(v))
+      .attr('y', 14)
+      .attr('text-anchor', 'middle')
+      .attr('font-family', 'IBM Plex Mono, monospace')
+      .attr('font-size', 10)
+      .attr('fill', '#c4c4bc')
+      .text(v === 0 ? '0' : v);
+  });
+
+  xAxisG.append('text')
+    .attr('x', innerW)
+    .attr('y', 14)
+    .attr('text-anchor', 'end')
+    .attr('font-family', 'Inter, sans-serif')
+    .attr('font-size', 10)
+    .attr('fill', '#c4c4bc')
+    .text('stores per 100,000 residents');
+}
+
+// ============================================================
+// NAV TITLE (show on scroll past hero)
+// ============================================================
+function setupNavTitleObserver() {
+  const hero = document.getElementById('story-hero');
+  const navTitle = document.getElementById('nav-title');
+  const observer = new IntersectionObserver(([entry]) => {
+    navTitle.classList.toggle('visible', !entry.isIntersecting);
+  }, { threshold: 0 });
+  observer.observe(hero);
+}
+
+// ============================================================
+// RESIZE
+// ============================================================
+function setupResizeHandler() {
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const container = document.getElementById('sticky-map');
+      W = container.clientWidth;
+      H = container.clientHeight;
+      svg.attr('width', W).attr('height', H);
+      if (japanGeo) {
+        projection = d3.geoMercator().fitSize([W, H], japanGeo);
+        path = d3.geoPath().projection(projection);
+        g.selectAll('path').attr('d', path);
+      }
+    }, 200);
+  });
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>

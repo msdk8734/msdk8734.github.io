@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Visualization Projects</title>
+<title>Kohei — Data Journalism</title>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>📊</text></svg>">
 
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
@@ -41,17 +41,24 @@
   }
 
   header {
-    padding: 60px 40px 40px;
+    padding: 72px 40px 44px;
     max-width: 960px;
     margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
   }
+  .header-text { flex: 1; }
 
   header h1 {
-    font-size: 32px;
-    font-weight: 700;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 42px;
+    font-weight: 400;
     letter-spacing: -0.02em;
-    color: #111;
-    margin-bottom: 8px;
+    color: #0d1f14;
+    margin-bottom: 10px;
+    line-height: 1.1;
   }
 
   header p {
@@ -59,8 +66,23 @@
     font-weight: 400;
     color: #888;
     line-height: 1.6;
-    max-width: 620px;
+    max-width: 560px;
   }
+  .header-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 4px;
+    flex-shrink: 0;
+  }
+  .header-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .header-links a:hover { color: #006241; }
 
   .divider {
     max-width: 960px;
@@ -285,7 +307,130 @@
   .card-arrow { font-size: 13px; color: #ccc; margin-left: auto; transition: color 0.2s, transform 0.2s; }
   .card:hover .card-arrow { color: #666; transform: translateX(3px); }
 
-  footer { max-width: 960px; margin: 0 auto; padding: 0 40px 40px; font-size: 12px; color: #ccc; }
+  /* ── Featured story ── */
+  .featured-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 40px 8px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin-bottom: 16px;
+  }
+  .featured-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #0d1f14;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s, transform 0.2s;
+    min-height: 260px;
+  }
+  .featured-card:hover {
+    box-shadow: 0 16px 56px rgba(0,0,0,0.18);
+    transform: translateY(-2px);
+  }
+  .featured-card-body {
+    padding: 40px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+  }
+  .featured-kicker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4db87a;
+  }
+  .featured-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.2;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  .featured-deck {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.55);
+    max-width: 340px;
+  }
+  .featured-cta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4db87a;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    transition: gap 0.15s;
+  }
+  .featured-card:hover .featured-cta { gap: 10px; }
+  .featured-card-viz {
+    background: #152a1e;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .featured-card-viz svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    opacity: 0.8;
+  }
+  .viz-label {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+  }
+
+  /* ── Gallery section label ── */
+  .gallery-section-label {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 36px 40px 0;
+  }
+
+  footer {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px 40px;
+    font-size: 12px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer a { color: #aaa; text-decoration: none; }
+  footer a:hover { color: #006241; }
+
+  @media (max-width: 760px) {
+    .featured-card { grid-template-columns: 1fr; }
+    .featured-card-viz { min-height: 160px; }
+    .featured-card-body { padding: 28px 24px; }
+    .featured-title { font-size: 24px; }
+    .featured-section { padding: 24px 20px 4px; }
+    .gallery-section-label { padding: 28px 20px 0; }
+    header { padding: 48px 20px 32px; flex-direction: column; align-items: flex-start; gap: 16px; }
+    header h1 { font-size: 32px; }
+  }
 
   @media (max-width: 640px) {
     header { padding: 40px 20px 28px; }
@@ -299,11 +444,92 @@
 <body>
 
 <header>
-  <h1>Data Visualization Projects</h1>
-  <p>Interactive data visualizations built with D3.js, exploring Japanese population, religion, consumption, and media data through charts, maps, and heatmaps.</p>
+  <div class="header-text">
+    <h1>Kohei</h1>
+    <p>Data journalism about Japan — built with D3.js, driven by open public data. Maps, charts, and scrollytelling stories that go somewhere.</p>
+  </div>
+  <div class="header-links">
+    <a href="about/">About</a>
+  </div>
 </header>
 
 <div class="divider"><hr></div>
+
+<!-- Featured story -->
+<div class="featured-section">
+  <p class="section-label">Featured Story</p>
+  <a class="featured-card" href="stories/starbucks-japan/">
+    <div class="featured-card-body">
+      <p class="featured-kicker">Data Journalism · Japan</p>
+      <h2 class="featured-title">The Corporate X-Ray of Japan</h2>
+      <p class="featured-deck">2,108 Starbucks stores reveal the economic geography of Japan — which cities are winning, and which are being left behind.</p>
+      <span class="featured-cta">Read the story →</span>
+    </div>
+    <div class="featured-card-viz">
+      <!-- Japan silhouette in Starbucks green palette -->
+      <svg viewBox="0 0 400 360" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <!-- Stylized Japan map dots -->
+        <!-- Hokkaido -->
+        <ellipse cx="290" cy="52" rx="52" ry="30" fill="#1e4a30" opacity="0.7"/>
+        <!-- Honshu main -->
+        <path d="M 120,100 Q 160,80 210,85 Q 260,90 300,110 Q 320,125 310,145 Q 295,165 270,175 Q 240,185 200,190 Q 160,195 130,185 Q 100,175 90,155 Q 80,135 100,115 Z" fill="#1e4a30" opacity="0.7"/>
+        <!-- Shikoku -->
+        <ellipse cx="220" cy="215" rx="32" ry="18" fill="#1e4a30" opacity="0.6"/>
+        <!-- Kyushu -->
+        <ellipse cx="155" cy="220" rx="28" ry="35" fill="#1e4a30" opacity="0.65"/>
+        <!-- Okinawa chain (small dots) -->
+        <circle cx="95" cy="295" r="5" fill="#1e4a30" opacity="0.5"/>
+        <circle cx="80" cy="305" r="4" fill="#1e4a30" opacity="0.45"/>
+        <circle cx="66" cy="313" r="3" fill="#1e4a30" opacity="0.4"/>
+
+        <!-- Store dots (scattered across Japan shape) -->
+        <!-- Tokyo cluster -->
+        <circle cx="285" cy="128" r="4" fill="#00e87a" opacity="0.9"/>
+        <circle cx="278" cy="135" r="3" fill="#00e87a" opacity="0.8"/>
+        <circle cx="292" cy="133" r="2.5" fill="#00e87a" opacity="0.75"/>
+        <circle cx="283" cy="140" r="2" fill="#00cc66" opacity="0.7"/>
+        <circle cx="272" cy="128" r="2" fill="#00cc66" opacity="0.65"/>
+        <circle cx="298" cy="126" r="2" fill="#00cc66" opacity="0.6"/>
+        <!-- Osaka cluster -->
+        <circle cx="220" cy="158" r="3.5" fill="#00e87a" opacity="0.85"/>
+        <circle cx="214" cy="165" r="2.5" fill="#00cc66" opacity="0.75"/>
+        <circle cx="226" cy="162" r="2" fill="#00cc66" opacity="0.7"/>
+        <!-- Nagoya -->
+        <circle cx="252" cy="148" r="3" fill="#00cc66" opacity="0.8"/>
+        <circle cx="247" cy="155" r="2" fill="#00cc66" opacity="0.65"/>
+        <!-- Sapporo -->
+        <circle cx="284" cy="50" r="3" fill="#00cc66" opacity="0.75"/>
+        <circle cx="276" cy="56" r="2" fill="#009950" opacity="0.6"/>
+        <!-- Sendai -->
+        <circle cx="303" cy="110" r="2.5" fill="#00aa55" opacity="0.7"/>
+        <!-- Fukuoka -->
+        <circle cx="155" cy="215" r="3" fill="#00cc66" opacity="0.8"/>
+        <circle cx="148" cy="222" r="2" fill="#00aa55" opacity="0.65"/>
+        <!-- Kitakyushu (muted) -->
+        <circle cx="162" cy="208" r="2" fill="#006633" opacity="0.5"/>
+        <!-- Hiroshima -->
+        <circle cx="193" cy="183" r="2.5" fill="#00aa55" opacity="0.7"/>
+        <!-- Scattered dots across Honshu -->
+        <circle cx="165" cy="160" r="2" fill="#009950" opacity="0.55"/>
+        <circle cx="178" cy="172" r="2" fill="#009950" opacity="0.55"/>
+        <circle cx="240" cy="135" r="2" fill="#009950" opacity="0.6"/>
+        <circle cx="260" cy="168" r="2" fill="#009950" opacity="0.55"/>
+        <circle cx="232" cy="148" r="1.5" fill="#009950" opacity="0.5"/>
+        <circle cx="200" cy="140" r="1.5" fill="#009950" opacity="0.5"/>
+        <circle cx="210" cy="175" r="1.5" fill="#009950" opacity="0.5"/>
+        <!-- Shikoku dots -->
+        <circle cx="222" cy="214" r="2" fill="#008844" opacity="0.6"/>
+        <!-- Okinawa dot -->
+        <circle cx="95" cy="292" r="2.5" fill="#00cc66" opacity="0.7"/>
+      </svg>
+      <div class="viz-label">2,108 stores · All Japan</div>
+    </div>
+  </a>
+</div>
+
+<div class="gallery-section-label">
+  <p class="section-label">Interactive Explorations</p>
+</div>
 
 <div class="gallery">
 
@@ -758,7 +984,8 @@
 </div>
 
 <footer>
-  Built with D3.js and open public data sources.
+  <span>Built with D3.js and open public data.</span>
+  <a href="about/">About the author →</a>
 </footer>
 
 </body>
