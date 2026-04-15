@@ -528,16 +528,16 @@ body {
    ============================================================ */
 @media (max-width: 768px) {
   .sticky-map {
-    height: 52vh;
+    height: 65vh;
   }
   .steps {
-    margin-top: -52vh;
+    margin-top: -65vh;
   }
   .step:first-child {
-    margin-top: 52vh;
+    margin-top: 65vh;
   }
   .step {
-    min-height: 60vh;
+    min-height: 55vh;
     padding: 16px 16px;
     align-items: flex-end;
   }
@@ -830,15 +830,15 @@ async function init() {
 
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
 
     colorPer100k = d3.scaleSequential()
       .domain([0.5, maxPer100k])
-      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
-      .interpolator(d3.interpolateRgb('#253d30', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
 
     drawPrefectures();
     updateLegend('total');
@@ -897,8 +897,8 @@ function drawPrefectures() {
       const d2 = storeByPref[d.properties.code];
       return d2 ? colorTotal(d2.count) : '#2a3d32';
     })
-    .attr('stroke', 'rgba(255,255,255,0.18)')
-    .attr('stroke-width', 0.5)
+    .attr('stroke', 'rgba(255,255,255,0.32)')
+    .attr('stroke-width', 0.7)
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
     .on('mouseleave', onPrefLeave);
@@ -928,7 +928,7 @@ function highlightPref(code, dur = 400) {
   prefLayer.selectAll('path')
     .transition().duration(dur)
     .attr('opacity', d => d.properties.code === code ? 1 : 0.28)
-    .attr('stroke-width', d => d.properties.code === code ? 1.5 : 0.5);
+    .attr('stroke-width', d => d.properties.code === code ? 2.0 : 0.7);
 }
 
 function highlightOutliers(dur = 400) {
@@ -941,14 +941,14 @@ function highlightOutliers(dur = 400) {
   prefLayer.selectAll('path')
     .transition().duration(dur)
     .attr('opacity', d => top5.includes(d.properties.code) ? 1 : 0.4)
-    .attr('stroke-width', d => top5.includes(d.properties.code) ? 1 : 0.5);
+    .attr('stroke-width', d => top5.includes(d.properties.code) ? 1.5 : 0.7);
 }
 
 function clearHighlights(dur = 400) {
   prefLayer.selectAll('path')
     .transition().duration(dur)
     .attr('opacity', 1)
-    .attr('stroke-width', 0.5);
+    .attr('stroke-width', 0.7);
   if (muniLayer) {
     muniLayer.selectAll('path')
       .transition().duration(dur)
@@ -1036,8 +1036,8 @@ async function loadAndShowFukuokaMunicipalities() {
         if (!md || md.per100k === null) return '#2e4838';
         return colorMuniPer100k(md.per100k);
       })
-      .attr('stroke', 'rgba(255,255,255,0.15)')
-      .attr('stroke-width', 0.15)
+      .attr('stroke', 'rgba(255,255,255,0.45)')
+      .attr('stroke-width', 0.4)
       .attr('opacity', 0)
       .on('mousemove', onMuniHover)
       .on('mouseleave', onMuniLeave);
@@ -1067,8 +1067,8 @@ function highlightCityComparison() {
     })
     .attr('stroke-width', d => {
       const code = d.properties.code;
-      if (fukuokaCityCodes.includes(code) || kitakyushuCodes.includes(code)) return 0.3;
-      return 0.15;
+      if (fukuokaCityCodes.includes(code) || kitakyushuCodes.includes(code)) return 0.7;
+      return 0.4;
     });
 }
 
