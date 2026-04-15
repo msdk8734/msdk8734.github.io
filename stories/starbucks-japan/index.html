@@ -897,7 +897,7 @@ function drawPrefectures() {
       const d2 = storeByPref[d.properties.code];
       return d2 ? colorTotal(d2.count) : '#2a3d32';
     })
-    .attr('stroke', 'rgba(0,0,0,0.35)')
+    .attr('stroke', 'rgba(255,255,255,0.18)')
     .attr('stroke-width', 0.5)
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
@@ -1036,7 +1036,7 @@ async function loadAndShowFukuokaMunicipalities() {
         if (!md || md.per100k === null) return '#2e4838';
         return colorMuniPer100k(md.per100k);
       })
-      .attr('stroke', 'rgba(0,0,0,0.25)')
+      .attr('stroke', 'rgba(255,255,255,0.15)')
       .attr('stroke-width', 0.15)
       .attr('opacity', 0)
       .on('mousemove', onMuniHover)
