@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Kohei</title>
+<meta name="description" content="Kohei — data journalist and interactive developer building stories about Japan.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px%22>📊</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #f8f7f4;
+  color: #1c1c1a;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* Nav */
+.site-nav {
+  padding: 20px 40px;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.nav-back {
+  font-size: 13px;
+  font-weight: 500;
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-back:hover { color: #006241; }
+
+/* Page layout */
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 40px 96px;
+}
+
+/* Header */
+.about-header {
+  margin-bottom: 56px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #e5e3de;
+}
+.about-header h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(40px, 7vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #0d1f14;
+  margin-bottom: 20px;
+}
+.about-header .tagline {
+  font-size: 19px;
+  font-weight: 300;
+  color: #4b5563;
+  line-height: 1.65;
+  max-width: 520px;
+}
+
+/* Body text */
+.about-body p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #2d2d2b;
+  margin-bottom: 24px;
+}
+.about-body p:last-child { margin-bottom: 0; }
+.about-body a {
+  color: #006241;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.about-body a:hover { color: #004f34; }
+
+/* Skills section */
+.skills-section {
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid #e5e3de;
+}
+.skills-section h2 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 20px;
+}
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.skill-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #4b5563;
+  background: #fff;
+  border: 1px solid #e5e3de;
+  border-radius: 4px;
+  padding: 5px 12px;
+}
+
+/* Work links */
+.work-section {
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid #e5e3de;
+}
+.work-section h2 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 20px;
+}
+.work-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.work-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0ede8;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.15s;
+  gap: 16px;
+}
+.work-item:hover .work-title { color: #006241; }
+.work-item:last-child { border-bottom: none; }
+.work-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1c1c1a;
+  transition: color 0.15s;
+}
+.work-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.about-footer {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid #e5e3de;
+  font-size: 13px;
+  color: #9ca3af;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.about-footer a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.about-footer a:hover { color: #006241; }
+
+@media (max-width: 600px) {
+  .site-nav { padding: 16px 20px; }
+  .page { padding: 28px 20px 72px; }
+  .about-header h1 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a href="../" class="nav-back">← All Stories</a>
+</nav>
+
+<main class="page">
+
+  <header class="about-header">
+    <h1>Kohei</h1>
+    <p class="tagline">Data journalist and interactive developer. I build stories about Japan — told through maps, charts, and scrollytelling visualizations.</p>
+  </header>
+
+  <div class="about-body">
+    <p>I'm a developer with a background in iOS and data visualization, currently focused on data journalism. My work lives at the intersection of statistics and storytelling — taking public datasets and finding the human questions hiding inside them.</p>
+    <p>Most of my projects explore Japan: its demographics, geography, culture, and the economic forces reshaping its cities. I work primarily with D3.js for interactive graphics, and I care a lot about getting the data right before I care about making it look good.</p>
+    <p>Previous work includes <strong>MementoMori</strong>, an iOS app built with SwiftUI and SwiftData, and a series of standalone interactive maps covering Japan's Starbucks locations, James Turrell installations, and Hiroshi Sugimoto artworks.</p>
+  </div>
+
+  <div class="skills-section">
+    <h2>Tools &amp; Methods</h2>
+    <div class="skills-grid">
+      <span class="skill-tag">D3.js</span>
+      <span class="skill-tag">JavaScript</span>
+      <span class="skill-tag">HTML / CSS</span>
+      <span class="skill-tag">Scrollama</span>
+      <span class="skill-tag">GeoJSON / TopoJSON</span>
+      <span class="skill-tag">Python</span>
+      <span class="skill-tag">SwiftUI</span>
+      <span class="skill-tag">GitHub Pages</span>
+      <span class="skill-tag">e-Stat / 国土地理院</span>
+    </div>
+  </div>
+
+  <div class="work-section">
+    <h2>Selected Work</h2>
+    <div class="work-list">
+      <a class="work-item" href="../stories/starbucks-japan/">
+        <span class="work-title">The Corporate X-Ray of Japan</span>
+        <span class="work-meta">2026 · Scrollytelling</span>
+      </a>
+      <a class="work-item" href="../starbucks-store-map.html">
+        <span class="work-title">Starbucks Japan Store Map</span>
+        <span class="work-meta">2026 · Interactive Map</span>
+      </a>
+      <a class="work-item" href="../japan-population-map-2025.html">
+        <span class="work-title">Japan Population Map 2025</span>
+        <span class="work-meta">2025 · Choropleth</span>
+      </a>
+      <a class="work-item" href="../japan-population-pyramid.html">
+        <span class="work-title">Japan Population Pyramid 1965–2070</span>
+        <span class="work-meta">2025 · Animation</span>
+      </a>
+      <a class="work-item" href="../sugimoto-map.html">
+        <span class="work-title">Hiroshi Sugimoto — Public Art &amp; Architecture</span>
+        <span class="work-meta">2025 · World Map</span>
+      </a>
+      <a class="work-item" href="../newspaper-circulation.html">
+        <span class="work-title">Japanese Newspaper Circulation 1965–2025</span>
+        <span class="work-meta">2025 · Bar Chart</span>
+      </a>
+    </div>
+  </div>
+
+  <footer class="about-footer">
+    <span>msdk8734.github.io</span>
+    <a href="../">← Back to all stories</a>
+  </footer>
+
+</main>
+
+</body>
+</html>
