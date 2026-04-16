@@ -733,19 +733,10 @@ body {
       </div>
     </div>
 
-    <!-- Step 4: Zoom Fukuoka -->
+    <!-- Step 4: Top 10 municipality ranking -->
     <div class="step" data-step="4">
-      <div class="step-card">
-        <p class="step-eyebrow">05 / Focus</p>
-        <h3>Zoom into Fukuoka.</h3>
-        <p>The gateway to Kyushu, Japan's southernmost main island. Prefecture-wide, Fukuoka ranks 8th by per-capita density — unremarkable on the national stage. But zoom in to the municipality level, and a striking contrast appears.</p>
-      </div>
-    </div>
-
-    <!-- Step 5: Top 10 municipality ranking -->
-    <div class="step" data-step="5">
       <div class="step-card step-card--ranking">
-        <p class="step-eyebrow">06 / Outliers</p>
+        <p class="step-eyebrow">05 / Outliers</p>
         <h3>The national top 10.</h3>
         <p style="margin-bottom:14px;font-size:13px">Stores per 100,000 residents — city mode. Each entry hides a story.</p>
         <ol class="ranking-list">
@@ -820,6 +811,15 @@ body {
             </span>
           </li>
         </ol>
+      </div>
+    </div>
+
+    <!-- Step 5: Zoom Fukuoka -->
+    <div class="step" data-step="5">
+      <div class="step-card">
+        <p class="step-eyebrow">06 / Focus</p>
+        <h3>Zoom into Fukuoka.</h3>
+        <p>The gateway to Kyushu, Japan's southernmost main island. Prefecture-wide, Fukuoka ranks 8th by per-capita density — unremarkable on the national stage. But zoom in to the municipality level, and a striking contrast appears.</p>
       </div>
     </div>
 
@@ -1462,14 +1462,6 @@ function enterStep(step) {
       break;
 
     case 4:
-      clearHighlights();
-      redrawPrefPaths(true); // full detail when zoomed into prefecture
-      updateMapMetric('per100k', 400);
-      zoomToPref('40');
-      updateCaption('Fukuoka Prefecture');
-      break;
-
-    case 5:
       resetZoom();
       redrawPrefPaths(false);
       if (muniLayer) muniLayer.attr('display', 'none');
@@ -1479,6 +1471,14 @@ function enterStep(step) {
       showTopTenMarkers();
       updateCaption('Top 10 municipalities · city mode · stores per 100k');
       updateLegend('per100k');
+      break;
+
+    case 5:
+      clearHighlights();
+      redrawPrefPaths(true); // full detail when zoomed into prefecture
+      updateMapMetric('per100k', 400);
+      zoomToPref('40');
+      updateCaption('Fukuoka Prefecture');
       break;
 
     case 6:
@@ -1493,25 +1493,25 @@ function enterStep(step) {
 }
 
 function exitStep(step, direction) {
-  // Scrolling back from city-zoom (step 6) → restore Fukuoka prefecture view
-  if (step === 6 && direction === 'up') {
-    zoomToPref('40', 600);
-    if (muniLayer) {
-      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.12);
-    }
-  }
-  // Leaving top-10 step (step 5) in either direction → hide markers
-  if (step === 5) {
+  // Leaving top-10 step (step 4) in either direction → hide markers
+  if (step === 4) {
     hideTopTenMarkers(direction === 'up' ? 300 : 500);
   }
-  // Scrolling back past Fukuoka → restore national view with filtered paths
-  if (step === 4 && direction === 'up') {
+  // Scrolling back from Fukuoka zoom (step 5) → restore national view
+  if (step === 5 && direction === 'up') {
     if (muniLayer) {
       muniLayer.attr('display', 'none');
       prefLayer.selectAll('path').attr('opacity', 1);
     }
     redrawPrefPaths(false);
     resetZoom(600);
+  }
+  // Scrolling back from city-zoom (step 6) → restore Fukuoka prefecture view
+  if (step === 6 && direction === 'up') {
+    zoomToPref('40', 600);
+    if (muniLayer) {
+      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.12);
+    }
   }
 }
 
