@@ -1448,11 +1448,17 @@ function highlightCityComparison() {
   const kitakyushuCodes  = ['40101','40103','40105','40106','40107','40108','40109'];
   muniLayer.selectAll('path')
     .transition().duration(600)
+    .attr('fill', d => {
+      const code = d.properties.code;
+      if (fukuokaCityCodes.includes(code)) return '#00e07a';   // Fukuoka City — green
+      if (kitakyushuCodes.includes(code))  return '#5bc8f0';   // Kitakyushu — blue
+      return muniData[code] ? colorMuniPer100k(muniData[code].per100k ?? 0) : '#1a2820';
+    })
     .attr('opacity', d => {
       const code = d.properties.code;
       if (fukuokaCityCodes.includes(code)) return 1;
-      if (kitakyushuCodes.includes(code))  return 0.75;
-      return 0.25;
+      if (kitakyushuCodes.includes(code))  return 1;
+      return 0.18;
     })
     .attr('stroke-width', d => {
       const code = d.properties.code;
@@ -1753,7 +1759,15 @@ function exitStep(step, direction) {
   if (step === 15 && direction === 'up') {
     zoomToPref('40', 600);
     if (muniLayer) {
-      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.12);
+      muniLayer.selectAll('path')
+        .transition().duration(400)
+        .attr('fill', d => {
+          const md = muniData[d.properties.code];
+          if (!md || md.per100k === null) return '#1a2820';
+          return colorMuniPer100k(md.per100k);
+        })
+        .attr('opacity', 1)
+        .attr('stroke-width', 0.12);
     }
   }
 }
