@@ -1012,12 +1012,19 @@ function resetZoom(dur = 900) {
     .call(zoomBehavior.transform, d3.zoomIdentity);
 }
 
-function zoomToPref(code, dur = 1000) {
-  const feature = japanGeo.features.find(f => f.properties.code === code);
-  if (!feature) return;
-  const [[x0, y0], [x1, y1]] = path.bounds(feature);
-  const padding = 80;
-  const k = Math.min(12, 0.85 / Math.max(
+// Compute projected [x,y] bounding box for a GeoJSON feature
+function featureBounds(feature) {
+  const pts = [];
+  const geom = feature.geometry;
+  const addRing = ring => ring.forEach(pt => pts.push(projectCoord(pt[0], pt[1], projection)));
+  if (geom.type === 'Polygon') geom.coordinates.forEach(addRing);
+  else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(poly => poly.forEach(addRing));
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  return [[Math.min(...xs), Math.min(...ys)], [Math.max(...xs), Math.max(...ys)]];
+}
+
+function zoomToBounds([[x0, y0], [x1, y1]], padding = 80, maxK = 12, dur = 1000) {
+  const k = Math.min(maxK, 0.85 / Math.max(
     (x1 - x0) / (W - padding * 2),
     (y1 - y0) / (H - padding * 2)
   ));
@@ -1025,6 +1032,29 @@ function zoomToPref(code, dur = 1000) {
   const ty = H / 2 - k * (y0 + y1) / 2;
   svg.transition().duration(dur).ease(d3.easeCubicInOut)
     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(k));
+}
+
+function zoomToPref(code, dur = 1000) {
+  const feature = japanGeo.features.find(f => f.properties.code === code);
+  if (!feature) return;
+  zoomToBounds(featureBounds(feature), 80, 12, dur);
+}
+
+// Zoom to both Fukuoka City and Kitakyushu City together
+function zoomToCities(dur = 800) {
+  if (!fukuokaGeo) return;
+  const cityCodesAll = [
+    '40131','40132','40133','40134','40135','40136','40137', // Fukuoka City wards
+    '40101','40103','40105','40106','40107','40108','40109'  // Kitakyushu wards
+  ];
+  const cityFeatures = fukuokaGeo.features.filter(f => cityCodesAll.includes(f.properties.code));
+  if (!cityFeatures.length) return;
+  const allBounds = cityFeatures.map(featureBounds);
+  const x0 = Math.min(...allBounds.map(b => b[0][0]));
+  const y0 = Math.min(...allBounds.map(b => b[0][1]));
+  const x1 = Math.max(...allBounds.map(b => b[1][0]));
+  const y1 = Math.max(...allBounds.map(b => b[1][1]));
+  zoomToBounds([[x0, y0], [x1, y1]], 40, 12, dur);
 }
 
 // ============================================================
@@ -1188,17 +1218,24 @@ function enterStep(step) {
       break;
 
     case 5:
-      zoomToPref('40', 300);
       loadAndShowFukuokaMunicipalities().then(() => {
         highlightCityComparison();
+        zoomToCities(800);
       });
-      updateCaption('Fukuoka Prefecture · Municipality level');
+      updateCaption('Fukuoka City vs Kitakyushu · Municipality level');
       break;
   }
 }
 
 function exitStep(step, direction) {
-  // When scrolling back up, restore national view
+  // Scrolling back from city-zoom → restore Fukuoka prefecture view
+  if (step === 5 && direction === 'up') {
+    zoomToPref('40', 600);
+    if (muniLayer) {
+      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.4);
+    }
+  }
+  // Scrolling back past Fukuoka → restore national view
   if (step === 4 && direction === 'up') {
     if (muniLayer) {
       muniLayer.attr('display', 'none');
