@@ -830,15 +830,15 @@ async function init() {
 
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
 
     colorPer100k = d3.scaleSequential()
       .domain([0.5, maxPer100k])
-      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
-      .interpolator(d3.interpolateRgb('#2e5a44', '#00d472'));
+      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
 
     drawPrefectures();
     updateLegend('total');
@@ -870,7 +870,16 @@ function setupSVG() {
     .attr('width', W)
     .attr('height', H);
 
-  g = svg.append('g').attr('class', 'map-g');
+  // Clip all map content to the SVG viewport so antimeridian boundary lines
+  // (which D3 renders at ±180°) are not visible outside the Japan view area.
+  svg.append('defs').append('clipPath')
+    .attr('id', 'map-clip')
+    .append('rect')
+    .attr('width', W)
+    .attr('height', H);
+
+  g = svg.append('g').attr('class', 'map-g')
+    .attr('clip-path', 'url(#map-clip)');
 
   zoomBehavior = d3.zoom()
     .scaleExtent([1, 14])
@@ -882,9 +891,51 @@ function setupSVG() {
 // ============================================================
 // DRAW PREFECTURES
 // ============================================================
+function makeProjection(w, h) {
+  // Manually compute Mercator scale/translate for Japan's main islands
+  // (fitSize is unreliable in this D3 build — it scales the whole world)
+  const toRad = Math.PI / 180;
+  const lon1 = 126, lon2 = 147, lat1 = 26, lat2 = 46.5;
+  const x1 = lon1 * toRad, x2 = lon2 * toRad;
+  const mercYtop = Math.log(Math.tan(Math.PI / 4 + lat2 * toRad / 2));
+  const mercYbot = Math.log(Math.tan(Math.PI / 4 + lat1 * toRad / 2));
+  const mercDx = x2 - x1;
+  const mercDy = mercYtop - mercYbot;
+  const pad = 10;
+  const scale = Math.min((w - 2 * pad) / mercDx, (h - 2 * pad) / mercDy);
+  const tx = (w - scale * mercDx) / 2 - scale * x1;
+  const ty = (h - scale * mercDy) / 2 + scale * mercYtop;
+  return { scale, tx, ty };
+}
+
+// Manually project lon/lat → SVG x,y (bypasses D3 geoPath sphere-boundary rendering)
+function projectCoord(lon, lat, proj) {
+  const toRad = Math.PI / 180;
+  const x = proj.scale * lon * toRad + proj.tx;
+  const y = -proj.scale * Math.log(Math.tan(Math.PI / 4 + lat * toRad / 2)) + proj.ty;
+  return [x, y];
+}
+
+// Build a path `d` string from a GeoJSON feature
+function featureToPath(feature, proj) {
+  function ringPath(ring) {
+    return ring.map((pt, i) => {
+      const [x, y] = projectCoord(pt[0], pt[1], proj);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }).join('') + 'Z';
+  }
+  const geom = feature.geometry;
+  if (geom.type === 'Polygon') {
+    return geom.coordinates.map(ringPath).join('');
+  } else if (geom.type === 'MultiPolygon') {
+    return geom.coordinates.flatMap(poly => poly.map(ringPath)).join('');
+  }
+  return '';
+}
+
 function drawPrefectures() {
-  projection = d3.geoMercator().fitSize([W, H], japanGeo);
-  path = d3.geoPath().projection(projection);
+  projection = makeProjection(W, H);
+  path = d => featureToPath(d, projection);
 
   prefLayer = g.append('g').attr('class', 'pref-layer');
 
@@ -1030,7 +1081,7 @@ async function loadAndShowFukuokaMunicipalities() {
           return 'muni-path is-kitakyushu';
         return 'muni-path';
       })
-      .attr('d', path)
+      .attr('d', d => featureToPath(d, projection))
       .attr('fill', d => {
         const md = muniData[d.properties.code];
         if (!md || md.per100k === null) return '#2e4838';
@@ -1471,10 +1522,11 @@ function setupResizeHandler() {
       W = container.clientWidth;
       H = container.clientHeight;
       svg.attr('width', W).attr('height', H);
+      svg.select('#map-clip rect').attr('width', W).attr('height', H);
       if (japanGeo) {
-        projection = d3.geoMercator().fitSize([W, H], japanGeo);
-        path = d3.geoPath().projection(projection);
-        g.selectAll('path').attr('d', path);
+        projection = makeProjection(W, H);
+        path = d => featureToPath(d, projection);
+        g.selectAll('.pref-path').attr('d', path);
       }
     }, 200);
   });
