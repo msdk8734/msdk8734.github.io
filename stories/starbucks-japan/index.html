@@ -1101,7 +1101,8 @@ async function init() {
       .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     colorPer100k = d3.scaleSequential()
-      .domain([0, maxPer100k])
+      .domain([0, 2.2])
+      .clamp(true)
       .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     colorMuniPer100k = d3.scaleSequential()
@@ -1668,8 +1669,8 @@ function updateLegend(metric) {
     high.textContent = '432';
   } else {
     bar.style.background = 'linear-gradient(90deg, #1a2820, #00e07a)';
-    low.textContent  = '0.7';
-    high.textContent = '3.1/100k';
+    low.textContent  = '0';
+    high.textContent = '2.2+/100k';
   }
 }
 
