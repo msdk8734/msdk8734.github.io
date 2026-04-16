@@ -384,6 +384,68 @@ body {
   color: #6b7280;
 }
 
+/* Top-10 ranking step card */
+.step-card--ranking {
+  max-width: 420px;
+}
+.ranking-list {
+  list-style: none;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.ranking-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.rank-num {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #006241;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.rank-body { flex: 1; min-width: 0; }
+.rank-name-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+.rank-muni {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0d1f14;
+}
+.rank-pref {
+  font-size: 11px;
+  font-weight: 400;
+  color: #9ca3af;
+}
+.rank-stat {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #006241;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.rank-reason {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
 /* Loading overlay */
 #map-loading {
   position: absolute;
@@ -690,6 +752,87 @@ body {
       </div>
     </div>
 
+    <!-- Step 6: Top 10 municipality ranking -->
+    <div class="step" data-step="6">
+      <div class="step-card step-card--ranking">
+        <p class="step-eyebrow">07 / Outliers</p>
+        <h3>The national top 10.</h3>
+        <p style="margin-bottom:14px;font-size:13px">Stores per 100,000 residents — city mode. Each entry hides a story.</p>
+        <ol class="ranking-list">
+          <li class="ranking-item">
+            <span class="rank-num">1</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">千代田区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">69.7 /100k</span></span>
+              <span class="rank-reason">Japan's political and business nerve centre. Registered population: 69k — but a million commuters flood in daily. The Starbucks count reflects the daytime city.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">2</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">日吉津村 <span class="rank-pref">· Tottori</span></span><span class="rank-stat">27.7 /100k</span></span>
+              <span class="rank-reason">3,600 residents; one Starbucks — inside a mall that serves the entire Yonago area. The store isn't for the village. The village just contains the mall.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">3</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">多賀町 <span class="rank-pref">· Shiga</span></span><span class="rank-stat">27.2 /100k</span></span>
+              <span class="rank-reason">Two stores on the Meishin Expressway corridor. Built for highway travelers passing through, not the 7,000 residents of this quiet Shiga town.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">4</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">田尻町 <span class="rank-pref">· Osaka</span></span><span class="rank-stat">23.6 /100k</span></span>
+              <span class="rank-reason">Kansai International Airport sits partly inside this 8,500-person town. Two airport stores — neither is there for the locals.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">5</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">渋谷区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">18.2 /100k</span></span>
+              <span class="rank-reason">Youth, fashion, tech. Shibuya Crossing draws tens of thousands daily. A genuine commercial powerhouse — 42 stores, fully earned.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">6</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">北谷町 <span class="rank-pref">· Okinawa</span></span><span class="rank-stat">17.1 /100k</span></span>
+              <span class="rank-reason">American Village — a consumer district shaped by US military presence. Five stores for 29,000 residents, plus a constant stream of tourists.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">7</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">港区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">16.4 /100k</span></span>
+              <span class="rank-reason">Roppongi, Aoyama, Azabudai Hills. Tokyo's most international ward and its highest concentration of global headquarters.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">8</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">中央区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">14.9 /100k</span></span>
+              <span class="rank-reason">Ginza and Nihonbashi. Japan's historic commercial heart — premium retail and major banks in a few concentrated square kilometres.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">9</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">昭和町 <span class="rank-pref">· Yamanashi</span></span><span class="rank-stat">14.0 /100k</span></span>
+              <span class="rank-reason">A Kofu suburb that became the retail hub of the entire Yamanashi basin — Costco and big-box stores drew the region's spending power. Three stores for 21,000 residents.</span>
+            </span>
+          </li>
+          <li class="ranking-item">
+            <span class="rank-num">10</span>
+            <span class="rank-body">
+              <span class="rank-name-row"><span class="rank-muni">日の出町 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">12.5 /100k</span></span>
+              <span class="rank-reason">A small Nishitama town on the Chuo Expressway. Two stores serving the wider highway corridor — not the 16,000 locals.</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+
   </div><!-- /steps -->
 </section><!-- /scrolly -->
 
@@ -789,7 +932,21 @@ const fukuokaMuniPopP     = d3.json(URL_MUNI_POP_40);
 
 // D3 elements
 let svg, g, path, projection, zoomBehavior;
-let prefLayer, muniLayer;
+let prefLayer, muniLayer, topTenLayer;
+
+// Top-10 city-mode municipalities with approximate centroids
+const TOP10_CITY = [
+  { rank: 1,  nameJa: '千代田区',  pref: 'Tokyo',     per100k: 69.7, lon: 139.754, lat: 35.694 },
+  { rank: 2,  nameJa: '日吉津村',  pref: 'Tottori',   per100k: 27.7, lon: 133.346, lat: 35.430 },
+  { rank: 3,  nameJa: '多賀町',    pref: 'Shiga',     per100k: 27.2, lon: 136.281, lat: 35.222 },
+  { rank: 4,  nameJa: '田尻町',    pref: 'Osaka',     per100k: 23.6, lon: 135.248, lat: 34.433 },
+  { rank: 5,  nameJa: '渋谷区',    pref: 'Tokyo',     per100k: 18.2, lon: 139.701, lat: 35.661 },
+  { rank: 6,  nameJa: '北谷町',    pref: 'Okinawa',   per100k: 17.1, lon: 127.758, lat: 26.313 },
+  { rank: 7,  nameJa: '港区',      pref: 'Tokyo',     per100k: 16.4, lon: 139.751, lat: 35.659 },
+  { rank: 8,  nameJa: '中央区',    pref: 'Tokyo',     per100k: 14.9, lon: 139.773, lat: 35.670 },
+  { rank: 9,  nameJa: '昭和町',    pref: 'Yamanashi', per100k: 14.0, lon: 138.568, lat: 35.632 },
+  { rank: 10, nameJa: '日の出町',  pref: 'Tokyo',     per100k: 12.5, lon: 139.259, lat: 35.742 },
+];
 
 // Color scales (set after data loads)
 let colorTotal, colorPer100k, colorMuniPer100k;
@@ -1190,6 +1347,60 @@ function highlightCityComparison() {
 }
 
 // ============================================================
+// TOP-10 MARKERS
+// ============================================================
+function showTopTenMarkers(dur = 600) {
+  if (!topTenLayer) {
+    topTenLayer = g.append('g').attr('class', 'top10-layer');
+
+    const markers = topTenLayer.selectAll('.top10-marker')
+      .data(TOP10_CITY)
+      .enter().append('g')
+      .attr('class', 'top10-marker')
+      .attr('transform', d => {
+        const [x, y] = projectCoord(d.lon, d.lat, projection);
+        return `translate(${x.toFixed(1)},${y.toFixed(1)})`;
+      });
+
+    // Outer halo
+    markers.append('circle')
+      .attr('r', 10)
+      .attr('fill', 'rgba(0,98,65,0.18)')
+      .attr('stroke', 'rgba(0,180,120,0.55)')
+      .attr('stroke-width', 1)
+      .attr('vector-effect', 'non-scaling-stroke');
+
+    // Filled circle
+    markers.append('circle')
+      .attr('r', 7)
+      .attr('fill', '#006241')
+      .attr('stroke', 'rgba(255,255,255,0.88)')
+      .attr('stroke-width', 1.5)
+      .attr('vector-effect', 'non-scaling-stroke');
+
+    // Rank number
+    markers.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('fill', '#fff')
+      .attr('font-family', "'IBM Plex Mono', monospace")
+      .attr('font-size', 7.5)
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none')
+      .text(d => d.rank);
+  }
+
+  topTenLayer.attr('display', null).attr('opacity', 0)
+    .transition().duration(dur).attr('opacity', 1);
+}
+
+function hideTopTenMarkers(dur = 300) {
+  if (!topTenLayer) return;
+  topTenLayer.transition().duration(dur).attr('opacity', 0)
+    .on('end', () => { if (topTenLayer) topTenLayer.attr('display', 'none'); });
+}
+
+// ============================================================
 // SCROLLAMA
 // ============================================================
 function setupScrollama() {
@@ -1266,6 +1477,18 @@ function enterStep(step) {
       });
       updateCaption('Fukuoka City vs Kitakyushu · Municipality level');
       break;
+
+    case 6:
+      resetZoom();
+      redrawPrefPaths(false);
+      if (muniLayer) muniLayer.attr('display', 'none');
+      prefLayer.selectAll('path').transition().duration(400).attr('opacity', 1);
+      updateMapMetric('per100k');
+      clearHighlights();
+      showTopTenMarkers();
+      updateCaption('Top 10 municipalities · city mode · stores per 100k');
+      updateLegend('per100k');
+      break;
   }
 }
 
@@ -1285,6 +1508,10 @@ function exitStep(step, direction) {
     }
     redrawPrefPaths(false);
     resetZoom(600);
+  }
+  // Hide top-10 markers when leaving step 6 in either direction
+  if (step === 6) {
+    hideTopTenMarkers(direction === 'up' ? 300 : 500);
   }
 }
 
