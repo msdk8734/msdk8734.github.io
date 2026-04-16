@@ -762,7 +762,7 @@ body {
 // ============================================================
 // DATA PATHS (relative to stories/starbucks-japan/)
 // ============================================================
-const URL_JAPAN_GEO      = '../../geo-json/japan.geojson';
+const URL_JAPAN_GEO      = '../../geo-json/japan-simple.geojson';
 const URL_STORE_COUNTS   = '../../data/starbucks-store-counts.json';
 const URL_PREF_POP       = '../../population-json/pref-pop.json';
 const URL_FUKUOKA_GEO    = '../../geo-json/pref_40.geojson';
@@ -916,8 +916,21 @@ function projectCoord(lon, lat, proj) {
   return [x, y];
 }
 
-// Build a path `d` string from a GeoJSON feature
-function featureToPath(feature, proj) {
+// Compute the bounding-box area (in projected px²) of a polygon ring
+function ringPxArea(ring, proj) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const pt of ring) {
+    const [x, y] = projectCoord(pt[0], pt[1], proj);
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  return (maxX - minX) * (maxY - minY);
+}
+
+// Build a path `d` string from a GeoJSON feature.
+// minAreaPx: skip sub-polygons whose projected bounding-box area is smaller
+// than this (sq px). Pass 0 to include every polygon (e.g. when zoomed in).
+function featureToPath(feature, proj, minAreaPx = 0) {
   function ringPath(ring) {
     return ring.map((pt, i) => {
       const [x, y] = projectCoord(pt[0], pt[1], proj);
@@ -925,17 +938,30 @@ function featureToPath(feature, proj) {
     }).join('') + 'Z';
   }
   const geom = feature.geometry;
+  const renderPoly = poly => {
+    // Outer ring of this polygon
+    if (minAreaPx > 0 && ringPxArea(poly[0], proj) < minAreaPx) return '';
+    return poly.map(ringPath).join('');
+  };
   if (geom.type === 'Polygon') {
-    return geom.coordinates.map(ringPath).join('');
+    return renderPoly(geom.coordinates);
   } else if (geom.type === 'MultiPolygon') {
-    return geom.coordinates.flatMap(poly => poly.map(ringPath)).join('');
+    return geom.coordinates.map(renderPoly).join('');
   }
   return '';
 }
 
+// Min polygon bounding-box area (px²) to show at national overview.
+// japan-simple.geojson has properly dissolved prefecture outlines, so
+// sub-polygons are real islands. 30px² ≈ ~5×6px — hides specks while
+// keeping Okinawa, Iki, Tsushima, Northern Territories etc.
+const PREF_MIN_AREA_PX = 30;
+
 function drawPrefectures() {
   projection = makeProjection(W, H);
-  path = d => featureToPath(d, projection);
+  // At overview zoom, filter tiny island polygons for cleaner appearance.
+  // When zoomed into a prefecture, redraw with full detail (minAreaPx=0).
+  path = d => featureToPath(d, projection, PREF_MIN_AREA_PX);
 
   prefLayer = g.append('g').attr('class', 'pref-layer');
 
@@ -953,6 +979,14 @@ function drawPrefectures() {
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
     .on('mouseleave', onPrefLeave);
+}
+
+// Redraw prefecture paths with full island detail (for zoomed views)
+// or with small-island filter (for national overview).
+function redrawPrefPaths(detailed = false) {
+  const minArea = detailed ? 0 : PREF_MIN_AREA_PX;
+  prefLayer.selectAll('path')
+    .attr('d', d => featureToPath(d, projection, minArea));
 }
 
 // ============================================================
@@ -1183,6 +1217,7 @@ function enterStep(step) {
   switch (step) {
     case 0:
       resetZoom();
+      redrawPrefPaths(false); // filtered: hide tiny islands at national view
       updateMapMetric('total');
       clearHighlights();
       updateCaption('Store count by prefecture');
@@ -1191,6 +1226,7 @@ function enterStep(step) {
 
     case 1:
       resetZoom();
+      redrawPrefPaths(false);
       updateMapMetric('total');
       highlightPref('13'); // Tokyo
       updateCaption('Store count by prefecture · Tokyo highlighted');
@@ -1198,6 +1234,7 @@ function enterStep(step) {
 
     case 2:
       resetZoom();
+      redrawPrefPaths(false);
       updateMapMetric('per100k');
       clearHighlights();
       updateCaption('Stores per 100,000 residents');
@@ -1205,6 +1242,7 @@ function enterStep(step) {
 
     case 3:
       resetZoom();
+      redrawPrefPaths(false);
       updateMapMetric('per100k');
       highlightOutliers();
       updateCaption('Stores per 100,000 residents · Top prefectures');
@@ -1212,12 +1250,14 @@ function enterStep(step) {
 
     case 4:
       clearHighlights();
+      redrawPrefPaths(true); // full detail when zoomed into prefecture
       updateMapMetric('per100k', 400);
       zoomToPref('40');
       updateCaption('Fukuoka Prefecture');
       break;
 
     case 5:
+      redrawPrefPaths(true);
       loadAndShowFukuokaMunicipalities().then(() => {
         highlightCityComparison();
         zoomToCities(800);
@@ -1235,12 +1275,13 @@ function exitStep(step, direction) {
       muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.4);
     }
   }
-  // Scrolling back past Fukuoka → restore national view
+  // Scrolling back past Fukuoka → restore national view with filtered paths
   if (step === 4 && direction === 'up') {
     if (muniLayer) {
       muniLayer.attr('display', 'none');
       prefLayer.selectAll('path').attr('opacity', 1);
     }
+    redrawPrefPaths(false);
     resetZoom(600);
   }
 }
