@@ -446,6 +446,47 @@ body {
   margin-top: 1px;
 }
 
+/* Individual outlier step cards */
+.outlier-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0 14px;
+}
+.outlier-num {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 52px;
+  color: #006241;
+  line-height: 1;
+  flex-shrink: 0;
+  min-width: 44px;
+}
+.outlier-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #0d1f14;
+  margin-bottom: 4px;
+}
+.outlier-loc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+.outlier-stat {
+  font-family: 'IBM Plex Mono', monospace;
+  color: #006241;
+  font-size: 12px;
+  font-weight: 500;
+}
+.outlier-progress {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: #9ca3af;
+  letter-spacing: 0.04em;
+  margin-top: 12px;
+}
+
 /* Loading overlay */
 #map-loading {
   position: absolute;
@@ -733,89 +774,159 @@ body {
       </div>
     </div>
 
-    <!-- Step 4: Top 10 municipality ranking -->
+    <!-- Steps 4-13: Top 10 outliers (one per step) -->
     <div class="step" data-step="4">
-      <div class="step-card step-card--ranking">
-        <p class="step-eyebrow">05 / Outliers</p>
-        <h3>The national top 10.</h3>
-        <p style="margin-bottom:14px;font-size:13px">Stores per 100,000 residents — city mode. Each entry hides a story.</p>
-        <ol class="ranking-list">
-          <li class="ranking-item">
-            <span class="rank-num">1</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">千代田区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">69.7 /100k</span></span>
-              <span class="rank-reason">Japan's political and business nerve centre. Registered population: 69k — but a million commuters flood in daily. The Starbucks count reflects the daytime city.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">2</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">日吉津村 <span class="rank-pref">· Tottori</span></span><span class="rank-stat">27.7 /100k</span></span>
-              <span class="rank-reason">3,600 residents; one Starbucks — inside a mall that serves the entire Yonago area. The store isn't for the village. The village just contains the mall.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">3</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">多賀町 <span class="rank-pref">· Shiga</span></span><span class="rank-stat">27.2 /100k</span></span>
-              <span class="rank-reason">Two stores on the Meishin Expressway corridor. Built for highway travelers passing through, not the 7,000 residents of this quiet Shiga town.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">4</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">田尻町 <span class="rank-pref">· Osaka</span></span><span class="rank-stat">23.6 /100k</span></span>
-              <span class="rank-reason">Kansai International Airport sits partly inside this 8,500-person town. Two airport stores — neither is there for the locals.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">5</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">渋谷区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">18.2 /100k</span></span>
-              <span class="rank-reason">Youth, fashion, tech. Shibuya Crossing draws tens of thousands daily. A genuine commercial powerhouse — 42 stores, fully earned.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">6</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">北谷町 <span class="rank-pref">· Okinawa</span></span><span class="rank-stat">17.1 /100k</span></span>
-              <span class="rank-reason">American Village — a consumer district shaped by US military presence. Five stores for 29,000 residents, plus a constant stream of tourists.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">7</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">港区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">16.4 /100k</span></span>
-              <span class="rank-reason">Roppongi, Aoyama, Azabudai Hills. Tokyo's most international ward and its highest concentration of global headquarters.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">8</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">中央区 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">14.9 /100k</span></span>
-              <span class="rank-reason">Ginza and Nihonbashi. Japan's historic commercial heart — premium retail and major banks in a few concentrated square kilometres.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">9</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">昭和町 <span class="rank-pref">· Yamanashi</span></span><span class="rank-stat">14.0 /100k</span></span>
-              <span class="rank-reason">A Kofu suburb that became the retail hub of the entire Yamanashi basin — Costco and big-box stores drew the region's spending power. Three stores for 21,000 residents.</span>
-            </span>
-          </li>
-          <li class="ranking-item">
-            <span class="rank-num">10</span>
-            <span class="rank-body">
-              <span class="rank-name-row"><span class="rank-muni">日の出町 <span class="rank-pref">· Tokyo</span></span><span class="rank-stat">12.5 /100k</span></span>
-              <span class="rank-reason">A small Nishitama town on the Chuo Expressway. Two stores serving the wider highway corridor — not the 16,000 locals.</span>
-            </span>
-          </li>
-        </ol>
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 1 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">1</span>
+          <div>
+            <p class="outlier-name">Chiyoda Ward</p>
+            <p class="outlier-loc">Tokyo &nbsp;·&nbsp; <span class="outlier-stat">69.7 per 100k</span></p>
+          </div>
+        </div>
+        <p>Japan's political and business nerve centre. Registered population: 69k — but a million commuters flood in daily. The Starbucks count reflects the daytime city, not the census city.</p>
+        <p class="outlier-progress">▸ 48 stores</p>
       </div>
     </div>
 
-    <!-- Step 5: Zoom Fukuoka -->
     <div class="step" data-step="5">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 2 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">2</span>
+          <div>
+            <p class="outlier-name">Hiezu Village</p>
+            <p class="outlier-loc">Tottori &nbsp;·&nbsp; <span class="outlier-stat">27.7 per 100k</span></p>
+          </div>
+        </div>
+        <p>3,600 residents; one Starbucks — inside a mall that draws shoppers from across the Yonago region. The store isn't for the village. The village just contains the mall.</p>
+        <p class="outlier-progress">▸ 1 store</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="6">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 3 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">3</span>
+          <div>
+            <p class="outlier-name">Taga Town</p>
+            <p class="outlier-loc">Shiga &nbsp;·&nbsp; <span class="outlier-stat">27.2 per 100k</span></p>
+          </div>
+        </div>
+        <p>Two stores on the Meishin Expressway corridor. Built for highway travelers passing through, not the 7,000 residents of this quiet Shiga town.</p>
+        <p class="outlier-progress">▸ 2 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="7">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 4 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">4</span>
+          <div>
+            <p class="outlier-name">Tajiri Town</p>
+            <p class="outlier-loc">Osaka &nbsp;·&nbsp; <span class="outlier-stat">23.6 per 100k</span></p>
+          </div>
+        </div>
+        <p>Kansai International Airport sits partly inside this 8,500-person town. Two airport Starbucks — neither is there for the locals.</p>
+        <p class="outlier-progress">▸ 2 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="8">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 5 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">5</span>
+          <div>
+            <p class="outlier-name">Shibuya Ward</p>
+            <p class="outlier-loc">Tokyo &nbsp;·&nbsp; <span class="outlier-stat">18.2 per 100k</span></p>
+          </div>
+        </div>
+        <p>Youth, fashion, tech. Shibuya Crossing draws tens of thousands daily. A genuine commercial powerhouse — 42 stores, fully earned.</p>
+        <p class="outlier-progress">▸ 42 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="9">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 6 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">6</span>
+          <div>
+            <p class="outlier-name">Chatan Town</p>
+            <p class="outlier-loc">Okinawa &nbsp;·&nbsp; <span class="outlier-stat">17.1 per 100k</span></p>
+          </div>
+        </div>
+        <p>American Village — a consumer district shaped by decades of US military presence. Five stores for 29,000 residents, plus a constant stream of tourists.</p>
+        <p class="outlier-progress">▸ 5 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="10">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 7 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">7</span>
+          <div>
+            <p class="outlier-name">Minato Ward</p>
+            <p class="outlier-loc">Tokyo &nbsp;·&nbsp; <span class="outlier-stat">16.4 per 100k</span></p>
+          </div>
+        </div>
+        <p>Roppongi, Aoyama, Azabudai Hills. Tokyo's most international ward and its highest concentration of global headquarters.</p>
+        <p class="outlier-progress">▸ 44 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="11">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 8 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">8</span>
+          <div>
+            <p class="outlier-name">Chuo Ward</p>
+            <p class="outlier-loc">Tokyo &nbsp;·&nbsp; <span class="outlier-stat">14.9 per 100k</span></p>
+          </div>
+        </div>
+        <p>Ginza and Nihonbashi. Japan's historic commercial heart — premium retail and major finance in a few concentrated square kilometres.</p>
+        <p class="outlier-progress">▸ 28 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="12">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 9 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">9</span>
+          <div>
+            <p class="outlier-name">Showa Town</p>
+            <p class="outlier-loc">Yamanashi &nbsp;·&nbsp; <span class="outlier-stat">14.0 per 100k</span></p>
+          </div>
+        </div>
+        <p>A Kofu suburb that became the retail hub of the entire Yamanashi basin — Costco and big-box stores drew the region's spending power. Three stores for 21,000 residents.</p>
+        <p class="outlier-progress">▸ 3 stores</p>
+      </div>
+    </div>
+
+    <div class="step" data-step="13">
+      <div class="step-card">
+        <p class="step-eyebrow">05 / Outliers · 10 of 10</p>
+        <div class="outlier-hero">
+          <span class="outlier-num">10</span>
+          <div>
+            <p class="outlier-name">Hinode Town</p>
+            <p class="outlier-loc">Tokyo &nbsp;·&nbsp; <span class="outlier-stat">12.5 per 100k</span></p>
+          </div>
+        </div>
+        <p>A small Nishitama town on the Chuo Expressway, at the western edge of Tokyo. Two stores serving the wider highway corridor — not the 16,000 locals.</p>
+        <p class="outlier-progress">▸ 2 stores</p>
+      </div>
+    </div>
+
+    <!-- Step 14: Zoom Fukuoka -->
+    <div class="step" data-step="14">
       <div class="step-card">
         <p class="step-eyebrow">06 / Focus</p>
         <h3>Zoom into Fukuoka.</h3>
@@ -823,8 +934,8 @@ body {
       </div>
     </div>
 
-    <!-- Step 6: Fukuoka municipalities -->
-    <div class="step" data-step="6">
+    <!-- Step 15: Fukuoka municipalities -->
+    <div class="step" data-step="15">
       <div class="step-card">
         <p class="step-eyebrow">07 / Contrast</p>
         <h3>Two cities. One diverging story.</h3>
@@ -936,16 +1047,16 @@ let prefLayer, muniLayer, topTenLayer;
 
 // Top-10 city-mode municipalities with approximate centroids
 const TOP10_CITY = [
-  { rank: 1,  nameJa: '千代田区',  pref: 'Tokyo',     per100k: 69.7, lon: 139.754, lat: 35.694 },
-  { rank: 2,  nameJa: '日吉津村',  pref: 'Tottori',   per100k: 27.7, lon: 133.346, lat: 35.430 },
-  { rank: 3,  nameJa: '多賀町',    pref: 'Shiga',     per100k: 27.2, lon: 136.281, lat: 35.222 },
-  { rank: 4,  nameJa: '田尻町',    pref: 'Osaka',     per100k: 23.6, lon: 135.248, lat: 34.433 },
-  { rank: 5,  nameJa: '渋谷区',    pref: 'Tokyo',     per100k: 18.2, lon: 139.701, lat: 35.661 },
-  { rank: 6,  nameJa: '北谷町',    pref: 'Okinawa',   per100k: 17.1, lon: 127.758, lat: 26.313 },
-  { rank: 7,  nameJa: '港区',      pref: 'Tokyo',     per100k: 16.4, lon: 139.751, lat: 35.659 },
-  { rank: 8,  nameJa: '中央区',    pref: 'Tokyo',     per100k: 14.9, lon: 139.773, lat: 35.670 },
-  { rank: 9,  nameJa: '昭和町',    pref: 'Yamanashi', per100k: 14.0, lon: 138.568, lat: 35.632 },
-  { rank: 10, nameJa: '日の出町',  pref: 'Tokyo',     per100k: 12.5, lon: 139.259, lat: 35.742 },
+  { rank: 1,  nameJa: '千代田区', nameEn: 'Chiyoda Ward',  pref: 'Tokyo',     prefCode: '13', per100k: 69.7, lon: 139.754, lat: 35.694, zoomK: 8  },
+  { rank: 2,  nameJa: '日吉津村', nameEn: 'Hiezu Village', pref: 'Tottori',   prefCode: '31', per100k: 27.7, lon: 133.346, lat: 35.430, zoomK: 7  },
+  { rank: 3,  nameJa: '多賀町',   nameEn: 'Taga Town',     pref: 'Shiga',     prefCode: '25', per100k: 27.2, lon: 136.281, lat: 35.222, zoomK: 7  },
+  { rank: 4,  nameJa: '田尻町',   nameEn: 'Tajiri Town',   pref: 'Osaka',     prefCode: '27', per100k: 23.6, lon: 135.248, lat: 34.433, zoomK: 7  },
+  { rank: 5,  nameJa: '渋谷区',   nameEn: 'Shibuya Ward',  pref: 'Tokyo',     prefCode: '13', per100k: 18.2, lon: 139.701, lat: 35.661, zoomK: 7  },
+  { rank: 6,  nameJa: '北谷町',   nameEn: 'Chatan Town',   pref: 'Okinawa',   prefCode: '47', per100k: 17.1, lon: 127.758, lat: 26.313, zoomK: 6  },
+  { rank: 7,  nameJa: '港区',     nameEn: 'Minato Ward',   pref: 'Tokyo',     prefCode: '13', per100k: 16.4, lon: 139.751, lat: 35.659, zoomK: 9  },
+  { rank: 8,  nameJa: '中央区',   nameEn: 'Chuo Ward',     pref: 'Tokyo',     prefCode: '13', per100k: 14.9, lon: 139.773, lat: 35.670, zoomK: 10 },
+  { rank: 9,  nameJa: '昭和町',   nameEn: 'Showa Town',    pref: 'Yamanashi', prefCode: '19', per100k: 14.0, lon: 138.568, lat: 35.632, zoomK: 7  },
+  { rank: 10, nameJa: '日の出町', nameEn: 'Hinode Town',   pref: 'Tokyo',     prefCode: '13', per100k: 12.5, lon: 139.259, lat: 35.742, zoomK: 6  },
 ];
 
 // Color scales (set after data loads)
@@ -1347,6 +1458,15 @@ function highlightCityComparison() {
 }
 
 // ============================================================
+function zoomToEntry(entry, dur = 700) {
+  const [x, y] = projectCoord(entry.lon, entry.lat, projection);
+  const k = entry.zoomK;
+  const tx = W / 2 - k * x;
+  const ty = H / 2 - k * y;
+  svg.transition().duration(dur).ease(d3.easeCubicInOut)
+    .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(k));
+}
+
 // TOP-10 MARKERS
 // ============================================================
 function showTopTenMarkers(dur = 600) {
@@ -1430,7 +1550,7 @@ function enterStep(step) {
   switch (step) {
     case 0:
       resetZoom();
-      redrawPrefPaths(false); // filtered: hide tiny islands at national view
+      redrawPrefPaths(false);
       updateMapMetric('total');
       clearHighlights();
       updateCaption('Store count by prefecture');
@@ -1462,26 +1582,38 @@ function enterStep(step) {
       break;
 
     case 4:
-      resetZoom();
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13: {
+      const entry = TOP10_CITY[step - 4];
       redrawPrefPaths(false);
-      if (muniLayer) muniLayer.attr('display', 'none');
-      prefLayer.selectAll('path').transition().duration(400).attr('opacity', 1);
       updateMapMetric('per100k');
       clearHighlights();
-      showTopTenMarkers();
-      updateCaption('Top 10 municipalities · city mode · stores per 100k');
+      if (!topTenLayer || topTenLayer.attr('display') === 'none') {
+        showTopTenMarkers(step === 4 ? 500 : 0);
+      }
+      highlightPref(entry.prefCode, 400);
+      zoomToEntry(entry, step === 4 ? 1000 : 700);
+      updateCaption(`#${entry.rank} · ${entry.nameEn} · ${entry.pref} · ${entry.per100k.toFixed(1)}/100k`);
       updateLegend('per100k');
       break;
+    }
 
-    case 5:
+    case 14:
       clearHighlights();
-      redrawPrefPaths(true); // full detail when zoomed into prefecture
+      redrawPrefPaths(true);
       updateMapMetric('per100k', 400);
       zoomToPref('40');
       updateCaption('Fukuoka Prefecture');
       break;
 
-    case 6:
+    case 15:
       redrawPrefPaths(true);
       loadAndShowFukuokaMunicipalities().then(() => {
         highlightCityComparison();
@@ -1493,21 +1625,28 @@ function enterStep(step) {
 }
 
 function exitStep(step, direction) {
-  // Leaving top-10 step (step 4) in either direction → hide markers
-  if (step === 4) {
-    hideTopTenMarkers(direction === 'up' ? 300 : 500);
-  }
-  // Scrolling back from Fukuoka zoom (step 5) → restore national view
-  if (step === 5 && direction === 'up') {
-    if (muniLayer) {
-      muniLayer.attr('display', 'none');
-      prefLayer.selectAll('path').attr('opacity', 1);
-    }
+  // Leaving the first outlier step backward → restore national view
+  if (step === 4 && direction === 'up') {
+    hideTopTenMarkers(300);
+    prefLayer.selectAll('path').attr('opacity', 1);
     redrawPrefPaths(false);
-    resetZoom(600);
+    resetZoom(700);
   }
-  // Scrolling back from city-zoom (step 6) → restore Fukuoka prefecture view
-  if (step === 6 && direction === 'up') {
+  // Leaving the last outlier step forward → hide markers, reset
+  if (step === 13 && direction === 'down') {
+    hideTopTenMarkers(400);
+    prefLayer.selectAll('path').attr('opacity', 1);
+    redrawPrefPaths(false);
+    resetZoom(500);
+  }
+  // Scrolling back from Fukuoka zoom (step 14) → handled by enterStep(13)
+  if (step === 14 && direction === 'up') {
+    if (muniLayer) muniLayer.attr('display', 'none');
+    prefLayer.selectAll('path').attr('opacity', 1);
+    redrawPrefPaths(false);
+  }
+  // Scrolling back from city-zoom (step 15) → restore Fukuoka pref view
+  if (step === 15 && direction === 'up') {
     zoomToPref('40', 600);
     if (muniLayer) {
       muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.12);
