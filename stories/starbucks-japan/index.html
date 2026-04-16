@@ -976,6 +976,7 @@ function drawPrefectures() {
     })
     .attr('stroke', 'rgba(255,255,255,0.32)')
     .attr('stroke-width', 0.7)
+    .attr('vector-effect', 'non-scaling-stroke')
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
     .on('mouseleave', onPrefLeave);
@@ -1153,6 +1154,7 @@ async function loadAndShowFukuokaMunicipalities() {
       })
       .attr('stroke', 'rgba(255,255,255,0.45)')
       .attr('stroke-width', 0.4)
+      .attr('vector-effect', 'non-scaling-stroke')
       .attr('opacity', 0)
       .on('mousemove', onMuniHover)
       .on('mouseleave', onMuniLeave);
