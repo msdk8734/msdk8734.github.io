@@ -987,15 +987,15 @@ async function init() {
 
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
+      .interpolator(d3.interpolateRgb('#1e3d2c', '#00a86b'));
 
     colorPer100k = d3.scaleSequential()
       .domain([0.5, maxPer100k])
-      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
+      .interpolator(d3.interpolateRgb('#1e3d2c', '#00a86b'));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
-      .interpolator(d3.interpolateRgb('#2a8c59', '#00d472'));
+      .interpolator(d3.interpolateRgb('#1e3d2c', '#00c87a'));
 
     drawPrefectures();
     updateLegend('total');
@@ -1129,10 +1129,10 @@ function drawPrefectures() {
     .attr('d', path)
     .attr('fill', d => {
       const d2 = storeByPref[d.properties.code];
-      return d2 ? colorTotal(d2.count) : '#2a3d32';
+      return d2 ? colorTotal(d2.count) : '#1c3526';
     })
-    .attr('stroke', 'rgba(255,255,255,0.32)')
-    .attr('stroke-width', 0.7)
+    .attr('stroke', 'rgba(255,255,255,0.45)')
+    .attr('stroke-width', 0.25)
     .attr('vector-effect', 'non-scaling-stroke')
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
@@ -1306,11 +1306,11 @@ async function loadAndShowFukuokaMunicipalities() {
       .attr('d', d => featureToPath(d, projection))
       .attr('fill', d => {
         const md = muniData[d.properties.code];
-        if (!md || md.per100k === null) return '#2e4838';
+        if (!md || md.per100k === null) return '#1c3526';
         return colorMuniPer100k(md.per100k);
       })
-      .attr('stroke', 'rgba(255,255,255,0.45)')
-      .attr('stroke-width', 0.4)
+      .attr('stroke', 'rgba(255,255,255,0.28)')
+      .attr('stroke-width', 0.12)
       .attr('vector-effect', 'non-scaling-stroke')
       .attr('opacity', 0)
       .on('mousemove', onMuniHover)
@@ -1341,8 +1341,8 @@ function highlightCityComparison() {
     })
     .attr('stroke-width', d => {
       const code = d.properties.code;
-      if (fukuokaCityCodes.includes(code) || kitakyushuCodes.includes(code)) return 0.7;
-      return 0.4;
+      if (fukuokaCityCodes.includes(code) || kitakyushuCodes.includes(code)) return 0.25;
+      return 0.12;
     });
 }
 
@@ -1497,7 +1497,7 @@ function exitStep(step, direction) {
   if (step === 6 && direction === 'up') {
     zoomToPref('40', 600);
     if (muniLayer) {
-      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.4);
+      muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.12);
     }
   }
   // Leaving top-10 step (step 5) in either direction → hide markers
@@ -1524,11 +1524,11 @@ function updateLegend(metric) {
   const high = document.getElementById('legend-high');
 
   if (metric === 'total') {
-    bar.style.background = 'linear-gradient(90deg, #253d30, #00d472)';
+    bar.style.background = 'linear-gradient(90deg, #1e3d2c, #00a86b)';
     low.textContent  = '0';
     high.textContent = '432';
   } else {
-    bar.style.background = 'linear-gradient(90deg, #253d30, #00d472)';
+    bar.style.background = 'linear-gradient(90deg, #1e3d2c, #00a86b)';
     low.textContent  = '0.7';
     high.textContent = '3.1/100k';
   }
