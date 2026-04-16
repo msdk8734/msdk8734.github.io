@@ -742,20 +742,10 @@ body {
       </div>
     </div>
 
-    <!-- Step 5: Fukuoka municipalities -->
+    <!-- Step 5: Top 10 municipality ranking -->
     <div class="step" data-step="5">
-      <div class="step-card">
-        <p class="step-eyebrow">06 / Contrast</p>
-        <h3>Two cities. One diverging story.</h3>
-        <p>In southern Fukuoka: <strong>Fukuoka City</strong> — 52 stores, 1.6M residents, <strong>3.23 per 100k</strong>.</p>
-        <p style="margin-top:10px">In northern Fukuoka: <strong>Kitakyushu</strong> — 13 stores, 913k residents, <strong>1.42 per 100k</strong>. Below the national average. The same prefecture; a very different economic trajectory.</p>
-      </div>
-    </div>
-
-    <!-- Step 6: Top 10 municipality ranking -->
-    <div class="step" data-step="6">
       <div class="step-card step-card--ranking">
-        <p class="step-eyebrow">07 / Outliers</p>
+        <p class="step-eyebrow">06 / Outliers</p>
         <h3>The national top 10.</h3>
         <p style="margin-bottom:14px;font-size:13px">Stores per 100,000 residents — city mode. Each entry hides a story.</p>
         <ol class="ranking-list">
@@ -830,6 +820,16 @@ body {
             </span>
           </li>
         </ol>
+      </div>
+    </div>
+
+    <!-- Step 6: Fukuoka municipalities -->
+    <div class="step" data-step="6">
+      <div class="step-card">
+        <p class="step-eyebrow">07 / Contrast</p>
+        <h3>Two cities. One diverging story.</h3>
+        <p>In southern Fukuoka: <strong>Fukuoka City</strong> — 52 stores, 1.6M residents, <strong>3.23 per 100k</strong>.</p>
+        <p style="margin-top:10px">In northern Fukuoka: <strong>Kitakyushu</strong> — 13 stores, 913k residents, <strong>1.42 per 100k</strong>. Below the national average. The same prefecture; a very different economic trajectory.</p>
       </div>
     </div>
 
@@ -1470,15 +1470,6 @@ function enterStep(step) {
       break;
 
     case 5:
-      redrawPrefPaths(true);
-      loadAndShowFukuokaMunicipalities().then(() => {
-        highlightCityComparison();
-        zoomToCities(800);
-      });
-      updateCaption('Fukuoka City vs Kitakyushu · Municipality level');
-      break;
-
-    case 6:
       resetZoom();
       redrawPrefPaths(false);
       if (muniLayer) muniLayer.attr('display', 'none');
@@ -1489,16 +1480,29 @@ function enterStep(step) {
       updateCaption('Top 10 municipalities · city mode · stores per 100k');
       updateLegend('per100k');
       break;
+
+    case 6:
+      redrawPrefPaths(true);
+      loadAndShowFukuokaMunicipalities().then(() => {
+        highlightCityComparison();
+        zoomToCities(800);
+      });
+      updateCaption('Fukuoka City vs Kitakyushu · Municipality level');
+      break;
   }
 }
 
 function exitStep(step, direction) {
-  // Scrolling back from city-zoom → restore Fukuoka prefecture view
-  if (step === 5 && direction === 'up') {
+  // Scrolling back from city-zoom (step 6) → restore Fukuoka prefecture view
+  if (step === 6 && direction === 'up') {
     zoomToPref('40', 600);
     if (muniLayer) {
       muniLayer.selectAll('path').transition().duration(400).attr('opacity', 1).attr('stroke-width', 0.4);
     }
+  }
+  // Leaving top-10 step (step 5) in either direction → hide markers
+  if (step === 5) {
+    hideTopTenMarkers(direction === 'up' ? 300 : 500);
   }
   // Scrolling back past Fukuoka → restore national view with filtered paths
   if (step === 4 && direction === 'up') {
@@ -1508,10 +1512,6 @@ function exitStep(step, direction) {
     }
     redrawPrefPaths(false);
     resetZoom(600);
-  }
-  // Hide top-10 markers when leaving step 6 in either direction
-  if (step === 6) {
-    hideTopTenMarkers(direction === 'up' ? 300 : 500);
   }
 }
 
