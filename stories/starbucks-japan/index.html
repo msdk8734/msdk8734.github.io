@@ -1044,19 +1044,22 @@ const fukuokaMuniPopP     = d3.json(URL_MUNI_POP_40);
 // D3 elements
 let svg, g, path, projection, zoomBehavior;
 let prefLayer, muniLayer, topTenLayer;
+let outlierMuniLayer = null;
+let outlierCurrentPref = null;
+const prefMuniCache = {};
 
 // Top-10 city-mode municipalities with approximate centroids
 const TOP10_CITY = [
-  { rank: 1,  nameJa: '千代田区', nameEn: 'Chiyoda Ward',  pref: 'Tokyo',     prefCode: '13', per100k: 69.7, lon: 139.754, lat: 35.694, zoomK: 8  },
-  { rank: 2,  nameJa: '日吉津村', nameEn: 'Hiezu Village', pref: 'Tottori',   prefCode: '31', per100k: 27.7, lon: 133.346, lat: 35.430, zoomK: 7  },
-  { rank: 3,  nameJa: '多賀町',   nameEn: 'Taga Town',     pref: 'Shiga',     prefCode: '25', per100k: 27.2, lon: 136.281, lat: 35.222, zoomK: 7  },
-  { rank: 4,  nameJa: '田尻町',   nameEn: 'Tajiri Town',   pref: 'Osaka',     prefCode: '27', per100k: 23.6, lon: 135.248, lat: 34.433, zoomK: 7  },
-  { rank: 5,  nameJa: '渋谷区',   nameEn: 'Shibuya Ward',  pref: 'Tokyo',     prefCode: '13', per100k: 18.2, lon: 139.701, lat: 35.661, zoomK: 7  },
-  { rank: 6,  nameJa: '北谷町',   nameEn: 'Chatan Town',   pref: 'Okinawa',   prefCode: '47', per100k: 17.1, lon: 127.758, lat: 26.313, zoomK: 6  },
-  { rank: 7,  nameJa: '港区',     nameEn: 'Minato Ward',   pref: 'Tokyo',     prefCode: '13', per100k: 16.4, lon: 139.751, lat: 35.659, zoomK: 9  },
-  { rank: 8,  nameJa: '中央区',   nameEn: 'Chuo Ward',     pref: 'Tokyo',     prefCode: '13', per100k: 14.9, lon: 139.773, lat: 35.670, zoomK: 10 },
-  { rank: 9,  nameJa: '昭和町',   nameEn: 'Showa Town',    pref: 'Yamanashi', prefCode: '19', per100k: 14.0, lon: 138.568, lat: 35.632, zoomK: 7  },
-  { rank: 10, nameJa: '日の出町', nameEn: 'Hinode Town',   pref: 'Tokyo',     prefCode: '13', per100k: 12.5, lon: 139.259, lat: 35.742, zoomK: 6  },
+  { rank: 1,  nameJa: '千代田区', nameEn: 'Chiyoda Ward',  pref: 'Tokyo',     prefCode: '13', muniCode: '13101', per100k: 69.7, lon: 139.754, lat: 35.694, zoomK: 8  },
+  { rank: 2,  nameJa: '日吉津村', nameEn: 'Hiezu Village', pref: 'Tottori',   prefCode: '31', muniCode: '31384', per100k: 27.7, lon: 133.346, lat: 35.430, zoomK: 7  },
+  { rank: 3,  nameJa: '多賀町',   nameEn: 'Taga Town',     pref: 'Shiga',     prefCode: '25', muniCode: '25443', per100k: 27.2, lon: 136.281, lat: 35.222, zoomK: 7  },
+  { rank: 4,  nameJa: '田尻町',   nameEn: 'Tajiri Town',   pref: 'Osaka',     prefCode: '27', muniCode: '27362', per100k: 23.6, lon: 135.248, lat: 34.433, zoomK: 7  },
+  { rank: 5,  nameJa: '渋谷区',   nameEn: 'Shibuya Ward',  pref: 'Tokyo',     prefCode: '13', muniCode: '13113', per100k: 18.2, lon: 139.701, lat: 35.661, zoomK: 7  },
+  { rank: 6,  nameJa: '北谷町',   nameEn: 'Chatan Town',   pref: 'Okinawa',   prefCode: '47', muniCode: '47326', per100k: 17.1, lon: 127.758, lat: 26.313, zoomK: 6  },
+  { rank: 7,  nameJa: '港区',     nameEn: 'Minato Ward',   pref: 'Tokyo',     prefCode: '13', muniCode: '13103', per100k: 16.4, lon: 139.751, lat: 35.659, zoomK: 9  },
+  { rank: 8,  nameJa: '中央区',   nameEn: 'Chuo Ward',     pref: 'Tokyo',     prefCode: '13', muniCode: '13102', per100k: 14.9, lon: 139.773, lat: 35.670, zoomK: 10 },
+  { rank: 9,  nameJa: '昭和町',   nameEn: 'Showa Town',    pref: 'Yamanashi', prefCode: '19', muniCode: '19384', per100k: 14.0, lon: 138.568, lat: 35.632, zoomK: 7  },
+  { rank: 10, nameJa: '日の出町', nameEn: 'Hinode Town',   pref: 'Tokyo',     prefCode: '13', muniCode: '13305', per100k: 12.5, lon: 139.259, lat: 35.742, zoomK: 6  },
 ];
 
 // Color scales (set after data loads)
@@ -1468,6 +1471,112 @@ function zoomToEntry(entry, dur = 700) {
     .call(zoomBehavior.transform, d3.zoomIdentity.translate(tx, ty).scale(k));
 }
 
+// ============================================================
+// OUTLIER MUNICIPALITY ZOOM (05/Outliers steps 4-13)
+// ============================================================
+async function loadAndShowOutlierMuni(entry, dur = 700) {
+  const prefCode = entry.prefCode;
+  const muniCode = entry.muniCode;
+
+  // Hide prefecture-level top-10 markers
+  hideTopTenMarkers(200);
+
+  // Dim all prefecture paths except target
+  prefLayer.selectAll('path')
+    .transition().duration(400)
+    .attr('opacity', d => d.properties.code === prefCode ? 0 : 0.15);
+
+  // If same prefecture already loaded, just re-highlight target + re-zoom
+  if (outlierCurrentPref === prefCode && outlierMuniLayer) {
+    outlierMuniLayer.attr('display', null);
+    outlierMuniLayer.selectAll('path')
+      .transition().duration(300)
+      .attr('stroke', d => d.properties.code === muniCode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.22)')
+      .attr('stroke-width', d => d.properties.code === muniCode ? 0.5 : 0.12)
+      .attr('opacity', d => d.properties.code === muniCode ? 1 : 0.65);
+
+    const cached = prefMuniCache[prefCode];
+    const targetFeature = cached?.geo?.features?.find(f => f.properties.code === muniCode);
+    if (targetFeature) {
+      zoomToBounds(featureBounds(targetFeature), 60, 20, dur);
+    }
+    return;
+  }
+
+  // Remove old layer if different prefecture
+  if (outlierMuniLayer) {
+    outlierMuniLayer.remove();
+    outlierMuniLayer = null;
+  }
+  outlierCurrentPref = prefCode;
+
+  try {
+    // Use cache or fetch
+    if (!prefMuniCache[prefCode]) {
+      const padded = prefCode.padStart(2, '0');
+      const [geo, pop, muniCounts] = await Promise.all([
+        d3.json(`../../geo-json/pref_${padded}.geojson`),
+        d3.json(`../../population-json/municipalities/muni-pop-${padded}.json`),
+        fukuokaMuniCountsP,
+      ]);
+      const entries = muniCounts.municipalities?.[prefCode]?.entries || {};
+      const data = {};
+      for (const f of geo.features) {
+        const code = f.properties.code;
+        const count = entries[code]?.count || 0;
+        const popVal = pop[code]?.total || null;
+        data[code] = {
+          count,
+          per100k: popVal ? count / popVal * 100000 : null,
+        };
+      }
+      prefMuniCache[prefCode] = { geo, data };
+    }
+
+    const { geo, data } = prefMuniCache[prefCode];
+
+    // Build layer
+    outlierMuniLayer = g.append('g').attr('class', 'outlier-muni-layer');
+
+    outlierMuniLayer.selectAll('path')
+      .data(geo.features)
+      .enter().append('path')
+      .attr('d', d => featureToPath(d, projection))
+      .attr('fill', d => {
+        const md = data[d.properties.code];
+        if (!md || md.per100k === null) return '#1a2820';
+        return colorMuniPer100k(md.per100k);
+      })
+      .attr('stroke', d => d.properties.code === muniCode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.22)')
+      .attr('stroke-width', d => d.properties.code === muniCode ? 0.5 : 0.12)
+      .attr('vector-effect', 'non-scaling-stroke')
+      .attr('opacity', 0);
+
+    outlierMuniLayer.selectAll('path')
+      .transition().duration(400)
+      .attr('opacity', d => d.properties.code === muniCode ? 1 : 0.65);
+
+    // Zoom to target municipality
+    const targetFeature = geo.features.find(f => f.properties.code === muniCode);
+    if (targetFeature) {
+      zoomToBounds(featureBounds(targetFeature), 60, 20, dur);
+    }
+
+  } catch (err) {
+    console.error('Outlier muni load error:', err);
+  }
+}
+
+function hideOutlierMuni(dur = 400) {
+  if (outlierMuniLayer) {
+    outlierMuniLayer.transition().duration(dur).attr('opacity', 0)
+      .on('end', function() { d3.select(this).remove(); });
+    outlierMuniLayer = null;
+  }
+  outlierCurrentPref = null;
+  prefLayer.selectAll('path').transition().duration(dur).attr('opacity', 1);
+}
+
 // TOP-10 MARKERS
 // ============================================================
 function showTopTenMarkers(dur = 600) {
@@ -1596,11 +1705,7 @@ function enterStep(step) {
       redrawPrefPaths(false);
       updateMapMetric('per100k');
       clearHighlights();
-      if (!topTenLayer || topTenLayer.attr('display') === 'none') {
-        showTopTenMarkers(step === 4 ? 500 : 0);
-      }
-      highlightPref(entry.prefCode, 400);
-      zoomToEntry(entry, step === 4 ? 1000 : 700);
+      loadAndShowOutlierMuni(entry, step === 4 ? 1000 : 700);
       updateCaption(`#${entry.rank} · ${entry.nameEn} · ${entry.pref} · ${entry.per100k.toFixed(1)}/100k`);
       updateLegend('per100k');
       break;
@@ -1628,15 +1733,13 @@ function enterStep(step) {
 function exitStep(step, direction) {
   // Leaving the first outlier step backward → restore national view
   if (step === 4 && direction === 'up') {
-    hideTopTenMarkers(300);
-    prefLayer.selectAll('path').attr('opacity', 1);
+    hideOutlierMuni(300);
     redrawPrefPaths(false);
     resetZoom(700);
   }
-  // Leaving the last outlier step forward → hide markers, reset
+  // Leaving the last outlier step forward → hide muni layer, reset
   if (step === 13 && direction === 'down') {
-    hideTopTenMarkers(400);
-    prefLayer.selectAll('path').attr('opacity', 1);
+    hideOutlierMuni(400);
     redrawPrefPaths(false);
     resetZoom(500);
   }
