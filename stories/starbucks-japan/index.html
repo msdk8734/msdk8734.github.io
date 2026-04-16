@@ -987,15 +987,15 @@ async function init() {
 
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#1e3d2c', '#00a86b'));
+      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     colorPer100k = d3.scaleSequential()
-      .domain([0.5, maxPer100k])
-      .interpolator(d3.interpolateRgb('#1e3d2c', '#00a86b'));
+      .domain([0, maxPer100k])
+      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
-      .interpolator(d3.interpolateRgb('#1e3d2c', '#00c87a'));
+      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     drawPrefectures();
     updateLegend('total');
@@ -1129,7 +1129,7 @@ function drawPrefectures() {
     .attr('d', path)
     .attr('fill', d => {
       const d2 = storeByPref[d.properties.code];
-      return d2 ? colorTotal(d2.count) : '#1c3526';
+      return d2 ? colorTotal(d2.count) : '#1a2820';
     })
     .attr('stroke', 'rgba(255,255,255,0.45)')
     .attr('stroke-width', 0.25)
@@ -1306,7 +1306,7 @@ async function loadAndShowFukuokaMunicipalities() {
       .attr('d', d => featureToPath(d, projection))
       .attr('fill', d => {
         const md = muniData[d.properties.code];
-        if (!md || md.per100k === null) return '#1c3526';
+        if (!md || md.per100k === null) return '#1a2820';
         return colorMuniPer100k(md.per100k);
       })
       .attr('stroke', 'rgba(255,255,255,0.28)')
@@ -1524,11 +1524,11 @@ function updateLegend(metric) {
   const high = document.getElementById('legend-high');
 
   if (metric === 'total') {
-    bar.style.background = 'linear-gradient(90deg, #1e3d2c, #00a86b)';
+    bar.style.background = 'linear-gradient(90deg, #1a2820, #00e07a)';
     low.textContent  = '0';
     high.textContent = '432';
   } else {
-    bar.style.background = 'linear-gradient(90deg, #1e3d2c, #00a86b)';
+    bar.style.background = 'linear-gradient(90deg, #1a2820, #00e07a)';
     low.textContent  = '0.7';
     high.textContent = '3.1/100k';
   }
