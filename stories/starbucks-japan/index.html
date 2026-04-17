@@ -1064,6 +1064,8 @@ const TOP10_CITY = [
 
 // Color scales (set after data loads)
 let colorTotal, colorPer100k, colorMuniPer100k;
+const PREF_COLOR_LO = '#eff8f2';
+const PREF_COLOR_HI = '#006241';
 
 // Map dimensions
 let W, H;
@@ -1099,22 +1101,22 @@ async function init() {
     const maxCount   = d3.max(Object.values(storeByPref), d => d.count);
     const maxPer100k = d3.max(Object.values(storeByPref), d => d.per100k);
 
-    // Keep the overview map proportional to raw store counts.
-    // The previous sqrt lift made low-count prefectures look too bright,
-    // which blurred the visual difference between places like Ishikawa
-    // and genuinely high-count prefectures.
+    // Match the main interactive map: low values should stay pale,
+    // while higher values deepen into dark Starbucks green.
+    // Using the actual max for each metric makes the total/per-capita
+    // transition noticeably re-order the map.
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
+      .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     colorPer100k = d3.scaleSequential()
-      .domain([0, 2.2])
+      .domain([0, maxPer100k])
       .clamp(true)
-      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
+      .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
-      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
+      .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     drawPrefectures();
     updateLegend('total');
