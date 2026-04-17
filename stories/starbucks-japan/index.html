@@ -586,6 +586,66 @@ body {
 }
 .outro p { margin-bottom: 28px; }
 
+.map-link-callout {
+  max-width: 680px;
+  margin: 0 auto 72px;
+  padding: 0 24px;
+}
+.map-link-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  padding: 24px 26px;
+  border: 1px solid #dfe7e1;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f7fbf8 0%, #edf6f0 100%);
+  box-shadow: 0 10px 28px rgba(0,0,0,.05);
+}
+.map-link-copy {
+  max-width: 460px;
+}
+.map-link-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #00754a;
+  margin-bottom: 10px;
+}
+.map-link-card h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.15;
+  color: #123526;
+  margin-bottom: 10px;
+}
+.map-link-card p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #496255;
+}
+.map-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  background: #00754a;
+  color: #f4faf7;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,117,74,.18);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.map-link-button:hover {
+  background: #006241;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0,117,74,.22);
+}
+
 .story-footer {
   background: #0d1f14;
   color: rgba(255,255,255,0.7);
@@ -656,6 +716,14 @@ body {
   }
   .story-footer-inner {
     grid-template-columns: 1fr;
+  }
+  .map-link-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .map-link-button {
+    min-width: 0;
+    width: 100%;
   }
   #map-ui {
     bottom: 16px;
@@ -990,6 +1058,17 @@ body {
   <p>In this sense, the Japan Starbucks map is a kind of revealed preference study of a major corporation's read on Japanese urban vitality. It won't always be right. Outliers exist — single highway-exit locations that serve a regional population but sit within a small municipality, inflating its per-capita figure. Small towns in Shiga, Tottori, and Yamanashi appear disproportionately high in the rankings for exactly this reason.</p>
   <p>But at scale, the pattern holds. The prefectures and cities that score high on Starbucks density are, almost without exception, places that demographers and economists already identify as winners in Japan's ongoing urbanization: Tokyo's core wards, Fukuoka City, Okinawa's tourist corridors, Aichi's manufacturing belt.</p>
   <p>The green logos aren't just cafés. They're data points in a decades-long story about which Japanese cities are gaining, and which are quietly being left behind.</p>
+</section>
+
+<section class="map-link-callout" aria-label="Interactive Starbucks map link">
+  <div class="map-link-card">
+    <div class="map-link-copy">
+      <p class="map-link-kicker">Explore The Data</p>
+      <h3>Open the full Starbucks Japan map.</h3>
+      <p>The story gives you the argument. The live map lets you test it yourself, prefecture by prefecture, city by city.</p>
+    </div>
+    <a class="map-link-button" href="https://msdk8734.github.io/starbucks-store-map.html">Launch Interactive Map ↗</a>
+  </div>
 </section>
 
 <!-- ============================================================
