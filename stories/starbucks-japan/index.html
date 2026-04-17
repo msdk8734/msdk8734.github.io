@@ -741,7 +741,7 @@ body {
         <h3>Every store, mapped.</h3>
         <span class="stat-big">2,108</span>
         <span class="stat-label">Starbucks locations across Japan</span>
-        <p style="margin-top:14px">Japan's 47 prefectures, colored by total store count. Darker means more. The biggest cities light up — but is that the whole story?</p>
+        <p style="margin-top:14px">Japan's 47 prefectures, colored by total store count. Brighter means more. The biggest cities light up — but is that the whole story?</p>
       </div>
     </div>
 
@@ -1101,7 +1101,7 @@ async function init() {
 
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
+      .interpolator(t => d3.interpolateRgb('#1a2820', '#00e07a')(Math.sqrt(t)));
 
     colorPer100k = d3.scaleSequential()
       .domain([0, 2.2])
