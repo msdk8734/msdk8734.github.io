@@ -218,7 +218,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100%;
-  background: #1a2820;
+  background: #ffffff;
   overflow: hidden;
   z-index: 0;
 }
@@ -241,7 +241,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
+  color: #7b857f;
   margin-bottom: 8px;
 }
 #map-legend {
@@ -253,7 +253,8 @@ body {
   width: 140px;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #2a5040, #00e87a);
+  border: 1px solid rgba(0,0,0,.08);
+  background: linear-gradient(90deg, rgb(239,248,242), rgb(0,98,65));
 }
 .legend-labels {
   display: flex;
@@ -261,29 +262,30 @@ body {
   width: 140px;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px;
-  color: rgba(255,255,255,0.4);
+  color: #9ba59f;
 }
 
 /* Tooltip */
 .map-tooltip {
   position: absolute;
   pointer-events: none;
-  background: rgba(10, 22, 16, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 12px 16px;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #dfe7e1;
+  border-radius: 12px;
+  padding: 16px 18px;
   opacity: 0;
   transition: opacity 0.15s;
   z-index: 50;
   min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.05);
 }
 .map-tooltip.visible { opacity: 1; }
 .tt-name {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: #183428;
   margin-bottom: 8px;
 }
 .tt-row {
@@ -293,14 +295,14 @@ body {
   gap: 16px;
   margin-bottom: 4px;
 }
-.tt-label { font-size: 11px; color: rgba(255,255,255,0.45); }
+.tt-label { font-size: 11px; color: #748179; }
 .tt-val {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255,255,255,0.9);
+  color: #18271f;
 }
-.tt-val .unit { font-size: 10px; color: rgba(255,255,255,0.4); }
+.tt-val .unit { font-size: 10px; color: #93a098; }
 
 /* Annotation labels on the map (prefecture names) */
 .map-annotation {
@@ -310,8 +312,8 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.8);
-  background: rgba(0,0,0,0.3);
+  color: #3d4f45;
+  background: rgba(255,255,255,.85);
   padding: 3px 7px;
   border-radius: 4px;
   opacity: 0;
@@ -496,9 +498,9 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: #1a2820;
+  background: rgba(255,255,255,.96);
   z-index: 20;
-  color: rgba(255,255,255,0.5);
+  color: #7b857f;
   font-size: 13px;
   transition: opacity 0.5s;
 }
@@ -506,8 +508,8 @@ body {
 .spinner {
   width: 28px;
   height: 28px;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: #00a86b;
+  border: 2px solid rgba(0,0,0,.10);
+  border-top-color: #00754a;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -1263,8 +1265,8 @@ function drawPrefectures() {
       const d2 = storeByPref[d.properties.code];
       return d2 ? colorTotal(d2.count) : '#1a2820';
     })
-    .attr('stroke', 'rgba(255,255,255,0.45)')
-    .attr('stroke-width', 0.25)
+    .attr('stroke', 'rgba(255,255,255,0.68)')
+    .attr('stroke-width', 0.18)
     .attr('vector-effect', 'non-scaling-stroke')
     .style('cursor', 'default')
     .on('mousemove', onPrefHover)
