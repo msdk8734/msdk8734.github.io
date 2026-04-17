@@ -1451,7 +1451,7 @@ function highlightCityComparison() {
     .attr('fill', d => {
       const code = d.properties.code;
       if (fukuokaCityCodes.includes(code)) return '#00e07a';   // Fukuoka City — green
-      if (kitakyushuCodes.includes(code))  return '#5bc8f0';   // Kitakyushu — blue
+      if (kitakyushuCodes.includes(code))  return '#00e07a';   // Kitakyushu — same green
       return muniData[code] ? colorMuniPer100k(muniData[code].per100k ?? 0) : '#1a2820';
     })
     .attr('opacity', d => {
