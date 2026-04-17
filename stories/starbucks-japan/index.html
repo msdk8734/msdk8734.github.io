@@ -1068,6 +1068,7 @@ const TOP10_CITY = [
 let colorTotal, colorPer100k, colorMuniPer100k;
 const PREF_COLOR_LO = '#eff8f2';
 const PREF_COLOR_HI = '#006241';
+const PREF_HIGHLIGHT_GREEN = '#006241';
 let totalRange = { min: 0, max: 0 };
 let per100kRange = { min: 0, max: 0 };
 
@@ -1112,10 +1113,12 @@ async function init() {
       max: d3.max(prefValues, d => d.per100k),
     };
 
+    // Keep the overview step visually honest to raw totals:
+    // use a zero-based linear ramp so low-count prefectures stay pale.
     colorTotal = d3.scaleSequential()
-      .domain([totalRange.min, totalRange.max])
+      .domain([0, totalRange.max])
       .clamp(true)
-      .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
+      .interpolator(d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI));
 
     colorPer100k = d3.scaleSequential()
       .domain([per100kRange.min, per100kRange.max])
@@ -1465,8 +1468,8 @@ function highlightCityComparison() {
     .transition().duration(600)
     .attr('fill', d => {
       const code = d.properties.code;
-      if (fukuokaCityCodes.includes(code)) return '#00e07a';   // Fukuoka City — green
-      if (kitakyushuCodes.includes(code))  return '#00e07a';   // Kitakyushu — same green
+      if (fukuokaCityCodes.includes(code)) return PREF_HIGHLIGHT_GREEN;
+      if (kitakyushuCodes.includes(code))  return PREF_HIGHLIGHT_GREEN;
       return muniData[code] ? colorMuniPer100k(muniData[code].per100k ?? 0) : '#1a2820';
     })
     .attr('opacity', d => {
@@ -1797,7 +1800,7 @@ function updateLegend(metric) {
 
   if (metric === 'total') {
     bar.style.background = `linear-gradient(90deg, ${PREF_COLOR_LO}, ${PREF_COLOR_HI})`;
-    low.textContent  = String(totalRange.min);
+    low.textContent  = '0';
     high.textContent = String(totalRange.max);
   } else {
     bar.style.background = `linear-gradient(90deg, ${PREF_COLOR_LO}, ${PREF_COLOR_HI})`;
