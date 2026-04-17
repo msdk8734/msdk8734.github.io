@@ -1066,6 +1066,8 @@ const TOP10_CITY = [
 let colorTotal, colorPer100k, colorMuniPer100k;
 const PREF_COLOR_LO = '#eff8f2';
 const PREF_COLOR_HI = '#006241';
+let totalRange = { min: 0, max: 0 };
+let per100kRange = { min: 0, max: 0 };
 
 // Map dimensions
 let W, H;
@@ -1098,24 +1100,33 @@ async function init() {
     }
 
     // Color scales
-    const maxCount   = d3.max(Object.values(storeByPref), d => d.count);
-    const maxPer100k = d3.max(Object.values(storeByPref), d => d.per100k);
+    const prefValues = Object.values(storeByPref);
+    totalRange = {
+      min: d3.min(prefValues, d => d.count),
+      max: d3.max(prefValues, d => d.count),
+    };
+    per100kRange = {
+      min: d3.min(prefValues, d => d.per100k),
+      max: d3.max(prefValues, d => d.per100k),
+    };
 
     // Match the main interactive map: low values should stay pale,
     // while higher values deepen into dark Starbucks green.
     // Using the actual max for each metric makes the total/per-capita
     // transition noticeably re-order the map.
     colorTotal = d3.scaleSequential()
-      .domain([0, maxCount])
+      .domain([totalRange.min, totalRange.max])
+      .clamp(true)
       .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     colorPer100k = d3.scaleSequential()
-      .domain([0, maxPer100k])
+      .domain([per100kRange.min, per100kRange.max])
       .clamp(true)
       .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     colorMuniPer100k = d3.scaleSequential()
       .domain([0, 6])
+      .clamp(true)
       .interpolator(t => d3.interpolateRgb(PREF_COLOR_LO, PREF_COLOR_HI)(Math.pow(t, 0.58)));
 
     drawPrefectures();
@@ -1787,13 +1798,13 @@ function updateLegend(metric) {
   const high = document.getElementById('legend-high');
 
   if (metric === 'total') {
-    bar.style.background = 'linear-gradient(90deg, #1a2820, #00e07a)';
-    low.textContent  = '0';
-    high.textContent = '432';
+    bar.style.background = `linear-gradient(90deg, ${PREF_COLOR_LO}, ${PREF_COLOR_HI})`;
+    low.textContent  = String(totalRange.min);
+    high.textContent = String(totalRange.max);
   } else {
-    bar.style.background = 'linear-gradient(90deg, #1a2820, #00e07a)';
-    low.textContent  = '0';
-    high.textContent = '2.2+/100k';
+    bar.style.background = `linear-gradient(90deg, ${PREF_COLOR_LO}, ${PREF_COLOR_HI})`;
+    low.textContent  = per100kRange.min.toFixed(2);
+    high.textContent = `${per100kRange.max.toFixed(2)}/100k`;
   }
 }
 
