@@ -1099,9 +1099,13 @@ async function init() {
     const maxCount   = d3.max(Object.values(storeByPref), d => d.count);
     const maxPer100k = d3.max(Object.values(storeByPref), d => d.per100k);
 
+    // Keep the overview map proportional to raw store counts.
+    // The previous sqrt lift made low-count prefectures look too bright,
+    // which blurred the visual difference between places like Ishikawa
+    // and genuinely high-count prefectures.
     colorTotal = d3.scaleSequential()
       .domain([0, maxCount])
-      .interpolator(t => d3.interpolateRgb('#1a2820', '#00e07a')(Math.sqrt(t)));
+      .interpolator(d3.interpolateRgb('#1a2820', '#00e07a'));
 
     colorPer100k = d3.scaleSequential()
       .domain([0, 2.2])
