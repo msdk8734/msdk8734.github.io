@@ -1291,7 +1291,7 @@ function updateMapMetric(metric, dur = 800) {
   const dataKey   = metric === 'total' ? 'count' : 'per100k';
 
   prefLayer.selectAll('path')
-    .transition().duration(dur).ease(d3.easeQuadInOut)
+    .transition('metric').duration(dur).ease(d3.easeQuadInOut)
     .attr('fill', d => {
       const d2 = storeByPref[d.properties.code];
       return d2 ? colorFn(d2[dataKey]) : '#2a3d32';
