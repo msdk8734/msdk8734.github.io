@@ -564,6 +564,7 @@
     const bottomSheetHandle = document.getElementById('bottom-sheet-handle');
 
     const map = L.map('map', { zoomControl: false, worldCopyJump: true }).setView([28, 12], 2.1);
+    const detailZoom = 17;
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; OpenStreetMap contributors'
@@ -652,8 +653,7 @@
       setActive(id);
       renderInfo(work);
       if (fly) {
-        const targetZoom = window.innerWidth <= 760 ? 16 : 6;
-        map.flyTo([work.lat, work.lng], targetZoom, { animate: true, duration: 1.2 });
+        map.flyTo([work.lat, work.lng], detailZoom, { animate: true, duration: 1.2 });
       }
     }
 
@@ -837,7 +837,10 @@
         works = data.filter(work => typeof work.lat === 'number' && typeof work.lng === 'number');
         works.forEach(work => {
           const marker = L.marker([work.lat, work.lng], { icon: makeIcon(work) });
-          marker.on('click', () => selectWork(work.id, false));
+          marker.on('click', () => {
+            map.flyTo([work.lat, work.lng], detailZoom, { animate: true, duration: 1.2 });
+            selectWork(work.id, false);
+          });
           marker.on('mouseover', () => marker.getElement()?.querySelector('.custom-marker')?.classList.add('hover'));
           marker.on('mouseout', () => {
             if (work.id !== activeId) marker.getElement()?.querySelector('.custom-marker')?.classList.remove('hover');
