@@ -397,6 +397,10 @@
       color: var(--muted);
     }
 
+    #bottom-sheet {
+      display: none;
+    }
+
     @media (max-width: 920px) {
       #sidebar { width: 300px; min-width: 300px; }
       #info-panel { width: 250px; }
@@ -412,21 +416,62 @@
       #header {
         position: sticky;
       }
-      #sidebar {
-        width: 100%;
-        min-width: 0;
-        height: auto;
-      }
+      #sidebar { display: none; }
       #map {
-        height: 62vh;
+        height: calc(100vh - 54px);
       }
       #info-panel {
         position: fixed;
         left: 12px;
         right: 12px;
         top: auto;
-        bottom: 12px;
+        bottom: 60px;
         width: auto;
+      }
+      #bottom-sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1100;
+        background: rgba(119,112,103,0.98);
+        border-top: 1px solid var(--border);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.22);
+        display: flex;
+        flex-direction: column;
+        transition: height 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+      #bottom-sheet-handle {
+        height: 48px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .handle-bar {
+        width: 36px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+      }
+      .handle-label {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      #bottom-sheet-list {
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .leaflet-bottom.leaflet-right {
+        bottom: 56px !important;
       }
     }
   </style>
@@ -481,6 +526,15 @@
     </aside>
   </div>
 
+  <div id="bottom-sheet">
+    <div id="bottom-sheet-handle">
+      <div class="handle-bar"></div>
+      <span class="handle-label">Works</span>
+      <div class="handle-bar"></div>
+    </div>
+    <div id="bottom-sheet-list"></div>
+  </div>
+
   <script>
     const COLOR_BY_CATEGORY = {
       "site-specific": getComputedStyle(document.documentElement).getPropertyValue('--site-specific').trim(),
@@ -505,6 +559,9 @@
     const infoPanel = document.getElementById('info-panel');
     const infoContent = document.getElementById('info-content');
     const infoClose = document.getElementById('info-close');
+    const bottomSheet = document.getElementById('bottom-sheet');
+    const bottomSheetList = document.getElementById('bottom-sheet-list');
+    const bottomSheetHandle = document.getElementById('bottom-sheet-handle');
 
     const map = L.map('map', { zoomControl: false, worldCopyJump: true }).setView([28, 12], 2.1);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -516,6 +573,7 @@
     let works = [];
     const markers = {};
     let activeId = null;
+    const HANDLE_HEIGHT = 48;
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -594,8 +652,65 @@
       setActive(id);
       renderInfo(work);
       if (fly) {
-        map.flyTo([work.lat, work.lng], 6, { animate: true, duration: 1.2 });
+        const targetZoom = window.innerWidth <= 760 ? 16 : 6;
+        map.flyTo([work.lat, work.lng], targetZoom, { animate: true, duration: 1.2 });
       }
+    }
+
+    function sheetStage() {
+      if (!bottomSheet) return 'peek';
+      if (bottomSheet.classList.contains('open')) return 'open';
+      if (bottomSheet.classList.contains('half')) return 'half';
+      return 'peek';
+    }
+
+    function setSheetStage(stage) {
+      if (!bottomSheet || !bottomSheetList || window.innerWidth > 760) return;
+      const winH = window.innerHeight;
+      const halfH = Math.round(winH * 0.4);
+      const openH = Math.round(winH * 0.78);
+
+      bottomSheet.classList.remove('half', 'open');
+      if (stage === 'peek') {
+        bottomSheet.style.height = HANDLE_HEIGHT + 'px';
+        bottomSheetList.style.maxHeight = '0px';
+      } else if (stage === 'half') {
+        bottomSheet.classList.add('half');
+        bottomSheet.style.height = halfH + 'px';
+        bottomSheetList.style.maxHeight = (halfH - HANDLE_HEIGHT) + 'px';
+      } else {
+        bottomSheet.classList.add('open');
+        bottomSheet.style.height = openH + 'px';
+        bottomSheetList.style.maxHeight = (openH - HANDLE_HEIGHT) + 'px';
+      }
+    }
+
+    function buildMobileList(filteredWorks) {
+      if (!bottomSheetList) return;
+      bottomSheetList.innerHTML = '';
+
+      filteredWorks.forEach(work => {
+        const item = document.createElement('div');
+        item.className = 'work-item';
+        item.dataset.id = work.id;
+        item.innerHTML = `
+          <div class="work-dot" style="background:${markerColor(work)}"></div>
+          <div class="work-info">
+            <div class="work-name-ja">${escapeHtml(work.nameJa || work.name)}</div>
+            <div class="work-name-en">${escapeHtml(work.venue)} / ${escapeHtml(work.cityRegion)}, ${escapeHtml(work.country)}</div>
+            <div class="work-meta">
+              <span class="tag">${escapeHtml(work.year || 'n/a')}</span>
+              <span class="tag">${escapeHtml(work.type)}</span>
+              <span class="tag">${escapeHtml(work.confidence)}</span>
+            </div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          selectWork(work.id, true);
+          setSheetStage('peek');
+        });
+        bottomSheetList.appendChild(item);
+      });
     }
 
     function matchesSearch(work, query) {
@@ -660,6 +775,8 @@
         workList.appendChild(item);
       });
 
+      buildMobileList(filtered);
+
       if (filtered.length) {
         const bounds = L.latLngBounds(filtered.map(work => [work.lat, work.lng]));
         map.fitBounds(bounds.pad(0.2));
@@ -678,6 +795,42 @@
     countryFilterEl.addEventListener('change', applyFilters);
     confidenceFilterEl.addEventListener('change', applyFilters);
 
+    if (bottomSheetHandle) {
+      bottomSheetHandle.addEventListener('click', () => {
+        const current = sheetStage();
+        if (current === 'peek') setSheetStage('half');
+        else if (current === 'half') setSheetStage('open');
+        else setSheetStage('peek');
+      });
+
+      let touchStartY = 0;
+      let touchOnHandle = false;
+
+      bottomSheet.addEventListener('touchstart', (event) => {
+        touchStartY = event.touches[0].clientY;
+        touchOnHandle = !!event.target.closest('#bottom-sheet-handle');
+      }, { passive: true });
+
+      bottomSheet.addEventListener('touchend', (event) => {
+        if (!touchOnHandle) return;
+        const deltaY = touchStartY - event.changedTouches[0].clientY;
+        const current = sheetStage();
+        if (deltaY > 40) {
+          if (current === 'peek') setSheetStage('half');
+          else if (current === 'half') setSheetStage('open');
+        } else if (deltaY < -40) {
+          if (current === 'open') setSheetStage('half');
+          else if (current === 'half') setSheetStage('peek');
+        }
+      }, { passive: true });
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 760) {
+        setSheetStage(sheetStage());
+      }
+    });
+
     fetch('data/turrell.json')
       .then(r => r.json())
       .then(data => {
@@ -695,6 +848,9 @@
         buildStats(works);
         buildCountryFilter(works);
         applyFilters();
+        if (window.innerWidth <= 760) {
+          setTimeout(() => setSheetStage('peek'), 0);
+        }
       })
       .catch(error => {
         console.error('Failed to load turrell.json:', error);
