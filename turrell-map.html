@@ -444,14 +444,14 @@
     <aside id="sidebar">
       <section class="intro">
         <p>
-          タレルの Skyspace、恒久インスタレーション、建築的光作品を一覧と地図で横断できるマップです。
-          左の作品リストから選ぶと、右の地図がその地点へジャンプします。
+          This map lets you browse James Turrell's Skyspaces, permanent installations, and architectural light works across both a list and a world map.
+          Select a work from the list on the left and the map on the right will jump to its location.
         </p>
         <div class="stats" id="stats"></div>
       </section>
 
       <section class="filters">
-        <input id="search" class="control" type="search" placeholder="作品名・会場名・国で検索">
+        <input id="search" class="control" type="search" placeholder="Search by title, venue, or country">
         <select id="countryFilter" class="control">
           <option value="all">All countries</option>
         </select>
@@ -596,7 +596,6 @@
       if (fly) {
         map.flyTo([work.lat, work.lng], 6, { animate: true, duration: 1.2 });
       }
-      markers[id]?.openPopup();
     }
 
     function matchesSearch(work, query) {
@@ -685,12 +684,6 @@
         works = data.filter(work => typeof work.lat === 'number' && typeof work.lng === 'number');
         works.forEach(work => {
           const marker = L.marker([work.lat, work.lng], { icon: makeIcon(work) });
-          marker.bindPopup(`
-            <div class="popup-inner">
-              <div class="popup-title">${escapeHtml(work.nameJa || work.name)}</div>
-              <div class="popup-meta">${escapeHtml(work.venue)}<br>${escapeHtml(work.cityRegion)}, ${escapeHtml(work.country)}<br>${escapeHtml(work.type)} / ${escapeHtml(work.accessText)} / confidence: ${escapeHtml(work.confidence)}</div>
-            </div>
-          `);
           marker.on('click', () => selectWork(work.id, false));
           marker.on('mouseover', () => marker.getElement()?.querySelector('.custom-marker')?.classList.add('hover'));
           marker.on('mouseout', () => {
