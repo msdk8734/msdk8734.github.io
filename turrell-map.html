@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>James Turrell — Site-Specific Works Map</title>
+  <meta property="og:title" content="James Turrell — Site-Specific Works Map">
+  <meta property="og:description" content="Interactive world map of James Turrell's site-specific works, Skyspaces, permanent installations, and architectural light projects.">
+  <meta property="og:url" content="https://msdk8734.github.io/turrell-map.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="James Turrell — Site-Specific Works Map">
+  <meta name="twitter:description" content="Interactive world map of James Turrell's site-specific works, Skyspaces, permanent installations, and architectural light projects.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=IBM+Plex+Sans+JP:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #6b665f;
+      --surface: #777067;
+      --surface-2: #837c72;
+      --border: #8d857c;
+      --text: #f3efe9;
+      --text-2: #dfd8cf;
+      --muted: #c3baaf;
+      --accent: #d1b48a;
+      --chip: rgba(255,255,255,0.08);
+      --high: #c8d8c0;
+      --medium: #e3c88d;
+      --low: #d8a7a0;
+      --site-specific: #d8cfbf;
+      --installation: #c6b3d8;
+      --architecture: #b9cddd;
+      --permanent: #b9d8c8;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', 'IBM Plex Sans JP', sans-serif;
+      overflow: hidden;
+    }
+
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(107, 102, 95, 0.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .logo-jp {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .logo-en {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header-note {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #app {
+      position: fixed;
+      inset: 54px 0 0 0;
+      display: flex;
+    }
+
+    #sidebar {
+      width: 340px;
+      min-width: 340px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .intro {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .intro p {
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--text-2);
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      padding: 7px 9px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      border-radius: 3px;
+      min-width: 88px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 2px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .filters {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      gap: 8px;
+    }
+
+    .control {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      border-radius: 3px;
+      padding: 10px 11px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .control::placeholder { color: var(--muted); }
+
+    .legend {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      padding: 0 18px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      font-size: 10px;
+      color: var(--text-2);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    #work-list {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    #work-list::-webkit-scrollbar { width: 4px; }
+    #work-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .work-item {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 13px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .work-item:hover { background: rgba(255,255,255,0.07); }
+    .work-item.active { background: rgba(209,180,138,0.16); }
+
+    .work-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
+    }
+
+    .work-info { min-width: 0; flex: 1; }
+
+    .work-name-ja {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .work-name-en {
+      margin-top: 2px;
+      font-size: 10px;
+      color: var(--text-2);
+      line-height: 1.45;
+    }
+
+    .work-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .tag {
+      padding: 2px 5px;
+      border-radius: 2px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      line-height: 1.3;
+      letter-spacing: 0.04em;
+      background: var(--chip);
+      color: var(--muted);
+    }
+
+    #map {
+      flex: 1;
+      background: #5f625e;
+    }
+    .leaflet-tile { filter: brightness(0.7) grayscale(0.72) contrast(1.02) saturate(0.7); }
+    .leaflet-container { background: #626660; }
+
+    .custom-marker {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid rgba(54,50,47,0.92);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.45);
+      transition: transform 0.12s ease;
+    }
+    .custom-marker.hover { transform: scale(1.45); }
+
+    #info-panel {
+      position: absolute;
+      top: 70px;
+      right: 16px;
+      width: 286px;
+      z-index: 900;
+      display: none;
+      background: rgba(119,112,103,0.98);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.28);
+      overflow: hidden;
+    }
+    #info-panel.visible { display: block; }
+    #info-close {
+      position: absolute;
+      top: 9px;
+      right: 11px;
+      border: none;
+      background: none;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .info-inner {
+      padding: 18px 18px 16px;
+    }
+
+    .info-bar {
+      width: 30px;
+      height: 2px;
+      border-radius: 1px;
+      margin-bottom: 10px;
+    }
+
+    .info-title {
+      font-size: 15px;
+      line-height: 1.35;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .info-subtitle {
+      margin-top: 3px;
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--text-2);
+    }
+
+    .info-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 12px 0;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .info-row {
+      display: grid;
+      gap: 2px;
+    }
+
+    .info-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .info-value {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: rgba(119,112,103,0.98);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.34);
+    }
+    .leaflet-popup-content {
+      margin: 0;
+      width: 256px !important;
+    }
+    .leaflet-popup-tip-container { display: none; }
+    .leaflet-popup-close-button {
+      color: var(--muted) !important;
+      top: 8px !important;
+      right: 8px !important;
+    }
+
+    .popup-inner {
+      padding: 15px;
+    }
+
+    .popup-title {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.35;
+      font-weight: 500;
+    }
+    .popup-meta {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    #no-results {
+      display: none;
+      padding: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 920px) {
+      #sidebar { width: 300px; min-width: 300px; }
+      #info-panel { width: 250px; }
+    }
+
+    @media (max-width: 760px) {
+      html, body { overflow: auto; }
+      #app {
+        position: static;
+        display: block;
+        inset: auto;
+      }
+      #header {
+        position: sticky;
+      }
+      #sidebar {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+      }
+      #map {
+        height: 62vh;
+      }
+      #info-panel {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        top: auto;
+        bottom: 12px;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="logo">
+      <span class="logo-jp">James Turrell</span>
+      <span class="logo-en">Site-Specific Works Map</span>
+    </div>
+    <div class="header-note">109 works / global map</div>
+  </header>
+
+  <div id="app">
+    <aside id="sidebar">
+      <section class="intro">
+        <p>
+          タレルの Skyspace、恒久インスタレーション、建築的光作品を一覧と地図で横断できるマップです。
+          左の作品リストから選ぶと、右の地図がその地点へジャンプします。
+        </p>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <section class="filters">
+        <input id="search" class="control" type="search" placeholder="作品名・会場名・国で検索">
+        <select id="countryFilter" class="control">
+          <option value="all">All countries</option>
+        </select>
+        <select id="confidenceFilter" class="control">
+          <option value="all">All coordinate confidence</option>
+          <option value="high">High only</option>
+          <option value="medium">High + Medium</option>
+          <option value="low">Low only</option>
+        </select>
+      </section>
+
+      <div class="legend">
+        <span class="legend-chip"><span class="legend-dot" style="background:var(--high)"></span>high</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:var(--medium)"></span>medium</span>
+        <span class="legend-chip"><span class="legend-dot" style="background:var(--low)"></span>low</span>
+      </div>
+
+      <div id="work-list"></div>
+      <div id="no-results">No works matched the current filters.</div>
+    </aside>
+
+    <div id="map"></div>
+
+    <aside id="info-panel">
+      <button id="info-close" aria-label="Close">×</button>
+      <div class="info-inner" id="info-content"></div>
+    </aside>
+  </div>
+
+  <script>
+    const COLOR_BY_CATEGORY = {
+      "site-specific": getComputedStyle(document.documentElement).getPropertyValue('--site-specific').trim(),
+      "installation": getComputedStyle(document.documentElement).getPropertyValue('--installation').trim(),
+      "architecture": getComputedStyle(document.documentElement).getPropertyValue('--architecture').trim(),
+      "permanent": getComputedStyle(document.documentElement).getPropertyValue('--permanent').trim()
+    };
+    const COLOR_BY_CONFIDENCE = {
+      high: getComputedStyle(document.documentElement).getPropertyValue('--high').trim(),
+      medium: getComputedStyle(document.documentElement).getPropertyValue('--medium').trim(),
+      low: getComputedStyle(document.documentElement).getPropertyValue('--low').trim(),
+      unknown: getComputedStyle(document.documentElement).getPropertyValue('--low').trim()
+    };
+    const CONFIDENCE_RANK = { high: 3, medium: 2, low: 1, unknown: 0 };
+
+    const workList = document.getElementById('work-list');
+    const noResults = document.getElementById('no-results');
+    const statsEl = document.getElementById('stats');
+    const searchEl = document.getElementById('search');
+    const countryFilterEl = document.getElementById('countryFilter');
+    const confidenceFilterEl = document.getElementById('confidenceFilter');
+    const infoPanel = document.getElementById('info-panel');
+    const infoContent = document.getElementById('info-content');
+    const infoClose = document.getElementById('info-close');
+
+    const map = L.map('map', { zoomControl: false, worldCopyJump: true }).setView([28, 12], 2.1);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    let works = [];
+    const markers = {};
+    let activeId = null;
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function markerColor(work) {
+      return COLOR_BY_CONFIDENCE[work.confidence] || COLOR_BY_CATEGORY[work.category] || COLOR_BY_CONFIDENCE.low;
+    }
+
+    function makeIcon(work) {
+      return L.divIcon({
+        className: '',
+        html: `<div class="custom-marker" style="background:${markerColor(work)}"></div>`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+      });
+    }
+
+    function buildStats(items) {
+      const countries = new Set(items.map(w => w.country).filter(Boolean)).size;
+      const lowCount = items.filter(w => w.confidence === 'low').length;
+      statsEl.innerHTML = `
+        <div class="stat"><strong>${items.length}</strong><span>works</span></div>
+        <div class="stat"><strong>${countries}</strong><span>countries</span></div>
+        <div class="stat"><strong>${lowCount}</strong><span>low confidence</span></div>
+      `;
+    }
+
+    function buildCountryFilter(items) {
+      const countries = Array.from(new Set(items.map(w => w.country).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+      countryFilterEl.innerHTML = '<option value="all">All countries</option>' +
+        countries.map(country => `<option value="${escapeHtml(country)}">${escapeHtml(country)}</option>`).join('');
+    }
+
+    function renderInfo(work) {
+      const color = markerColor(work);
+      infoContent.innerHTML = `
+        <div class="info-bar" style="background:${color}"></div>
+        <div class="info-title">${escapeHtml(work.nameJa || work.name)}</div>
+        <div class="info-subtitle">${escapeHtml(work.venue)}</div>
+        <div class="info-divider"></div>
+        <div class="info-grid">
+          <div class="info-row"><div class="info-label">Year</div><div class="info-value">${escapeHtml(work.year || 'n/a')}</div></div>
+          <div class="info-row"><div class="info-label">Type</div><div class="info-value">${escapeHtml(work.type)}</div></div>
+          <div class="info-row"><div class="info-label">Location</div><div class="info-value">${escapeHtml(work.cityRegion)}, ${escapeHtml(work.country)}</div></div>
+          <div class="info-row"><div class="info-label">Access</div><div class="info-value">${escapeHtml(work.accessText)}</div></div>
+          <div class="info-row"><div class="info-label">Status</div><div class="info-value">${escapeHtml(work.status)}</div></div>
+          <div class="info-row"><div class="info-label">Coordinate Confidence</div><div class="info-value">${escapeHtml(work.confidence)}</div></div>
+          <div class="info-row"><div class="info-label">Geocode Match</div><div class="info-value">${escapeHtml(work.geocodeLabel || 'n/a')}</div></div>
+          <div class="info-row"><div class="info-label">Source</div><div class="info-value">${escapeHtml(work.source)}</div></div>
+        </div>
+      `;
+      infoPanel.classList.add('visible');
+    }
+
+    function setActive(id) {
+      activeId = id;
+      document.querySelectorAll('.work-item').forEach(node => {
+        node.classList.toggle('active', Number(node.dataset.id) === id);
+      });
+      Object.entries(markers).forEach(([key, marker]) => {
+        const el = marker.getElement();
+        if (!el) return;
+        el.querySelector('.custom-marker')?.classList.toggle('hover', Number(key) === id);
+      });
+    }
+
+    function selectWork(id, fly = false) {
+      const work = works.find(w => w.id === id);
+      if (!work) return;
+      setActive(id);
+      renderInfo(work);
+      if (fly) {
+        map.flyTo([work.lat, work.lng], 6, { animate: true, duration: 1.2 });
+      }
+      markers[id]?.openPopup();
+    }
+
+    function matchesSearch(work, query) {
+      if (!query) return true;
+      const haystack = [
+        work.name,
+        work.nameJa,
+        work.venue,
+        work.cityRegion,
+        work.country,
+        work.type,
+        work.status
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    }
+
+    function matchesConfidence(work, filterValue) {
+      if (filterValue === 'all') return true;
+      if (filterValue === 'low') return work.confidence === 'low';
+      if (filterValue === 'medium') return CONFIDENCE_RANK[work.confidence] >= CONFIDENCE_RANK.medium;
+      return work.confidence === 'high';
+    }
+
+    function applyFilters() {
+      const query = searchEl.value.trim().toLowerCase();
+      const country = countryFilterEl.value;
+      const confidence = confidenceFilterEl.value;
+
+      const filtered = works.filter(work =>
+        matchesSearch(work, query) &&
+        (country === 'all' || work.country === country) &&
+        matchesConfidence(work, confidence)
+      );
+
+      workList.innerHTML = '';
+      noResults.style.display = filtered.length ? 'none' : 'block';
+
+      Object.values(markers).forEach(marker => {
+        if (map.hasLayer(marker)) marker.remove();
+      });
+
+      filtered.forEach(work => {
+        const marker = markers[work.id];
+        marker.addTo(map);
+
+        const item = document.createElement('div');
+        item.className = 'work-item';
+        item.dataset.id = work.id;
+        item.innerHTML = `
+          <div class="work-dot" style="background:${markerColor(work)}"></div>
+          <div class="work-info">
+            <div class="work-name-ja">${escapeHtml(work.nameJa || work.name)}</div>
+            <div class="work-name-en">${escapeHtml(work.venue)} / ${escapeHtml(work.cityRegion)}, ${escapeHtml(work.country)}</div>
+            <div class="work-meta">
+              <span class="tag">${escapeHtml(work.year || 'n/a')}</span>
+              <span class="tag">${escapeHtml(work.type)}</span>
+              <span class="tag">${escapeHtml(work.confidence)}</span>
+            </div>
+          </div>
+        `;
+        item.addEventListener('click', () => selectWork(work.id, true));
+        workList.appendChild(item);
+      });
+
+      if (filtered.length) {
+        const bounds = L.latLngBounds(filtered.map(work => [work.lat, work.lng]));
+        map.fitBounds(bounds.pad(0.2));
+      }
+
+      if (activeId && filtered.some(work => work.id === activeId)) {
+        setActive(activeId);
+      } else if (!filtered.length) {
+        infoPanel.classList.remove('visible');
+        activeId = null;
+      }
+    }
+
+    infoClose.addEventListener('click', () => infoPanel.classList.remove('visible'));
+    searchEl.addEventListener('input', applyFilters);
+    countryFilterEl.addEventListener('change', applyFilters);
+    confidenceFilterEl.addEventListener('change', applyFilters);
+
+    fetch('data/turrell.json')
+      .then(r => r.json())
+      .then(data => {
+        works = data.filter(work => typeof work.lat === 'number' && typeof work.lng === 'number');
+        works.forEach(work => {
+          const marker = L.marker([work.lat, work.lng], { icon: makeIcon(work) });
+          marker.bindPopup(`
+            <div class="popup-inner">
+              <div class="popup-title">${escapeHtml(work.nameJa || work.name)}</div>
+              <div class="popup-meta">${escapeHtml(work.venue)}<br>${escapeHtml(work.cityRegion)}, ${escapeHtml(work.country)}<br>${escapeHtml(work.type)} / ${escapeHtml(work.accessText)} / confidence: ${escapeHtml(work.confidence)}</div>
+            </div>
+          `);
+          marker.on('click', () => selectWork(work.id, false));
+          marker.on('mouseover', () => marker.getElement()?.querySelector('.custom-marker')?.classList.add('hover'));
+          marker.on('mouseout', () => {
+            if (work.id !== activeId) marker.getElement()?.querySelector('.custom-marker')?.classList.remove('hover');
+          });
+          markers[work.id] = marker;
+        });
+
+        buildStats(works);
+        buildCountryFilter(works);
+        applyFilters();
+      })
+      .catch(error => {
+        console.error('Failed to load turrell.json:', error);
+        noResults.style.display = 'block';
+        noResults.textContent = 'Failed to load data/turrell.json';
+      });
+  </script>
+</body>
+</html>

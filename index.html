@@ -157,6 +157,10 @@
     background: linear-gradient(135deg, #6a6a6b 0%, #7a7a7b 50%, #868687 100%);
     overflow: hidden;
   }
+  .card-preview.turrell-theme {
+    background: linear-gradient(135deg, #5f5b56 0%, #777067 48%, #8a8177 100%);
+    overflow: hidden;
+  }
   /* ── Castle theme ── */
   .card-preview.castle-theme {
     background: linear-gradient(160deg, #f5e8c8 0%, #e8c87a 40%, #c8783a 75%, #8b2020 100%);
@@ -292,6 +296,10 @@
   /* ── Sugimoto map preview ── */
   .sugimoto-preview { position: absolute; inset: 0; overflow: hidden; }
   .sgmt-label { position: absolute; top: 13px; left: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.14em; color: #c8b89a; opacity: 0.75; text-transform: uppercase; }
+
+  /* ── Turrell map preview ── */
+  .turrell-preview { position: absolute; inset: 0; overflow: hidden; }
+  .turrell-label { position: absolute; top: 13px; left: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.14em; color: #ead5b3; opacity: 0.78; text-transform: uppercase; }
 
   /* ── Castle map preview ── */
   .castle-preview { position: absolute; inset: 0; overflow: hidden; }
@@ -723,7 +731,49 @@
     </div>
   </a>
 
-  <!-- 5. Japanese Castle Map -->
+  <!-- 5. James Turrell — Site-Specific Works Map -->
+  <a class="card" href="turrell-map.html">
+    <div class="card-preview turrell-theme">
+      <div class="turrell-preview">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 300 180" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="turrellGlow" cx="50%" cy="34%" r="52%">
+              <stop offset="0%" stop-color="#fff5d4" stop-opacity="0.92"/>
+              <stop offset="30%" stop-color="#f4d9a1" stop-opacity="0.78"/>
+              <stop offset="62%" stop-color="#d4b28a" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="#8b7d73" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="300" height="180" fill="url(#turrellGlow)"/>
+          <ellipse cx="150" cy="76" rx="94" ry="42" fill="none" stroke="#e8cfab" stroke-width="1.1" opacity="0.55"/>
+          <ellipse cx="150" cy="76" rx="72" ry="29" fill="none" stroke="#d6b48e" stroke-width="0.7" opacity="0.45"/>
+          <ellipse cx="150" cy="76" rx="48" ry="18" fill="none" stroke="#f5e8cb" stroke-width="0.5" opacity="0.5"/>
+          <path d="M58 132 Q150 86 242 132" fill="none" stroke="#f0dcc1" stroke-width="1.2" opacity="0.35"/>
+          <path d="M76 142 Q150 106 224 142" fill="none" stroke="#e4c49e" stroke-width="0.9" opacity="0.3"/>
+          <path d="M102 152 Q150 128 198 152" fill="none" stroke="#d8b086" stroke-width="0.7" opacity="0.28"/>
+          <circle cx="94" cy="104" r="4.2" fill="#c2d7ce" opacity="0.9"/>
+          <circle cx="121" cy="96" r="3.2" fill="#d8c0ea" opacity="0.82"/>
+          <circle cx="177" cy="91" r="4.6" fill="#f1dfb6" opacity="0.88"/>
+          <circle cx="212" cy="111" r="3.4" fill="#d8a7a0" opacity="0.84"/>
+          <circle cx="150" cy="76" r="8" fill="#fff6df" opacity="0.95"/>
+        </svg>
+        <div class="turrell-label">James Turrell</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Site-Specific Map</div>
+      <div class="card-title">James Turrell — Site-Specific Works</div>
+      <div class="card-desc">A world map of James Turrell's Skyspaces, permanent installations, architectural light projects, and site-specific works across museums, estates, campuses, and public sites.</div>
+      <div class="card-meta">
+        <span class="meta-tag">Leaflet.js</span>
+        <span class="meta-tag">Light Art</span>
+        <span class="meta-tag">Architecture</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- 6. Japanese Castle Map -->
   <a class="card" href="castles-map.html">
     <div class="card-preview castle-theme">
       <div class="castle-preview">
@@ -860,7 +910,7 @@
     </div>
   </a>
 
-  <!-- 6. Tokyo Heatmap -->
+  <!-- 7. Tokyo Heatmap -->
   <a class="card" href="tokyo-heatmap.html">
     <div class="card-preview heatmap-theme">
       <div class="heat-grid">
@@ -885,7 +935,7 @@
     </div>
   </a>
 
-  <!-- 7. Ramen Map -->
+  <!-- 8. Ramen Map -->
   <a class="card" href="ramen-map.html">
     <div class="card-preview ramen-theme">
       <span class="preview-icon">🍜</span>
