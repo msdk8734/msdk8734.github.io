@@ -24,7 +24,7 @@ msdk8734.github.io/
 ├── index.html                    ← トップページ（杉本マップのカード追加済み）
 ├── sugimoto-map.html             ← 杉本マップ本体
 ├── data/
-│   └── sugimoto.json             ← 作品データ（16件）
+│   └── sugimoto.json             ← 作品データ（17件）
 ├── shrines-temples-map.html
 ├── japan-population-map-2025.html
 ├── japan-population-pyramid.html
@@ -97,7 +97,7 @@ msdk8734.github.io/
 
 ---
 
-## 現在の作品リスト（16件）
+## 現在の作品リスト（17件）
 
 | id | 作品名 | 国 | 年 | category | access |
 |---|---|---|---|---|---|
@@ -117,6 +117,7 @@ msdk8734.github.io/
 | 14 | Confession of Zero | Italy | 2014 | installation | limited |
 | 15 | Japan Society Atrium Garden | USA | 2017 | architecture | public |
 | 16 | Time Exposed | Japan | 2006 | permanent-collection | public |
+| 17 | VILLA COUCOU | Japan | 1957 | architecture | reservation |
 
 **サイドバーの表示順**: 国別（Japan → USA → France → Italy）→ 年代順
 

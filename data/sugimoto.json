@@ -238,5 +238,20 @@
     "lng": 133.9908889,
     "description": "A permanent installation of Sugimoto's 'Seascapes' series photographs at Benesse House Museum. The works are displayed as a unified site-specific presentation, in dialogue with the actual sea view visible through the museum's windows.",
     "url": "https://benesse-artsite.jp/en/art/benessehouse-museum.html"
+  },
+  {
+    "id": 17,
+    "name": "VILLA COUCOU",
+    "nameJa": "ヴィラ・クゥクゥ（近藤邸）",
+    "year": 1957,
+    "location": "Shibuya, Tokyo, Japan",
+    "locationJa": "東京都渋谷区",
+    "country": "Japan",
+    "category": "architecture",
+    "access": "reservation",
+    "lat": 35.67261040104697,
+    "lng": 139.67771196582677,
+    "description": "Representative early work by architect Takamasa Yoshizaka, completed in 1957 after his return from Le Corbusier's atelier. Located in Shibuya, the Kondo Residence was later renewed through a collaboration between New Material Research Laboratory's Hiroshi Sugimoto and Tomoyuki Sakakida. Visits are available by advance reservation, with admission priced at 1,000 yen.",
+    "url": "https://villacoucou-tokyo.peatix.com"
   }
 ]
