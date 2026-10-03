@@ -128,12 +128,14 @@ def build(csv_path):
                 code: {**row, "population": pref_population[code]["total"], "per100k": row["count"] / pref_population[code]["total"] * 100000}
                 for code, row in pref_counts["prefectures"].items()
             },
-            "municipalities": {row["code"]: row for row in ranking["modes"]["city"] if row["code"] in featured_codes},
+            "municipalities": {row["code"]: row for row in ranking["modes"]["city"] if row["code"] in featured_codes or row["prefCode"] == "40"},
             "topTenCodes": [row["code"] for row in top_ten],
         },
         "landmarks": [
             landmark("tokyo-station", "chiyoda", "Tokyo Station", ["2166"], "https://store.starbucks.co.jp/detail-2166/"),
             landmark("aeon-mall-hiezu", "hiezu", "AEON Mall Hiezu", ["1416"], "https://www.aeon.jp/sc/hiezu/access/"),
+            landmark("taga-upbound", "taga", "Taga SA · upbound", ["932"], "https://store.starbucks.co.jp/detail-932/"),
+            landmark("taga-downbound", "taga", "Taga SA · downbound", ["980"], "https://store.starbucks.co.jp/detail-980/"),
             landmark("kix-terminal-1", "tajiri", "Kansai Airport · Terminal 1", ["677", "4252"], "https://store.starbucks.co.jp/detail-677/"),
         ],
         "sources": [

@@ -53,8 +53,11 @@ class StorySnapshotTests(unittest.TestCase):
 
     def test_featured_cases_and_context_are_historical(self):
         counts = Counter(s["muniCode"] for s in self.data["stores"])
-        self.assertEqual([counts[c] for c in ("13101", "31384", "27362")], [48, 1, 2])
-        self.assertEqual(len(self.data["landmarks"]), 3)
+        self.assertEqual([counts[c] for c in ("13101", "31384", "25443", "27362")], [48, 1, 2, 2])
+        self.assertEqual(len(self.data["landmarks"]), 5)
+        self.assertEqual(self.data["statistics"]["topTenCodes"][:4], ["13101", "31384", "25443", "27362"])
+        taga = [s for s in self.data["stores"] if s["muniCode"] == "25443"]
+        self.assertEqual({s["id"] for s in taga}, {"932", "980"})
         ids = {s["id"] for s in self.data["stores"]}
         for landmark in self.data["landmarks"]:
             self.assertTrue(set(landmark["sourceStoreIds"]) <= ids)
@@ -65,7 +68,7 @@ class StorySnapshotTests(unittest.TestCase):
         national = stats["national"]
         self.assertEqual(national["population"], 124330690)
         self.assertAlmostEqual(national["per100k"], 2108 / 124330690 * 100000)
-        for name, code in (("chiyoda", "13101"), ("hiezu", "31384"), ("tajiri", "27362")):
+        for name, code in (("chiyoda", "13101"), ("hiezu", "31384"), ("taga", "25443"), ("tajiri", "27362")):
             row = stats["municipalities"][code]
             shown = re.search(rf'data-stat="{name}-rate">([^<]+)', self.html).group(1)
             self.assertEqual(shown, f'{row["per100k"]:.1f}')
@@ -86,8 +89,30 @@ class StorySnapshotTests(unittest.TestCase):
             values = [unescape(re.sub('<[^>]+>', '', value)) for value in re.findall(r'<td>(.*?)</td>', markup)]
             self.assertEqual(values[1:], [str(row["count"]), f'{row["population"]:,}', f'{row["per100k"]:.1f}'])
 
+    def test_fukuoka_city_units_cover_boundaries_and_reconcile(self):
+        stats = self.data["statistics"]
+        rows = [r for r in stats["municipalities"].values() if r["prefCode"] == "40"]
+        self.assertEqual(len(rows), 60)
+        self.assertEqual(sum(r["count"] for r in rows), stats["prefectures"]["40"]["count"])
+        counts = Counter(s["muniCode"] for s in self.data["stores"])
+        codes = set()
+        for row in rows:
+            ward_codes = row.get("aggregatedWardCodes", [row["code"]])
+            self.assertFalse(codes.intersection(ward_codes))
+            codes.update(ward_codes)
+            self.assertEqual(sum(counts[c] for c in ward_codes), row["count"])
+            self.assertAlmostEqual(row["per100k"], row["count"] / row["population"] * 100000, places=5)
+        features = json.loads((ROOT / "geo-json/pref_40.geojson").read_text())["features"]
+        self.assertEqual({f["properties"]["code"] for f in features} - codes, {"40000"})
+
+    def test_featured_prefecture_ranks_use_all_47(self):
+        prefs = self.data["statistics"]["prefectures"]
+        for code, total, rate in [("13",1,1),("47",15,2),("11",5,29),("01",9,33),("14",4,17),("12",6,19)]:
+            for key, expected in [("count",total),("per100k",rate)]:
+                self.assertEqual(1 + sum(r[key] > prefs[code][key] for r in prefs.values()), expected)
+
     def test_chapters_and_local_links_resolve(self):
-        self.assertEqual(self.article.steps, list(range(6)))
+        self.assertEqual(self.article.steps, list(range(10)))
         self.assertEqual(len(self.article.ids), len(set(self.article.ids)))
         for link in self.article.links:
             if link.startswith('#'):

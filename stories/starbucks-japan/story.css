@@ -1205,3 +1205,51 @@ td small {
     text-align:right
   }
 }
+
+/* Comparison controls sit with the explanation, leaving the map unobstructed. */
+.scene-controls {
+  display:flex;
+  gap:4px;
+  padding:4px;
+  margin:20px 0 14px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#edf1e9;
+}
+.scene-controls button {
+  flex:1;
+  border:0;
+  border-radius:5px;
+  padding:10px 6px;
+  background:transparent;
+  color:var(--green);
+  font:500 11px var(--sans);
+  cursor:pointer;
+  min-height:40px;
+}
+.scene-controls button[aria-pressed=true] { background:var(--green);color:white }
+.scene-controls button:focus-visible { outline:2px solid #b5672b;outline-offset:3px }
+.metric-ranking { margin:16px 0;font:11px/1.5 var(--mono) }
+.metric-ranking>div { display:grid;grid-template-columns:1fr 65px 66px;gap:6px;padding:9px 0;border-bottom:1px solid var(--line) }
+.metric-ranking>div>:not(:first-child) { text-align:right }
+.metric-ranking .rank-heading { font:10px var(--sans);color:var(--muted) }
+.pref-shape,.municipal-shape { transition:fill 650ms ease,stroke 650ms ease }
+.chapter-nav { min-width:0;overflow-x:auto }
+.chapter-nav a { flex-shrink:0 }
+.nav-back { flex-shrink:0 }
+@media(max-width:640px) {
+  .chapter-nav a { width:25px;height:30px }
+  .scene-controls { margin-top:16px }
+  .metric-ranking { font-size:11px }
+}
+@media(prefers-reduced-motion:reduce) {
+  .pref-shape,.municipal-shape { transition:none }
+}
+@media print { .scene-controls { display:none } }
+@media(max-width:360px) {
+  .story-nav { padding-inline:12px;gap:6px }
+  .nav-back { font-size:10px }
+}
+@media(max-width:360px) {
+  .chapter-nav a { width:22px }
+}
