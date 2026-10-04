@@ -18,11 +18,31 @@ function placeMarkup(item) {
   const totalRank=nationalRank(item,'count'),rateRank=nationalRank(item,'per100k');
   return `<h3>${escapeHTML(item.nameEn)}</h3><p>${escapeHTML(item.nameJa)}</p><dl><div><dt>Stores</dt><dd>${formatCount(item.count)}</dd></div><div><dt>Residents · 2025</dt><dd>${formatPopulation(item.population)}</dd></div><div><dt>Per 100,000</dt><dd>${item.population>0?item.per100k.toFixed(2):'No data'}</dd></div></dl><p class="rank-change">National rank: <strong>#${totalRank??'—'} → #${rateRank??'—'}</strong><br>total stores → per 100k · ${item.code.length===2?'47 prefectures':currentNationalMode==='city'?'City Mode':'Ward Mode'}</p>`;
 }
+function selectedMarkup(item) {
+  const total=nationalRank(item,'count'),rate=nationalRank(item,'per100k');
+  const added=comparison.some(r=>r.code===item.code);
+  return `<header class="detail-heading"><div><h3>${escapeHTML(item.nameEn)}</h3><p>${escapeHTML(item.nameJa)}${item.prefNameEn?' · '+escapeHTML(item.prefNameEn):''}</p></div><button type="button" data-close-detail aria-label="Close selected place">×</button></header>
+    <dl class="detail-metrics"><div><dt>Stores</dt><dd>${formatCount(item.count)}</dd></div><div><dt>Per 100k</dt><dd>${item.population?item.per100k.toFixed(2):'—'}</dd></div><div><dt>Residents · 2025</dt><dd>${formatPopulation(item.population)}</dd></div></dl>
+    <footer class="detail-footer"><p><span>National rank</span><strong>#${total??'—'} <span aria-label="to">→</span> #${rate??'—'}</strong><small>Stores → per 100k</small></p><button type="button" id="add-comparison" ${added||comparison.length>=3?'disabled':''}>${added?'Added ✓':'+ Compare'}</button></footer>`;
+}
+// Keep the containing city readable while highlighting an individual ward.
+function updateWardContext(code=selectedPlace?.code) {
+  const paths=[...document.querySelectorAll('.city-path')];
+  const parent=currentNationalMode==='ward' ? paths.find(el=>el.dataset.code===code)?.dataset.parentCity : '';
+  paths.forEach(el=>{
+    const sameCity=!!parent && el.dataset.parentCity===parent;
+    el.classList.toggle('ward-city-context',sameCity);
+    el.classList.toggle('outside-ward-city',!!parent && !sameCity);
+    if(sameCity)el.classList.remove('dimmed');
+  });
+}
 function updateExplorer() {
   if(!explorerReady)return;
   const panel=byId('place-detail');panel.hidden=!selectedPlace;
   document.querySelectorAll('.city-path,.pref-path').forEach(el=>el.classList.toggle('selected-place',(el.dataset.rankkey||el.dataset.code)===selectedPlace?.code));
-  if(selectedPlace)panel.innerHTML=`<button type="button" data-close-detail aria-label="Close selected place">×</button>${placeMarkup(selectedPlace)}<button type="button" id="add-comparison" ${comparison.some(r=>r.code===selectedPlace.code)||comparison.length>=3?'disabled':''}>Add to comparison</button>`;
+  updateWardContext();
+  document.body.classList.toggle('has-selection',!!selectedPlace);
+  if(selectedPlace){hideTip();panel.innerHTML=selectedMarkup(selectedPlace);}
   byId('compare-open').textContent=`Compare (${comparison.length}/3)`;
   byId('compare-content').innerHTML=comparison.length?comparison.map(item=>`<article>${placeMarkup(item)}<button type="button" data-remove="${item.code}">Remove ${escapeHTML(item.nameEn)}</button></article>`).join(''):'<p>Search for a place or select it on the map, then choose “Add to comparison”.</p>';
   if(!restoringView)saveView();

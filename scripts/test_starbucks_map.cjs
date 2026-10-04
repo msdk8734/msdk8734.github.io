@@ -22,6 +22,20 @@ context.currentNationalMode='ward';context.drawPrefectureMunicipalities('40');
 assert(Math.abs(context.legend[1]-8.937793)<1e-5,'ward legend must include the largest ward value');
 assert.equal(context.currentRankItems[0].code,'40133');
 assert.notEqual(context.cityLayerG.children.find(e=>e.attrs['data-code']==='40133').attrs.fill,context.cityLayerG.children.find(e=>e.attrs['data-code']==='40132').attrs.fill);
+const wardPaths=context.cityLayerG.children.map(e=>({
+  dataset:{code:e.attrs['data-code'],parentCity:e.attrs['data-parent-city']},
+  classes:new Set(['dimmed']),
+  classList:{toggle(name,on){on?this.owner.classes.add(name):this.owner.classes.delete(name);},remove(name){this.owner.classes.delete(name);}}
+}));
+wardPaths.forEach(e=>e.classList.owner=e);
+context.document.querySelectorAll=()=>wardPaths;
+context.selectedPlace={code:'40106'};
+vm.runInContext(fn(extra,'updateWardContext'),context);
+context.updateWardContext();
+assert.equal(wardPaths.filter(e=>e.classes.has('ward-city-context')).length,7,'selected Kitakyushu ward must retain all seven wards as context');
+assert(wardPaths.filter(e=>e.dataset.parentCity==='40100').every(e=>!e.classes.has('dimmed')));
+context.selectedPlace=null;context.updateWardContext();
+assert(wardPaths.every(e=>!e.classes.has('ward-city-context')&&!e.classes.has('outside-ward-city')),'closing selection clears city context');
 context.scaleMode='national';context.drawPrefectureMunicipalities('40');
 assert.equal(context.legend[1],Math.max(...context.getNationalItems().map(r=>r.per100k||0)));
 console.log('Passed: linear legend, city aggregation, ward ranking, unclipped local range, national fixed scale.');
