@@ -1,0 +1,75 @@
+#explorer-toolbar { grid-column:1/-1;display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin-top:8px }
+#header { flex-wrap:wrap }
+#explorer-toolbar { flex-basis:100% }
+#explorer-toolbar button,#explorer-toolbar select,#place-detail button,#compare-dialog button { border:1px solid #b8cbbf;border-radius:6px;background:#fff;color:#174f39;padding:8px 10px;font:inherit;cursor:pointer;min-height:36px }
+#explorer-toolbar label { display:block;font-size:11px;color:#435b4b }
+#place-search { width:260px;max-width:100%;padding:9px;border:1px solid #b8cbbf;border-radius:6px;font:inherit }
+.search-wrap { position:relative }
+#search-results { position:absolute;top:100%;left:0;width:340px;max-width:85vw;max-height:280px;overflow:auto;background:white;box-shadow:0 5px 25px #0003;z-index:100;padding:6px }
+#search-results button { display:block;width:100%;text-align:left }
+#scale-note { font-size:10px;color:#435b4b;flex-basis:100%;grid-column:1/-1;margin-top:4px }
+#data-notes { font-size:11px;max-width:500px }
+#data-notes p { background:white;padding:12px;line-height:1.6 }
+#place-detail { position:fixed;z-index:105;bottom:30px;left:16px;width:270px;max-height:45vh;overflow:auto;border:1px solid #bacbbf;border-radius:10px;background:#fffffff5;padding:16px;box-shadow:0 4px 18px #0001 }
+#place-detail[hidden],#search-results[hidden] { display:none }
+#place-detail h3,#compare-dialog h3 { margin:0 25px 4px 0;font-size:16px }
+#place-detail p,#compare-dialog p { font-size:11px;line-height:1.6;margin:4px 0 10px }
+#place-detail [data-close-detail] { float:right;padding:0 8px }
+dl { margin:10px 0;font-size:12px } dl div { display:flex;justify-content:space-between;gap:12px;padding:5px 0 } dd { margin:0;font-weight:600 }
+.rank-change strong { color:#006241 }
+#compare-dialog { width:min(920px,94vw);max-height:85vh;overflow:auto;border:1px solid #bacbbf;border-radius:12px;padding:24px;color:#183d2b }
+#compare-dialog::backdrop { background:#1236 }
+#compare-content { display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px }
+#compare-content article { border:1px solid #d4dfd6;border-radius:8px;padding:16px }
+#compare-close { float:right }
+#explorer-status { position:fixed;bottom:0;left:12px;background:white;z-index:110;font-size:12px }
+.rk-item:focus-visible,.pref-path:focus-visible,.city-path:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid #b5672b;outline-offset:2px }
+button:disabled { opacity:.5;cursor:default!important }
+#hint { display:none }
+#map-svg .pref-path,#map-svg .city-path { transition:fill .35s }
+@media(max-width:720px) {
+ #header { padding:10px 12px;gap:6px;grid-template-columns:1fr }
+ .title-block h1 { font-size:16px }
+ .title-block .sub,.map-link { display:none }
+ .header-right { max-width:none;justify-self:stretch;align-items:stretch;display:grid;grid-template-columns:1fr auto;gap:4px }
+ .header-actions { grid-column:1/-1;justify-content:start }
+ .legend-label { font-size:9px;align-self:center }
+ .color-minmax { grid-column:2;font-size:9px }
+ #explorer-toolbar { gap:5px;align-items:center;margin-top:0 }
+ #explorer-toolbar label { font-size:9px }
+ #explorer-toolbar button,#explorer-toolbar select { font-size:10px;padding:6px;min-height:32px }
+ #place-search { width:155px;padding:7px;font-size:12px }
+ .search-wrap { flex:1 }
+ #data-notes { font-size:10px }
+ #scale-note { font-size:9px;margin:0 }
+ #zoom-label { top:auto;bottom:106px;left:auto;right:10px;transform:none;max-width:55vw;font-size:11px }
+ #place-detail { left:10px;right:10px;bottom:106px;width:auto;max-height:30vh;padding:12px }
+ #place-detail dl { display:flex;gap:16px;flex-wrap:wrap } #place-detail dl div { display:block } #place-detail dd { margin-top:3px }
+ #place-detail .rank-change { margin-bottom:5px }
+ #explorer-status { bottom:94px }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important;animation:none!important } }
+@media(min-width:721px) {
+ #header { display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:8px 16px }
+ .title-block .sub { max-width:410px }
+ .header-right { max-width:470px }
+ .header-actions { flex-wrap:wrap }
+ #explorer-toolbar { margin-top:0 }
+ #zoom-label { top:auto;bottom:16px;left:50%;transform:translateX(-50%);font-size:12px }
+}
+#compare-dialog { margin:auto }
+.city-path.selected-place,.pref-path.selected-place { stroke:#a65e28!important;stroke-width:2.5px!important;vector-effect:non-scaling-stroke }
+.sheet-label { font-size:10px;color:#355843;display:block;text-align:center }
+#bs-handle-area { min-height:28px }
+@media(max-width:360px) {
+ #back-btn { font-size:0;padding:7px 8px }
+ #back-btn::after { content:'← Japan';font-size:10px }
+ .metric-btn { padding:6px;font-size:9px }
+ .color-bar,.color-minmax { width:130px }
+ #explorer-toolbar .search-wrap { flex:1 1 140px;min-width:0 }
+ #place-search { width:100% }
+ #explorer-toolbar .scale-control { width:112px }
+ #scale-mode { width:112px }
+ #explorer-toolbar { column-gap:5px }
+ #explorer-toolbar button { min-height:30px }
+}

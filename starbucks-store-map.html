@@ -591,6 +591,7 @@ body {
   #hint { display: none; }
 }
 </style>
+<link rel="stylesheet" href="starbucks-map-explorer.css?v=20261004">
 </head>
 <body>
 
@@ -623,9 +624,18 @@ body {
     <div class="color-bar" id="color-bar"></div>
     <div class="color-minmax">
       <span id="minLabel">0</span>
-      <span id="maxLabel">0</span>
+      <span id="midLabel">0</span><span id="maxLabel">0</span>
     </div>
   </div>
+  <div id="explorer-toolbar">
+    <div class="search-wrap"><label for="place-search">Find a place / 地名検索</label><input id="place-search" type="search" placeholder="Taga / 多賀 / Tokyo" autocomplete="off" aria-controls="search-results"><div id="search-results" hidden></div></div>
+    <label class="scale-control">Color scale <select id="scale-mode"><option value="national">National fixed</option><option value="local">Current area</option></select></label>
+    <button type="button" id="compare-open">Compare (0/3)</button>
+    <button type="button" id="share-view">Copy view link</button>
+    <details id="data-notes"><summary>Data &amp; sources</summary><p>Stores: April 2026, 2,108 locations. Population: <a href="population-json/README.txt">2025 Basic Resident Registration</a>. Stores ÷ residents × 100,000. These are different dates and do not measure customers. <a href="data/starbucks-store-counts.json">Store counts</a> · <a href="data/starbucks-national-municipality-ranking.json">Municipal data</a> · <a href="stories/starbucks-japan/">Read the story</a></p></details>
+  </div>
+  <div id="scale-note" aria-live="polite"></div>
+
 </div>
 
 <div id="map-container">
@@ -651,6 +661,9 @@ body {
 </div>
 
 <div class="tooltip" id="tooltip"></div>
+<section id="place-detail" aria-label="Selected place" hidden></section>
+<dialog id="compare-dialog" aria-labelledby="compare-title"><button id="compare-close" type="button">Close ×</button><h2 id="compare-title">Compare places</h2><p>Up to three places. National ranks compare prefectures with prefectures, and municipalities within the selected City/Ward mode.</p><div id="compare-content"></div></dialog>
+<p id="explorer-status" role="status" aria-live="polite"></p>
 <div id="hint">Hover prefectures and ranking rows to cross-highlight · Click a prefecture to zoom in</div>
 
 <div id="bottom-sheet" role="region" aria-label="Ranking">
@@ -676,7 +689,7 @@ body {
 'use strict';
 
 const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const PANEL_W = (window.innerWidth > 720 && !IS_TOUCH) ? 250 : 0;
+let PANEL_W = (window.innerWidth > 720 && !IS_TOUCH) ? 250 : 0;
 const BS_PEEK_H = 96;
 const BS_HALF_R = 0.45;
 const BS_FULL_R = 0.88;
@@ -801,7 +814,7 @@ function featureToPath(feat) {
 
 function getColor(v, lo, hi) {
   if (hi <= lo) return `rgb(${C_LO.join(',')})`;
-  const t = Math.pow(Math.max(0, Math.min(1, (v - lo) / (hi - lo))), 0.58);
+  const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
   return `rgb(${Math.round(C_LO[0] + (C_HI[0] - C_LO[0]) * t)},${Math.round(C_LO[1] + (C_HI[1] - C_LO[1]) * t)},${Math.round(C_LO[2] + (C_HI[2] - C_LO[2]) * t)})`;
 }
 function getMetricValue(item) {
@@ -852,7 +865,7 @@ function getNationalItems() {
 }
 function rankingTitleForState() {
   if (currentPanelMode === PANEL_NATIONAL) return 'National Municipality Ranking';
-  return zoomedPrefCode ? 'Municipality Ranking' : 'Prefecture Ranking';
+  return zoomedPrefCode ? 'Within-prefecture ranking' : 'National prefecture ranking';
 }
 function rankingNoteForState() {
   if (currentPanelMode === PANEL_NATIONAL) {
@@ -871,17 +884,19 @@ function updateRankingHeader(title) {
 function applyPanelToggleUI() {
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === currentPanelMode);
+    btn.setAttribute('aria-pressed', String(btn.dataset.view === currentPanelMode));
   });
   document.querySelectorAll('[data-national-mode]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.nationalMode === currentNationalMode);
+    btn.setAttribute('aria-pressed', String(btn.dataset.nationalMode === currentNationalMode));
   });
   document.querySelectorAll('#national-mode-toggle, #bs-national-mode-toggle').forEach(el => {
-    el.classList.toggle('hidden', currentPanelMode !== PANEL_NATIONAL);
+    el.classList.remove('hidden');
   });
 }
 function buildListRow(item, value, width, subtitle, index = 0) {
   const nc = index === 0 ? 'rk-num gold' : index === 1 ? 'rk-num silver' : index === 2 ? 'rk-num bronze' : 'rk-num';
-  return `<div class="rk-item" data-code="${item.code}">
+  return `<div class="rk-item" role="button" tabindex="0" data-code="${item.code}">
       <span class="${nc}">${item.rank || ''}</span>
       <span class="rk-text">
         <span class="rk-name" title="${item.nameEn}">${item.nameEn}</span>
@@ -1114,7 +1129,7 @@ function animateToView(targetX, targetY, targetScale, onComplete) {
   const startX = viewX;
   const startY = viewY;
   const startScale = viewScale;
-  const duration = 380;
+  const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 380;
   let startTime = null;
 
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
@@ -1284,7 +1299,7 @@ svgEl.addEventListener('touchend', e => {
     }
 
     highlightPrefecture(code, true);
-    showPrefTip({ clientX: t.clientX, clientY: t.clientY }, item);
+    selectPlace(item,false);hideTip();
     lastTapTime = now;
     lastTapTarget = pathEl;
     return;
@@ -1297,8 +1312,8 @@ svgEl.addEventListener('touchend', e => {
     highlightMunicipality(rankKey, true);
     const wardRows = currentWardMap[rankKey] || null;
     const wardCode = pathEl.dataset.code;
-    const wardItem = pathEl.dataset.isward === '1' ? (currentMuniFeatureByCode[wardCode] || null) : null;
-    showMunicipalityTip({ clientX: t.clientX, clientY: t.clientY }, item, wardRows, wardItem);
+    const wardItem = null;
+    selectPlace(canonical(item.code)||item,false);hideTip();
     lastTapTime = now;
     lastTapTarget = pathEl;
   }
@@ -1362,6 +1377,8 @@ function setLegend(minVal, maxVal, label) {
   document.getElementById('legend-label').textContent = label;
   document.getElementById('minLabel').textContent = formatMetricValue(minVal);
   document.getElementById('maxLabel').textContent = formatMetricValue(maxVal);
+  document.getElementById('midLabel').textContent = formatMetricValue((minVal+maxVal)/2);
+  document.getElementById('scale-note').textContent = `${scaleMode==='national'?'National fixed scale':'Current area scale'} · linear · ${currentNationalMode==='city'?'cities combined':'wards separate'}`;
 }
 
 function clearOverviewHighlight() {
@@ -1582,7 +1599,10 @@ function applyPrefZoomState(prefCode) {
 }
 
 async function zoomInPrefecture(prefCode) {
-  if (zoomedPrefCode === prefCode) return;
+  if (zoomedPrefCode === prefCode && muniGeoCache[prefCode] && cityLayerG) return;
+  const version=++navigationVersion;
+  svgEl.setAttribute('aria-busy','true');
+  byId('explorer-status').textContent='Loading local map…';
   zoomedPrefCode = prefCode;
   hideTip();
   clearOverviewHighlight();
@@ -1593,6 +1613,7 @@ async function zoomInPrefecture(prefCode) {
   document.getElementById('hint').textContent = 'Hover municipalities and ranking rows to cross-highlight';
   applyPrefZoomState(prefCode);
 
+  try {
   if (!muniGeoCache[prefCode]) {
     setStatus('Loading municipality data…');
     const [geoRes, metaRes] = await Promise.all([
@@ -1600,13 +1621,18 @@ async function zoomInPrefecture(prefCode) {
       fetch(`population-json/municipalities/muni-pop-${prefCode}.json`),
     ]);
     if (!geoRes.ok || !metaRes.ok) {
-      showError('Could not load municipality zoom data.');
-      return;
+      throw new Error('Local map request failed');
     }
     muniGeoCache[prefCode] = await geoRes.json();
     muniMetaCache[prefCode] = await metaRes.json();
   }
 
+  } catch(error) {
+    if(version===navigationVersion){svgEl.setAttribute('aria-busy','false');byId('explorer-status').textContent='Local map unavailable. Try selecting the prefecture again.';}
+    return;
+  }
+
+  if(version!==navigationVersion || zoomedPrefCode!==prefCode)return;
   const feat = prefFeatMap[prefCode];
   const MAINLAND_CENTROID_FILTER = {
     '13': { minCy: 35.0, maxCx: 141.0 },
@@ -1646,14 +1672,19 @@ async function zoomInPrefecture(prefCode) {
   const [x1, y1] = project(hi, la);
   const pad = IS_TOUCH ? 40 : 80;
   const availW = svgW - PANEL_W - pad * 2;
-  const availH = svgH - pad * 2;
-  const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * 1.18;
+  const top=document.getElementById('header').offsetHeight+35;
+  const bottom=bsMobile?BS_PEEK_H+20+(selectedPlace?byId('place-detail').offsetHeight+12:0):40;
+  const availH = Math.max(100,svgH-top-bottom);
+  const fs = Math.min(availW / (x1 - x0), availH / (y1 - y0)) * .88;
   const targetScale = Math.min(fs, 80);
   const targetX = (svgW - PANEL_W) / 2 - targetScale * (x0 + x1) / 2;
-  const targetY = svgH / 2 - targetScale * (y0 + y1) / 2;
+  const targetY = top+availH/2 - targetScale * (y0 + y1) / 2;
 
   await new Promise(resolve => animateToView(targetX, targetY, targetScale, resolve));
+  if(version!==navigationVersion || zoomedPrefCode!==prefCode)return;
   drawPrefectureMunicipalities(prefCode);
+  svgEl.setAttribute('aria-busy','false');
+  byId('explorer-status').textContent='';
   renderCurrentPanel();
   if (bsMobile) bsSetState('peek');
 }
@@ -1690,7 +1721,7 @@ function drawPrefectureMunicipalities(prefCode) {
       const count = entries[code]?.count || 0;
       const population = meta[code]?.total || 0;
       const per100k = population > 0 ? (count / population) * 100000 : 0;
-      const rankKey = wardToCity[code] || code;
+      const rankKey = currentNationalMode === NATIONAL_MODE_CITY ? (wardToCity[code] || code) : code;
       const isWard = rankKey !== code;
       if (isWard) {
         if (!rankItemMap[rankKey]) {
@@ -1730,7 +1761,7 @@ function drawPrefectureMunicipalities(prefCode) {
   currentWardMap = wardMap;
   municipalityRankLookup = {};
   sortedItems.forEach(item => { municipalityRankLookup[item.code] = item.rank; });
-  const muniRange = calcMetricRange(rankItems);
+  const muniRange = colorRange(rankItems, true);
   municipalityMin = muniRange.min;
   municipalityMax = muniRange.max;
   setLegend(municipalityMin, municipalityMax, metricLegendLabel('municipality'));
@@ -1738,9 +1769,10 @@ function drawPrefectureMunicipalities(prefCode) {
   features.forEach(item => {
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('d', featureToPath(item.feature));
-    pathEl.setAttribute('fill', getColor(getMetricValue(item), municipalityMin, municipalityMax || 1));
+    pathEl.setAttribute('fill', getColor(getMetricValue(rankItemMap[item.rankKey]), municipalityMin, municipalityMax || 1));
     pathEl.setAttribute('fill-rule', 'evenodd');
     pathEl.setAttribute('class', 'city-path');
+    pathEl.setAttribute('tabindex','0');pathEl.setAttribute('role','button');pathEl.setAttribute('aria-label',rankItemMap[item.rankKey].nameEn);
     pathEl.setAttribute('data-code', item.code);
     pathEl.setAttribute('data-rankkey', item.rankKey);
     pathEl.setAttribute('data-isward', item.isWard ? '1' : '0');
@@ -1748,7 +1780,7 @@ function drawPrefectureMunicipalities(prefCode) {
       highlightMunicipality(item.rankKey, true);
       const rankItem = sortedItems.find(row => row.code === item.rankKey);
       const wardRows = wardMap[item.rankKey] || null;
-      const wardItem = item.isWard ? item : null;
+      const wardItem = null; // City mode tooltips use the same city unit as the fill.
       if (rankItem) showMunicipalityTip(e, rankItem, wardRows, wardItem);
     });
     pathEl.addEventListener('mousemove', moveTip);
@@ -1764,6 +1796,9 @@ function drawPrefectureMunicipalities(prefCode) {
 
 function zoomOut() {
   if (!zoomedPrefCode) return;
+  ++navigationVersion;
+  svgEl.setAttribute('aria-busy','false');
+  byId('explorer-status').textContent='';
   zoomedPrefCode = null;
   currentNationalSelection = null;
   hideTip();
@@ -1791,7 +1826,7 @@ function renderOverviewRanking() {
   currentOverviewItems = items;
   prefRankLookup = {};
   items.forEach(item => { prefRankLookup[item.code] = item.rank; });
-  const prefRange = calcMetricRange(items);
+  const prefRange = colorRange(items, false);
   overviewMin = prefRange.min;
   overviewMax = prefRange.max;
   setLegend(overviewMin, overviewMax, metricLegendLabel('prefecture'));
@@ -1830,7 +1865,7 @@ function applyNationalSelection(item) {
   const selectedPaths = Array.from(document.querySelectorAll(`.city-path[data-rankkey="${rankKey}"]`));
   selectedPaths.forEach(path => {
     if (!path.dataset.origFill) path.dataset.origFill = path.getAttribute('fill');
-    path.setAttribute('fill', SELECT_FILL);
+    path.classList.add('selected-place');
   });
   const point = getTooltipPointForPaths(selectedPaths);
   const rankItem = currentRankItems.find(entry => entry.code === rankKey) || item;
@@ -1884,6 +1919,7 @@ function renderNationalRanking() {
 }
 
 function renderCurrentPanel() {
+  updateExplorer();
   applyPanelToggleUI();
   markNationalSelection(currentPanelMode === PANEL_NATIONAL && currentNationalSelection ? currentNationalSelection.code : null);
   updateRankingHeader(rankingTitleForState());
@@ -1901,6 +1937,7 @@ function renderCurrentPanel() {
 function applyMetricToggleUI() {
   document.querySelectorAll('.metric-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.metric === currentMetric);
+    btn.setAttribute('aria-pressed', String(btn.dataset.metric === currentMetric));
   });
 }
 
@@ -1910,7 +1947,7 @@ function applyMetric(metric) {
   currentMetric = metric;
   applyMetricToggleUI();
   hideTip();
-  if (zoomedPrefCode) {
+  if (zoomedPrefCode && muniGeoCache[zoomedPrefCode]) {
     drawPrefectureMunicipalities(zoomedPrefCode);
     applyPrefZoomState(zoomedPrefCode);
   } else {
@@ -1952,6 +1989,11 @@ function initPanelToggles() {
     btn.addEventListener('click', () => {
       currentNationalMode = btn.dataset.nationalMode;
       hideTip();
+      if(zoomedPrefCode && muniGeoCache[zoomedPrefCode])drawPrefectureMunicipalities(zoomedPrefCode);
+      if(selectedPlace && selectedPlace.code.length>2)selectedPlace = getNationalItems().find(r=>r.code===selectedPlace.code) || null;
+      const previousCount=comparison.length;
+      comparison=comparison.map(r=>canonical(r.code)).filter(Boolean);
+      if(comparison.length<previousCount)byId('explorer-status').textContent='Comparisons outside this City/Ward mode were removed.';
       renderCurrentPanel();
     });
   });
@@ -1980,7 +2022,7 @@ async function init() {
     if (!geoRes.ok) throw new Error(`HTTP ${geoRes.status}`);
     const japanGeo = await geoRes.json();
     const allFeats = japanGeo.features.filter(f => f && f.geometry);
-    fitProjection(allFeats, svgW, svgH, 24, 116, 24 + PANEL_W, 40);
+    fitProjection(allFeats, svgW, svgH, 20, document.getElementById('header').offsetHeight+20, 20 + PANEL_W, bsMobile?120:40);
 
     const mapG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     mapG.id = 'map-g';
@@ -1997,6 +2039,7 @@ async function init() {
       pathEl.setAttribute('fill', getColor(getMetricValue(item), 0, 1));
       pathEl.setAttribute('fill-rule', 'evenodd');
       pathEl.setAttribute('class', 'pref-path clickable');
+      pathEl.setAttribute('tabindex','0');pathEl.setAttribute('role','button');pathEl.setAttribute('aria-label',item.nameEn);
       pathEl.setAttribute('data-code', code);
       pathEl.addEventListener('mouseenter', e => {
         if (zoomedPrefCode) return;
@@ -2023,19 +2066,16 @@ async function init() {
     initPanelToggles();
     document.getElementById('back-btn').addEventListener('click', zoomOut);
     hideOverlay();
+    await initExplorer();
   } catch (err) {
     showError(`Could not initialize <b>Starbucks Japan Store Map</b><br>${err.message}`);
   }
 }
 
-window.addEventListener('resize', () => {
-  svgW = window.innerWidth;
-  svgH = window.innerHeight;
-  svgEl.setAttribute('width', svgW);
-  svgEl.setAttribute('height', svgH);
-});
 
-init();
+
 </script>
+<script src="starbucks-map-explorer.js?v=20261004"></script>
+<script>init();</script>
 </body>
 </html>
