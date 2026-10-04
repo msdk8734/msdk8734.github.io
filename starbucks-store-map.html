@@ -596,7 +596,7 @@ body {
   #hint { display: none; }
 }
 </style>
-<link rel="stylesheet" href="starbucks-map-explorer.css?v=20261004e">
+<link rel="stylesheet" href="starbucks-map-explorer.css?v=20261004f">
 </head>
 <body>
 
@@ -1815,6 +1815,7 @@ function zoomOut() {
   svgEl.setAttribute('aria-busy','false');
   byId('explorer-status').textContent='';
   zoomedPrefCode = null;
+  focusedCity = null;
   currentNationalSelection = null;
   hideTip();
   if (cityLayerG) {
@@ -2003,6 +2004,7 @@ function initPanelToggles() {
   document.querySelectorAll('[data-national-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
       currentNationalMode = btn.dataset.nationalMode;
+      focusedCity=null;
       hideTip();
       if(zoomedPrefCode && muniGeoCache[zoomedPrefCode])drawPrefectureMunicipalities(zoomedPrefCode);
       if(selectedPlace && selectedPlace.code.length>2)selectedPlace = getNationalItems().find(r=>r.code===selectedPlace.code) || null;
@@ -2090,7 +2092,7 @@ async function init() {
 
 
 </script>
-<script src="starbucks-map-explorer.js?v=20261004e"></script>
+<script src="starbucks-map-explorer.js?v=20261004f"></script>
 <script>init();</script>
 </body>
 </html>

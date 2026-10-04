@@ -1,10 +1,15 @@
 /* Discovery, consistent scales and shareable state for the April 2026 map. */
 let scaleMode='national', selectedPlace=null, comparison=[], navigationVersion=0, resizeTimer;
+let focusedCity=null;
 let explorerReady=false, restoringView=false, sheetInitialized=false;
 const byId=id=>document.getElementById(id);
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function colorRange(items,municipal) {
-  const rows=scaleMode==='national'?(municipal?getNationalItems():Object.values(prefDataMap)):items;
+  let rows=scaleMode==='national'?(municipal?getNationalItems():Object.values(prefDataMap)):items;
+  if(municipal && scaleMode==='local' && currentNationalMode==='ward' && focusedCity) {
+    const wards=items.filter(r=>getNationalItems().find(w=>w.code===r.code)?.parentCode===focusedCity.code);
+    if(wards.length)rows=wards;
+  }
   return {min:0,max:Math.max(1,...rows.map(getMetricValue))};
 }
 function nationalRank(item,key) {
@@ -25,16 +30,33 @@ function selectedMarkup(item) {
     <dl class="detail-metrics"><div><dt>Stores</dt><dd>${formatCount(item.count)}</dd></div><div><dt>Per 100k</dt><dd>${item.population?item.per100k.toFixed(2):'—'}</dd></div><div><dt>Residents · 2025</dt><dd>${formatPopulation(item.population)}</dd></div></dl>
     <footer class="detail-footer"><p><span>National rank</span><strong>#${total??'—'} <span aria-label="to">→</span> #${rate??'—'}</strong><small>Stores → per 100k</small></p><button type="button" id="add-comparison" ${added||comparison.length>=3?'disabled':''}>${added?'Added ✓':'+ Compare'}</button></footer>`;
 }
-// Keep the containing city readable while highlighting an individual ward.
-function updateWardContext(code=selectedPlace?.code) {
+// City focus persists independently of the selected ward and its detail card.
+function focusCityForPlace(item) {
+  focusedCity=currentNationalMode==='ward' && item?.parentCode
+    ? {code:item.parentCode,name:item.parentNameEn,prefCode:item.prefCode}:null;
+}
+function clearPlaceSelection() {
+  selectedPlace=null;
+  currentNationalSelection=null;
+  clearMunicipalityHighlight();
+  hideTip();updateExplorer();
+}
+function updateWardContext() {
   const paths=[...document.querySelectorAll('.city-path')];
-  const parent=currentNationalMode==='ward' ? paths.find(el=>el.dataset.code===code)?.dataset.parentCity : '';
+  const parent=currentNationalMode==='ward' && focusedCity?.prefCode===zoomedPrefCode ? focusedCity.code : '';
+  const range=colorRange(currentRankItems,true);
   paths.forEach(el=>{
     const sameCity=!!parent && el.dataset.parentCity===parent;
     el.classList.toggle('ward-city-context',sameCity);
     el.classList.toggle('outside-ward-city',!!parent && !sameCity);
     if(sameCity)el.classList.remove('dimmed');
+    const row=currentRankItems.find(r=>r.code===el.dataset.rankkey);
+    if(row){el.setAttribute('fill',getColor(getMetricValue(row),range.min,range.max));delete el.dataset.origFill;}
   });
+  if(paths.length){
+    setLegend(range.min,range.max,metricLegendLabel('municipality'));
+    if(parent && scaleMode==='local')byId('scale-note').textContent=`Within ${focusedCity.name} · linear · wards separate`;
+  }
 }
 function updateExplorer() {
   if(!explorerReady)return;
@@ -51,12 +73,13 @@ function saveView() {
   const q=new URLSearchParams();q.set('metric',currentMetric);q.set('mode',currentNationalMode);q.set('scale',scaleMode);q.set('panel',currentPanelMode);
   if(zoomedPrefCode)q.set('pref',zoomedPrefCode);
   if(selectedPlace)q.set('place',selectedPlace.code);
+  if(focusedCity && currentNationalMode==='ward')q.set('city',focusedCity.code);
   if(comparison.length)q.set('compare',comparison.map(r=>r.code).join(','));
   history.replaceState(null,'',`${location.pathname}?${q}${location.hash}`);
 }
 async function selectPlace(item,navigate=true) {
   if(!item)return;
-  selectedPlace=item;updateExplorer();
+  focusCityForPlace(item);selectedPlace=item;updateExplorer();
   if(bsMobile)bsSetState('peek');
   if(navigate) {
     if(item.code.length===2)await zoomInPrefecture(item.code);
@@ -102,7 +125,9 @@ async function restoreView() {
   comparison=(q.get('compare')||'').split(',').map(canonical).filter(Boolean).filter((v,i,a)=>a.findIndex(r=>r.code===v.code)===i).slice(0,3);
   applyMetricToggleUI();renderOverviewRanking();renderCurrentPanel();
   const item=canonical(q.get('place'));
-  if(item){selectedPlace=item;updateExplorer();}
+  if(item){focusCityForPlace(item);selectedPlace=item;updateExplorer();}
+  const city=nationalMunicipalityData.modes.city.find(r=>r.code===q.get('city'));
+  if(currentNationalMode==='ward' && city)focusedCity={code:city.code,name:city.nameEn,prefCode:city.prefCode};
   const pref=q.get('pref');
   if(prefDataMap[pref]){await zoomInPrefecture(pref);if(item?.prefCode===pref)applyNationalSelection(item);}
   hideTip();
@@ -120,7 +145,7 @@ async function initExplorer() {
   byId('compare-close').onclick=()=>byId('compare-dialog').close();
   byId('compare-dialog').addEventListener('click',e=>{const code=e.target.closest('[data-remove]')?.dataset.remove;if(code){comparison=comparison.filter(r=>r.code!==code);updateExplorer();byId('compare-close').focus();}});
   byId('place-detail').addEventListener('click',e=>{
-    if(e.target.closest('[data-close-detail]')){selectedPlace=null;updateExplorer();byId('place-search').focus();if(bsMobile)refitMap();return;}
+    if(e.target.closest('[data-close-detail]')){clearPlaceSelection();byId('place-search').focus();return;}
     if(e.target.id==='add-comparison'&&selectedPlace&&comparison.length<3&&!comparison.some(r=>r.code===selectedPlace.code))comparison.push({...selectedPlace});
     updateExplorer();if(e.target.id==='add-comparison')byId('compare-open').focus();
   });
@@ -129,14 +154,20 @@ async function initExplorer() {
   const hint=document.createElement('span');hint.textContent='Rankings ↕';hint.className='sheet-label';handle.append(hint);
   handle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();bsSetState(bsState==='peek'?'half':'peek');}});
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){byId('search-results').hidden=true;hideTip();if(!byId('compare-dialog').open){selectedPlace=null;updateExplorer();}}
+    if(e.key==='Escape'){byId('search-results').hidden=true;hideTip();if(!byId('compare-dialog').open){clearPlaceSelection();}}
     const el=e.target.closest('.rk-item,.pref-path,.city-path');
     if(el&&(e.key==='Enter'||e.key===' ')){e.preventDefault();el.dispatchEvent(new MouseEvent('click',{bubbles:true}));}
   });
   document.addEventListener('click',e=>{
+    const el=e.target.closest('.city-path');
+    if(el && !didDrag && selectedPlace?.code===(el.dataset.rankkey||el.dataset.code)){
+      e.preventDefault();e.stopImmediatePropagation();clearPlaceSelection();
+    }
+  },true);
+  document.addEventListener('click',e=>{
     const el=e.target.closest('.rk-item,.pref-path,.city-path');if(!el||didDrag)return;
     const code=el.dataset.rankkey||el.dataset.code;
-    const item=canonical(code);if(item){selectedPlace=item;hideTip();updateExplorer();if(bsMobile)bsSetState('peek');}
+    const item=canonical(code);if(item){focusCityForPlace(item);selectedPlace=item;hideTip();updateExplorer();if(bsMobile)bsSetState('peek');}
   });
   document.addEventListener('focusin',e=>{const el=e.target.closest('.pref-path,.city-path');if(el)el.setAttribute('aria-label',`${canonical(el.dataset.rankkey||el.dataset.code)?.nameEn||'Region'}, select for details`);});
   await restoreView();
